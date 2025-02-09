@@ -1,0 +1,48 @@
+#calendar {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Styling the day cells */
+.fc-daygrid-day {
+    background-color: #f9f9f9;
+}
+
+/* Highlighting weekends */
+.fc-day-sat, .fc-day-sun {
+    background-color: #f1f1f1;
+}
+
+/* Customizing the event's style */
+.fc-event {
+    background-color: #3498db;  /* Blue */
+    color: white;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+/* Adding hover effect to events */
+.fc-event:hover {
+    background-color: #2980b9;
+}
+
+/* Change the header background color */
+.fc-header-toolbar {
+    background-color: #2c3e50;
+    color: white;
+}
+
+/* Adjusting the navigation buttons */
+.fc-button {
+    background-color: #34495e;
+    color: white;
+    border-radius: 5px;
+}
+
+.fc-button:hover {
+    background-color: #2c3e50;
+}
+body {
+    background-color: black;
+}
