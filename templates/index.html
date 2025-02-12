@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <title>Home</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/output.css">
 </head>
 <body>
     <nav class="bg-blue-500 text-white p-4 flex justify-between items-center">
         <div class="text-xl font-bold">QUBE</div>
         <div>
-            <a href="{{ url_for('login') }}" class="bg-white text-blue-500 px-4 py-2 rounded">Login</a>
+            <a href="{{ url_for('auth.login') }}" class="bg-white text-blue-500 px-4 py-2 rounded">Login</a>
         </div>
     </nav>
     <div class="text-center mt-10">

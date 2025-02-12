@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Sign Up</title>
+    <link rel="stylesheet" href="/static/css/output.css">
 </head>
 <body>
     <h1>Sign Up</h1>
@@ -11,6 +12,6 @@
         <input type="password" name="confirm_password" placeholder="Confirm Password" required>
         <button type="submit">Sign Up</button>
     </form>
-    <a href="{{ url_for('login') }}">Already have an account? Login</a>
+    <a href="{{ url_for('auth.login') }}">Already have an account? Login</a>
 </body>
 </html>

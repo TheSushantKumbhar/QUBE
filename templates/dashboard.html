@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <title>Dashboard</title>
+    <link rel="stylesheet" href="/static/css/output.css">
 </head>
 <body>
     <h1>Welcome, {{ username }}!</h1>
-    <a href="{{ url_for('logout') }}">Logout</a>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
 </body>
 </html>

@@ -1,0 +1,7 @@
+# created by virtualenv automatically
+env/
+__pycache__/
+*.pyc
+node_modules/ 
+static/css/output.css
+.env
