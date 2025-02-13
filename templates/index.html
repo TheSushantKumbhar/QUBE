@@ -1,17 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/YOUR_KIT_CODE.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/static/css/output.css">
+    <title>Vertical Navbar</title>
 </head>
-<body>
-    <nav class="bg-blue-500 text-white p-4 flex justify-between items-center">
-        <div class="text-xl font-bold">QUBE</div>
+<body class="flex ">
+
+    <!-- Sidebar -->
+    <nav class="bg-white h-screen w-48 shadow-md fixed left-0 top-0 p-6 flex flex-col justify-between">
         <div>
-            <a href="{{ url_for('auth.login') }}" class="bg-white text-blue-500 px-4 py-2 rounded">Login</a>
+
+            <!-- Logo-->
+            <div class="flex items-center justify-center space-x-3">
+                <a href="/" class=" text-2xl font-bold text-blue-600">QUBE</a>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="mt-16 flex flex-col space-y-6">
+            <a href="/" class="flex items-center text-gray-700 hover:text-blue-600">
+                <i class="fas fa-home mr-3"></i> Home
+            </a>
+            <a href="/explore" class="flex items-center text-gray-700 hover:text-blue-600">
+                <i class="fas fa-search mr-3"></i> Explore Quizzes
+            </a>
+            <a href="/live" class="flex items-center text-gray-700 hover:text-blue-600">
+                <i class="fas fa-bolt mr-3"></i> Live Quizzes
+            </a>
+            <a href="/daily-bite" class="flex items-center text-gray-700 hover:text-blue-600">
+                <i class="fas fa-star mr-3"></i> Create Quiz
+            </a>
+            <a href="/create" class="flex items-center text-gray-700 hover:text-blue-600">
+                <i class="fas fa-plus-circle mr-3"></i> Analystics
+            </a>
+        </div>
+
+        <!-- Profile / Login -->
+        <div class="mt-auto">
+            <a href="/profile" class="hidden user-logged-in flex items-center space-x-3">
+                <img src="profile-pic.jpg" class="w-10 h-10 rounded-full border-2 border-blue-600" />
+                <span class="text-gray-700 font-medium">Your Profile</span>
+            </a>
         </div>
     </nav>
-    <div class="text-center mt-10">
+
+    <!-- Top Right Login Button -->
+    <div class="fixed top-8 right-6">
+        <a href="{{ url_for('auth.login') }}"  class="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700">
+            Login
+        </a>
     </div>
+
+    <!-- Main Content -->
+    <div class="ml-48 p-6 w-full">
+        <div class="mb-4">
+            <input type="text" placeholder="Search..." class="w[70%] px-3 py-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        </div>
+        <p class="mt-2 text-gray-600">MAIN CONTENT</p>
+    </div>
+
 </body>
 </html>
