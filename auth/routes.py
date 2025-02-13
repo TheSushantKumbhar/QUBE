@@ -38,7 +38,8 @@ def login():
             user = auth.sign_in_with_email_and_password(email, password)
             session['user'] = email
             flash('Login successful!', 'success')
-            return redirect(url_for('dashboard'))  
+            return redirect(url_for('home')) 
+        
         except Exception as e:
             flash(f'Invalid credentials. Error: {str(e)}', 'danger')
 
@@ -49,7 +50,7 @@ def login():
 def logout():
     session.pop('user', None)
     flash('Logged out successfully', 'info')
-    return redirect(url_for('auth.login')) 
+    return redirect(url_for('home'))
 
 
 @auth_bp.route('/resetPassword', methods=['GET', 'POST'])

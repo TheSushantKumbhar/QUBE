@@ -8,7 +8,7 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html',username=session.get('user'))
 
 
 @app.route('/dashboard')

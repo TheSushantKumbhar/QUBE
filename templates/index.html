@@ -7,59 +7,59 @@
     <link rel="stylesheet" href="/static/css/output.css">
     <title>Vertical Navbar</title>
 </head>
-<body class="flex ">
+<body class="flex bg-gray-100">
 
     <!-- Sidebar -->
-    <nav class="bg-white h-screen w-48 shadow-md fixed left-0 top-0 p-6 flex flex-col justify-between">
-        <div>
-
-            <!-- Logo-->
-            <div class="flex items-center justify-center space-x-3">
-                <a href="/" class=" text-2xl font-bold text-blue-600">QUBE</a>
-            </div>
+    <nav class="bg-white h-screen w-56 shadow-md fixed left-0 top-0 p-6 flex flex-col">
+        
+        <!-- Logo -->
+        <div class="flex items-center justify-center">
+            <a href="/" class="text-2xl font-bold text-blue-600">QUBE</a>
         </div>
 
         <!-- Navigation Links -->
-        <div class="mt-16 flex flex-col space-y-6">
-            <a href="/" class="flex items-center text-gray-700 hover:text-blue-600">
+        <div class="mt-12 flex flex-col space-y-6">
+            <a href="/" class="flex items-center text-gray-700 hover:text-blue-600 transition duration-300">
                 <i class="fas fa-home mr-3"></i> Home
             </a>
-            <a href="/explore" class="flex items-center text-gray-700 hover:text-blue-600">
+            <a href="/explore" class="flex items-center text-gray-700 hover:text-blue-600 transition duration-300">
                 <i class="fas fa-search mr-3"></i> Explore Quizzes
             </a>
-            <a href="/live" class="flex items-center text-gray-700 hover:text-blue-600">
+            <a href="/live" class="flex items-center text-gray-700 hover:text-blue-600 transition duration-300">
                 <i class="fas fa-bolt mr-3"></i> Live Quizzes
             </a>
-            <a href="/daily-bite" class="flex items-center text-gray-700 hover:text-blue-600">
-                <i class="fas fa-star mr-3"></i> Create Quiz
+            <a href="/create" class="flex items-center text-gray-700 hover:text-blue-600 transition duration-300">
+                <i class="fas fa-plus-circle mr-3"></i> Create Quiz
             </a>
-            <a href="/create" class="flex items-center text-gray-700 hover:text-blue-600">
-                <i class="fas fa-plus-circle mr-3"></i> Analystics
-            </a>
-        </div>
-
-        <!-- Profile / Login -->
-        <div class="mt-auto">
-            <a href="/profile" class="hidden user-logged-in flex items-center space-x-3">
-                <img src="profile-pic.jpg" class="w-10 h-10 rounded-full border-2 border-blue-600" />
-                <span class="text-gray-700 font-medium">Your Profile</span>
+            <a href="/analytics" class="flex items-center text-gray-700 hover:text-blue-600 transition duration-300">
+                <i class="fas fa-chart-bar mr-3"></i> Analytics
             </a>
         </div>
     </nav>
 
-    <!-- Top Right Login Button -->
-    <div class="fixed top-8 right-6">
-        <a href="{{ url_for('auth.login') }}"  class="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700">
-            Login
-        </a>
+    <!-- Top Right Login/Profile Section -->
+    <div class="fixed top-4 right-6">
+        {% if session['user'] %}
+            <div class="flex items-center space-x-3">
+                <span class="text-gray-700 font-medium">{{ session['user'] }}</span>
+                <a href="{{ url_for('auth.logout') }}" class="px-3 py-2 bg-red-600 text-white rounded-md shadow-md hover:bg-red-700 transition duration-300">
+                    Logout
+                </a>
+            </div>
+        {% else %}
+            <a href="{{ url_for('auth.login') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition duration-300">
+                Login
+            </a>
+        {% endif %}
     </div>
 
     <!-- Main Content -->
-    <div class="ml-48 p-6 w-full">
+    <div class="ml-56 p-6 w-full">
+        <!-- Search Bar -->
         <div class="mb-4">
-            <input type="text" placeholder="Search..." class="w[70%] px-3 py-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <input type="text" placeholder="Search..." class="w-1/4 px-3 py-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
         </div>
-        <p class="mt-2 text-gray-600">MAIN CONTENT</p>
+        <p class="mt-2 text-gray-600 text-lg font-semibold">MAIN CONTENT</p>
     </div>
 
 </body>
