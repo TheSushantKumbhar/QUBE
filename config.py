@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from flask_sqlalchemy import SQLAlchemy
 import os
 
 load_dotenv()
@@ -14,3 +15,15 @@ firebase_Config = {
     "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
 }
 
+
+
+SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
+if not SQLALCHEMY_DATABASE_URI:
+    raise ValueError("SQLALCHEMY_DATABASE_URI is not set. Check your .env file.")
+
+UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
+ALLOWED_EXTENSIONS = set(os.getenv("ALLOWED_EXTENSIONS", "").split(',')) if os.getenv("ALLOWED_EXTENSIONS") else set()
+SECRET_KEY = os.getenv("SECRET_KEY")
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+db = SQLAlchemy()

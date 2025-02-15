@@ -38,7 +38,7 @@
     </nav>
 
     <!-- Top Right Login/Profile Section -->
-    <div class="fixed top-4 right-6">
+    <!-- <div class="fixed top-4 right-6">
         {% if session['user'] %}
             <div class="flex items-center space-x-3">
                 <span class="text-gray-700 font-medium">{{ session['user'] }}</span>
@@ -51,7 +51,25 @@
                 Login
             </a>
         {% endif %}
-    </div>
+    </div> -->
+    <!-- Top Right Profile Section -->
+<div class="fixed top-4 right-6">
+    {% if session['user'] %}
+        <div class="flex items-center space-x-3">
+            <a href="{{ url_for('auth.update_profile') }}" class="flex items-center space-x-2">
+                <img src="{{ session['profile_pic'] or '/static/default-profile.png' }}" 
+                     alt="Profile" 
+                     class="w-10 h-10 max-w-[40px] max-h-[40px] rounded-full border border-gray-300 shadow-md object-cover">
+                <span class="text-gray-700 font-medium">{{ session['username'] }}</span>
+            </a>
+        </div>
+    {% else %}
+        <a href="{{ url_for('auth.login') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition duration-300">
+            Login
+        </a>
+    {% endif %}
+</div>
+
 
     <!-- Main Content -->
     <div class="ml-56 p-6 w-full">
