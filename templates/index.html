@@ -68,7 +68,7 @@
     <div class="container mx-auto mt-6 px-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div id="flash-messages" class="fixed top-4 right-4 space-y-2 z-50">
+                <div id="flash-messages" class="fixed top-5 right-60px space-y-2 z-50">
                     {% for category, message in messages %}
                         <div class="px-4 py-3 rounded-lg shadow-md text-white 
                             {% if category == 'success' %} bg-indigo-400 {% elif category == 'danger' %} bg-indigo-700 {% elif category == 'info' %} bg-indigo-300 {% else %} bg-indigo-300 {% endif %}">
