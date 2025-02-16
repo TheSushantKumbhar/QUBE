@@ -12,12 +12,20 @@
         <h2 class="text-2xl font-bold mb-4 text-center">Sign Up</h2>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <p class="text-{{ category }}-600">{{ message }}</p>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+    {% if messages %}
+        <div class="fixed top-4 right-6 space-y-2 z-50">
+            {% for category, message in messages %}
+                <div class="px-4 py-2 rounded-md shadow-md text-white 
+                            {% if category == 'success' %} bg-green-500 
+                            {% elif category == 'danger' %} bg-red-500 
+                            {% else %} bg-gray-500 {% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
 
         <form action="{{ url_for('auth.signup') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             <input type="email" name="email" placeholder="Email" required class="w-full p-2 border rounded-lg"><br>

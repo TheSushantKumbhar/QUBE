@@ -30,16 +30,24 @@ def signup():
             flash("Passwords do not match. Try again.", "danger")
             return redirect(url_for('auth.signup'))
 
+        # Check if email already exists in PostgreSQL
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash("Email already registered. Please log in instead.", "danger")
+            return redirect(url_for('auth.login'))
+
         try:
             # Firebase authentication
             auth.create_user_with_email_and_password(email, password)
-            
+            flash(" Firebase authentication successful!", "info")
+
             # Handle profile picture upload
             profile_pic_filename = None
             if profile_pic and allowed_file(profile_pic.filename):
                 filename = secure_filename(profile_pic.filename)
                 profile_pic_filename = os.path.join(UPLOAD_FOLDER, filename)
                 profile_pic.save(profile_pic_filename)
+                flash("📸 Profile picture uploaded successfully!", "success")
 
             # Save user in PostgreSQL
             new_user = User(email=email, username=username, profile_pic=profile_pic_filename)
@@ -50,9 +58,16 @@ def signup():
             return redirect(url_for('auth.login'))
 
         except Exception as e:
-            flash(f"Error: {str(e)}", "danger")
+            error_message = str(e)
+            if "EMAIL_EXISTS" in error_message:
+                flash("This email is already in use. Please log in instead.", "danger")
+                return redirect(url_for('auth.login'))
+            flash(f" Error: {error_message}", "danger")
 
     return render_template('signup.html')
+
+
+
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -64,7 +79,6 @@ def login():
             # Firebase authentication
             user = auth.sign_in_with_email_and_password(email, password)
             
-            # Fetch user from PostgreSQL
             db_user = User.query.filter_by(email=email).first()
             if not db_user:
                 flash("User not found in the database!", "danger")
@@ -72,7 +86,11 @@ def login():
 
             session['user'] = db_user.email
             session['username'] = db_user.username
-            session['profile_pic'] = db_user.profile_pic or '/static/default-profile.png'
+            
+            if db_user.profile_pic:
+                session['profile_pic'] = url_for('static', filename=db_user.profile_pic)
+            else:
+                session['profile_pic'] = url_for('static', filename='profile_pics/default.jpg')
 
             flash("Login successful!", "success")
             return redirect(url_for('home'))
@@ -128,24 +146,25 @@ def update_profile():
         # Handle profile picture upload
         if profile_pic and allowed_file(profile_pic.filename):
             filename = secure_filename(profile_pic.filename)
-            profile_pic_path = os.path.join(UPLOAD_FOLDER, filename)
+            profile_pic_path = os.path.join("static/profile_pics", filename)  # Ensure correct path
 
-            # **Delete the old profile picture if it exists**
-            if user.profile_pic and os.path.exists(os.path.join("static", user.profile_pic)):
-                os.remove(os.path.join("static", user.profile_pic))
+            # **Delete the old profile picture if it exists and is not the default**
+            if user.profile_pic and user.profile_pic != "profile_pics/default.jpg":
+                old_pic_path = os.path.join("static", user.profile_pic)  # Convert relative path to full path
+                if os.path.exists(old_pic_path):
+                    os.remove(old_pic_path)
 
             profile_pic.save(profile_pic_path)
 
-            # Store relative path for profile picture
+            # Store relative path for profile picture in the database
             user.profile_pic = f'profile_pics/{filename}'
+
+            # **Update session immediately so navbar updates**
+            session['profile_pic'] = url_for('static', filename=user.profile_pic)
 
         db.session.commit()
         flash("Profile updated successfully!", "success")
 
-        # **Update session profile_pic so it appears in navbar immediately**
-        session['profile_pic'] = user.profile_pic
-
         return redirect(url_for('auth.update_profile'))
 
     return render_template('profile.html', user=user)
-
