@@ -66,9 +66,6 @@ def signup():
 
     return render_template('signup.html')
 
-
-
-
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -159,7 +156,7 @@ def update_profile():
             # Store relative path for profile picture in the database
             user.profile_pic = f'profile_pics/{filename}'
 
-            # **Update session immediately so navbar updates**
+            # Update session immediately so navbar updates
             session['profile_pic'] = url_for('static', filename=user.profile_pic)
 
         db.session.commit()
