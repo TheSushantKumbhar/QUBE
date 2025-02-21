@@ -21,13 +21,11 @@ migrate.init_app(app, db)
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(quiz_bp) 
 
-
 create_database(app)
 
 @app.route('/')
 def home():
     return render_template('index.html',username=session.get('user'))
-
 
 if __name__ == '__main__':
     app.run(debug=True)
