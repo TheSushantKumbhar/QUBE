@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from werkzeug.utils import secure_filename
 import os
 import pyrebase
-from config import firebase_Config,UPLOAD_FOLDER,ALLOWED_EXTENSIONS
+from config import firebase_Config, UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 from models.models import User
 from extensions import db
 from dotenv import load_dotenv
@@ -37,19 +37,19 @@ def signup():
             return redirect(url_for('auth.login'))
 
         try:
-            # Firebase authentication
-            auth.create_user_with_email_and_password(email, password)
-            flash(" Firebase authentication successful!", "info")
-
+            # Firebase authentication first - only add to Postgres if this succeeds
+            firebase_user = auth.create_user_with_email_and_password(email, password)
+            
             # Handle profile picture upload
             profile_pic_filename = None
             if profile_pic and allowed_file(profile_pic.filename):
                 filename = secure_filename(profile_pic.filename)
-                profile_pic_filename = os.path.join(UPLOAD_FOLDER, filename)
-                profile_pic.save(profile_pic_filename)
+                profile_pic_path = os.path.join("static/profile_pics", filename)
+                profile_pic.save(profile_pic_path)
+                profile_pic_filename = f'profile_pics/{filename}'
                 flash("📸 Profile picture uploaded successfully!", "success")
 
-            # Save user in PostgreSQL
+            # Save user in PostgreSQL ONLY AFTER Firebase authentication succeeds
             new_user = User(email=email, username=username, profile_pic=profile_pic_filename)
             db.session.add(new_user)
             db.session.commit()
@@ -62,7 +62,7 @@ def signup():
             if "EMAIL_EXISTS" in error_message:
                 flash("This email is already in use. Please log in instead.", "danger")
                 return redirect(url_for('auth.login'))
-            flash(f" Error: {error_message}", "danger")
+            flash(f"Error: {error_message}", "danger")
 
     return render_template('signup.html')
 
@@ -74,13 +74,17 @@ def login():
 
         try:
             # Firebase authentication
-            user = auth.sign_in_with_email_and_password(email, password)
+            firebase_user = auth.sign_in_with_email_and_password(email, password)
             
+            # Only check database after successful Firebase authentication
             db_user = User.query.filter_by(email=email).first()
             if not db_user:
-                flash("User not found in the database!", "danger")
-                return redirect(url_for('auth.signup'))
+                # This is a case where user exists in Firebase but not in Postgres
+                # You might want to create the user in PostgreSQL here or handle differently
+                flash("User authenticated but not found in the database. Please contact support.", "warning")
+                return redirect(url_for('auth.login'))
 
+            # Set session variables
             session['user'] = db_user.email
             session['username'] = db_user.username
             
@@ -93,17 +97,18 @@ def login():
             return redirect(url_for('home'))
 
         except Exception as e:
-            flash(f"Invalid credentials. Error: {str(e)}", "danger")
+            # Don't expose full error message to users in production
+            flash("Invalid email or password. Please try again.", "danger")
 
     return render_template('login.html')
-
 
 @auth_bp.route('/logout')
 def logout():
     session.pop('user', None)
+    session.pop('username', None)
+    session.pop('profile_pic', None)
     flash('Logged out successfully', 'info')
     return redirect(url_for('home'))
-
 
 @auth_bp.route('/resetPassword', methods=['GET', 'POST'])
 def reset_password():
@@ -114,10 +119,9 @@ def reset_password():
             flash('Password reset email sent! Check your inbox.', 'success')
             return redirect(url_for('auth.login'))
         except Exception as e:
-            flash(f'Error: {str(e)}', 'danger')
+            flash('Error sending password reset email. Please check if the email is registered.', 'danger')
 
     return render_template('resetPassword.html')
-
 
 @auth_bp.route('/update_profile', methods=['GET', 'POST'])
 def update_profile():
@@ -139,15 +143,16 @@ def update_profile():
         # Update username if provided
         if username:
             user.username = username
+            session['username'] = username
 
         # Handle profile picture upload
         if profile_pic and allowed_file(profile_pic.filename):
             filename = secure_filename(profile_pic.filename)
-            profile_pic_path = os.path.join("static/profile_pics", filename)  # Ensure correct path
+            profile_pic_path = os.path.join("static/profile_pics", filename)
 
-            # **Delete the old profile picture if it exists and is not the default**
-            if user.profile_pic and user.profile_pic != "profile_pics/default.jpg":
-                old_pic_path = os.path.join("static", user.profile_pic)  # Convert relative path to full path
+            # Delete the old profile picture if it exists and is not the default
+            if user.profile_pic and "default.jpg" not in user.profile_pic:
+                old_pic_path = os.path.join("static", user.profile_pic)
                 if os.path.exists(old_pic_path):
                     os.remove(old_pic_path)
 

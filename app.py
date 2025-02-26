@@ -12,7 +12,7 @@ from models.db_init import create_database
 app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
-app.config["SECRET_KEY"] = "your_secret_key_here"
+app.config["SECRET_KEY"] = "your_secret_key_here"       
 
 db.init_app(app)
 migrate.init_app(app, db) 
