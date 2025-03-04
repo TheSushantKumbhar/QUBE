@@ -5,3 +5,4 @@ __pycache__/
 node_modules/ 
 static/css/output.css
 .env
+static/profile_pics
