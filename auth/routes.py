@@ -47,7 +47,7 @@ def signup():
                 profile_pic_path = os.path.join("static/profile_pics", filename)
                 profile_pic.save(profile_pic_path)
                 profile_pic_filename = f'profile_pics/{filename}'
-                flash("📸 Profile picture uploaded successfully!", "success")
+                flash(" Profile picture uploaded successfully!", "success")
 
             # Save user in PostgreSQL ONLY AFTER Firebase authentication succeeds
             new_user = User(email=email, username=username, profile_pic=profile_pic_filename)

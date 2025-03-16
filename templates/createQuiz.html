@@ -1,33 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Create Quiz</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/YOUR_KIT_CODE.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/static/css/output.css">
+    <title>Create Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .question-container {
+            width: 100%;
+        }
+        .question-page {
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+        .image-upload {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-align: center;
+            color: #999;
+        }
+        .image-upload img {
+            max-width: 100%;
+            max-height: 100%;
+            display: none;
+        }
+        .image-upload input {
+            display: none;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-2xl font-semibold mb-4">Create Quiz</h2>
-        <form id="quizForm" class="space-y-4">
-            <input type="text" id="quizTitle" class="w-full p-2 border rounded" placeholder="Quiz Title" required>
-            <textarea id="quizDescription" class="w-full p-2 border rounded" placeholder="Quiz Description"></textarea>
-            
-            <div id="questionsContainer" class="space-y-4">
-                <div class="question p-4 border rounded bg-gray-50">
-                    <input type="text" class="question_text w-full p-2 border rounded" placeholder="Enter question" required>
-                    <div class="grid grid-cols-2 gap-2 mt-2">
+<body class="flex bg-gray-100">
+
+    <nav class="bg-indigo-500 h-screen w-56 shadow-md fixed left-0 top-0 p-6 flex flex-col">
+        <!-- Logo -->
+        <div class="flex items-center justify-center">
+            <a href="/" class="text-2xl font-bold text-white">Q U B E</a>
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="mt-12 flex flex-col space-y-6">
+            <a href="/" class="flex items-center text-white hover:text-blue-500 transition duration-300">
+                <i class="fas fa-home mr-3"></i> Home
+            </a>
+            <a href="/explore" class="flex items-center text-white hover:text-blue-600 transition duration-300">
+                <i class="fas fa-search mr-3"></i> Explore Quizzes
+            </a>
+            <a href="/live" class="flex items-center text-white hover:text-blue-600 transition duration-300">
+                <i class="fas fa-bolt mr-3"></i> Live Quizzes
+            </a>
+            <a href="{{ url_for('createQuiz.create_quiz_page')}}" class="flex items-center text-white hover:text-blue-600 transition duration-300">
+                <i class="fas fa-plus-circle mr-3"></i> Create Quiz
+            </a>
+            <a href="/analytics" class="flex items-center text-white hover:text-blue-600 transition duration-300">
+                <i class="fas fa-chart-bar mr-3"></i> Analytics
+            </a>
+        </div>
+
+
+    </nav>
+
+    <!-- Main Content -->
+    <div class="ml-56 w-full">
+        <div class="flex items-center justify-between bg-indigo-300 px-6 py-4">
+            <h2 class="text-white text-xl font-semibold">Create Quiz</h2>
+        </div>
+
+        <div class="p-6 question-container">
+            <!-- Page 1: Welcome Page -->
+            <div class="question-page active" id="page1">
+                <h2 class="text-3xl font-bold mb-6 text-center">Welcome to Create Quiz</h2>
+                <p class="text-lg text-gray-700 mb-6 text-center">Click below to start creating your quiz.</p>
+                <div class="flex justify-center">
+                    <button onclick="showPage(2)" class="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md text-lg hover:bg-blue-600 transition duration-300">
+                        Create Quiz
+                    </button>
+                </div>
+            </div>
+
+            <!-- Page 2: Quiz Title & Description -->
+            <div class="question-page" id="page2">
+                <h2 class="text-2xl font-semibold mb-4">Quiz Details</h2>
+                <input type="text" id="quizTitle" class="w-full p-2 border rounded mb-2" placeholder="Quiz Title" required>
+                <textarea id="quizDescription" class="w-full p-2 border rounded" placeholder="Quiz Description"></textarea>
+
+                <div class="flex justify-between mt-6">
+                    <button type="button" onclick="showPage(1)" class="bg-gray-500 text-white px-4 py-2 rounded">Back</button>
+                    <button type="button" onclick="showPage(3)" class="bg-blue-500 text-white px-4 py-2 rounded">Next</button>
+                </div>
+            </div>
+
+            <!-- Questions Container -->
+            <div id="questionsContainer">
+                <!-- Page 3: First Question -->
+                <div class="question-page" id="page3">
+                    <h2 class="text-2xl font-semibold mb-4">Question <span id="qNumber1">1</span></h2>
+                    <div class="image-upload" onclick="document.getElementById('questionImage0').click()">
+                        <p>Click to add an image</p>
+                        <img id="previewImage0">
+                        <input type="file" id="questionImage0" accept="image/*" onchange="previewFile(event, 0)">
+                    </div>
+
+                    <input type="text" class="w-full p-2 border rounded mt-2" placeholder="Enter question" required>
+
+                    <!-- Options -->
+                    <div class="grid grid-cols-2 gap-2 mt-4">
                         <input type="text" class="option p-2 border rounded" placeholder="Option 1" required>
                         <input type="text" class="option p-2 border rounded" placeholder="Option 2" required>
                         <input type="text" class="option p-2 border rounded" placeholder="Option 3" required>
                         <input type="text" class="option p-2 border rounded" placeholder="Option 4" required>
                     </div>
-                    <input type="text" class="correct_answer w-full p-2 border rounded mt-2" placeholder="Correct Answer" required>
+
+                    <!-- Back and Next Buttons -->
+                    <div class="flex justify-between mt-6">
+                        <button type="button" onclick="showPage(2)" class="bg-gray-500 text-white px-4 py-2 rounded">Back</button>
+                        <button type="button" onclick="addQuestion()" class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-600 transition duration-300">
+                            Add Question
+                        </button>
+                    </div>
                 </div>
             </div>
-            
-            <button type="button" onclick="addQuestion()" class="bg-blue-500 text-white px-4 py-2 rounded">Add Question</button>
-            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Create Quiz</button>
-        </form>
+        </div>
     </div>
-    <script src="/static/js/createQuiz.js"></script>
+
+    <script>
+        let currentPage = 1;
+        let questionCount = 1;
+
+        function showPage(page) {
+            document.querySelectorAll('.question-page').forEach(el => el.classList.remove('active'));
+            document.getElementById('page' + page).classList.add('active');
+            currentPage = page;
+        }
+
+        function addQuestion() {
+            questionCount++;
+            const newQuestion = `
+                <div class="question-page active" id="page${questionCount + 2}">
+                    <h2 class="text-2xl font-semibold mb-4">Question <span>${questionCount}</span></h2>
+                    <div class="image-upload" onclick="document.getElementById('questionImage${questionCount}').click()">
+                        <p>Click to add an image</p>
+                        <img id="previewImage${questionCount}">
+                        <input type="file" id="questionImage${questionCount}" accept="image/*" onchange="previewFile(event, ${questionCount})">
+                    </div>
+                    <input type="text" class="w-full p-2 border rounded mt-2" placeholder="Enter question" required>
+                    <div class="grid grid-cols-2 gap-2 mt-4">
+                        <input type="text" class="option p-2 border rounded" placeholder="Option 1" required>
+                        <input type="text" class="option p-2 border rounded" placeholder="Option 2" required>
+                        <input type="text" class="option p-2 border rounded" placeholder="Option 3" required>
+                        <input type="text" class="option p-2 border rounded" placeholder="Option 4" required>
+                    </div>
+
+                    <div class="flex justify-between mt-6">
+                        <button type="button" onclick="showPage(${questionCount + 1})" class="bg-gray-500 text-white px-4 py-2 rounded">Back</button>
+                        <button type="button" onclick="addQuestion()" class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-600 transition duration-300">
+                            Add Question
+                        </button>
+                    </div>
+                </div>`;
+            
+            document.getElementById('questionsContainer').insertAdjacentHTML('beforeend', newQuestion);
+            document.getElementById('page' + (questionCount + 2)).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function previewFile(event, index) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('previewImage' + index);
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
 </body>
 </html>
