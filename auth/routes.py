@@ -14,8 +14,10 @@ auth_bp = Blueprint('auth', __name__)
 firebase = pyrebase.initialize_app(firebase_Config)
 auth = firebase.auth()
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -66,6 +68,7 @@ def signup():
 
     return render_template('signup.html')
 
+
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -102,6 +105,7 @@ def login():
 
     return render_template('login.html')
 
+
 @auth_bp.route('/logout')
 def logout():
     session.pop('user', None)
@@ -109,6 +113,7 @@ def logout():
     session.pop('profile_pic', None)
     flash('Logged out successfully', 'info')
     return redirect(url_for('home'))
+
 
 @auth_bp.route('/resetPassword', methods=['GET', 'POST'])
 def reset_password():
@@ -122,6 +127,7 @@ def reset_password():
             flash('Error sending password reset email. Please check if the email is registered.', 'danger')
 
     return render_template('resetPassword.html')
+
 
 @auth_bp.route('/update_profile', methods=['GET', 'POST'])
 def update_profile():
@@ -170,3 +176,5 @@ def update_profile():
         return redirect(url_for('auth.update_profile'))
 
     return render_template('profile.html', user=user)
+
+
