@@ -7,6 +7,9 @@ from createQuiz.routes import quiz_bp
 from extensions import db, migrate
 from config import SQLALCHEMY_DATABASE_URI
 from models.db_init import create_database
+from models.models import User   
+# from models.quizModel import QuizAttempt, Quiz, Question,Option,UserAnswer
+
 
 
 app = Flask(__name__)
