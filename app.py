@@ -8,7 +8,6 @@ from extensions import db, migrate
 from config import SQLALCHEMY_DATABASE_URI
 from models.db_init import create_database
 from models.models import User   
-# from models.quizModel import QuizAttempt, Quiz, Question,Option,UserAnswer
 
 
 
@@ -22,7 +21,9 @@ migrate.init_app(app, db)
 
 
 app.register_blueprint(auth_bp, url_prefix='/auth')
-app.register_blueprint(quiz_bp) 
+# app.register_blueprint(quiz_bp) 
+app.register_blueprint(quiz_bp, url_prefix='/quiz')
+
 
 create_database(app)
 
@@ -33,3 +34,4 @@ def home():
 if __name__ == '__main__':
     app.run(debug=True)
 
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
