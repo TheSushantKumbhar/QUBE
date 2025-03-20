@@ -5,23 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
     <link rel="stylesheet" href="/static/css/output.css">
+    <script>
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profile-preview').src = e.target.result;
+                    document.getElementById('upload-box-text').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
 </head>
 <body class="bg-gray-100 flex justify-center items-center h-screen">
 
     <div class="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 class="text-2xl font-bold mb-4 text-center">Profile</h2>
 
-        <!-- Corrected Profile Picture Handling -->
-        <img src="{{ url_for('static', filename=user.profile_pic or 'profile_pics/default.jpg') }}" 
-             alt="Profile Picture" 
-             class="w-24 h-24 rounded-full mx-auto border border-gray-300 shadow-md object-cover">
+        <p class="text-center mt-2 text-gray-600">Email: {{ user.email }}</p>
 
-        <p class="text-center mt-4 text-gray-600">Email: {{ user.email }}</p>
+        <!-- Image Upload Box -->
+        <div class="mt-4">
+            <label for="profile_pic" class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center cursor-pointer hover:border-blue-500">
+                <img id="profile-preview" 
+                     src="{{ user.profile_pic or url_for('static', filename='profile_pics/default.jpg') }}" 
+                     alt="Profile Picture" 
+                     class="w-24 h-24 rounded-full object-cover mb-2">
+                <p id="upload-box-text" class="text-gray-500">Click to upload a new image</p>
+                <input type="file" id="profile_pic" name="profile_pic" accept=".png, .jpg, .jpeg" class="hidden" onchange="previewImage(event)">
+            </label>
+        </div>
         
+        <!-- Profile Update Form -->
         <form action="{{ url_for('auth.update_profile') }}" method="POST" enctype="multipart/form-data" class="mt-4 space-y-4">
-            <input type="text" name="username" value="{{ user.username }}" placeholder="Update Username" class="w-full p-2 border rounded-lg"><br>
-
-            <input type="file" name="profile_pic" accept=".png, .jpg, .jpeg" class="w-full"><br>
+            <input type="text" name="username" value="{{ user.username }}" placeholder="Update Username" class="w-full p-2 border rounded-lg">
 
             <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-lg">Save Changes</button>
         </form>
