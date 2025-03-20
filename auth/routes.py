@@ -66,7 +66,7 @@ def signup():
                 return redirect(url_for('auth.login'))
             flash(f"Error: {error_message}", "danger")
 
-    return render_template('signup.html')
+    return render_template('authentication/signup.html')
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
@@ -103,7 +103,7 @@ def login():
             # Don't expose full error message to users in production
             flash("Invalid email or password. Please try again.", "danger")
 
-    return render_template('login.html')
+    return render_template('authentication/login.html')
 
 
 @auth_bp.route('/logout')
@@ -126,7 +126,7 @@ def reset_password():
         except Exception as e:
             flash('Error sending password reset email. Please check if the email is registered.', 'danger')
 
-    return render_template('resetPassword.html')
+    return render_template('authentication/resetPassword.html')
 
 
 @auth_bp.route('/update_profile', methods=['GET', 'POST'])
@@ -175,6 +175,6 @@ def update_profile():
 
         return redirect(url_for('auth.update_profile'))
 
-    return render_template('profile.html', user=user)
+    return render_template('authentication/profile.html', user=user)
 
 
