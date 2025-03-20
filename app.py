@@ -29,7 +29,7 @@ create_database(app)
 
 @app.route('/')
 def home():
-    return render_template('index.html',username=session.get('user'))
+    return render_template('Homepage/index.html',username=session.get('user'))
 
 if __name__ == '__main__':
     app.run(debug=True)
