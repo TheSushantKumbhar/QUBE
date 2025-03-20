@@ -51,7 +51,7 @@
             <!-- Profile/Login Button -->
             <div>
                 {% if session['user'] %}
-                <a href="{{ url_for('auth.update_profile') }}" class="flex items-center space-x-2 rounded-3xl bg-indigo-100 pr-3 pt-1 pb-1 pl-1">
+                <a href="{{ url_for('auth.update_profile') }}" class="flex items-center space-x-2 rounded-3xl bg-indigo-100 pr-4 pt-1 pb-1 pl-1">
                     <img src="{{ session['profile_pic'] or '/static/default-profile.png' }}" class="w-10 h-10 rounded-full border">
                     <span class="text-gray-700 font-medium">{{ session['username'] }}</span>
                 </a>
