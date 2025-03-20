@@ -72,7 +72,7 @@ def login_required(func):
 @quiz_bp.route('/quizCategories',methods=['GET','POST'])
 @login_required
 def quiz_categories():
-    return render_template('quizCategories.html')
+    return render_template('CreateQuiz/quizCategories.html')
 
 
 @quiz_bp.route('/create', methods=['GET', 'POST'])
@@ -127,7 +127,7 @@ def create_quiz_page():
             traceback.print_exc()
             flash(f"Error creating quiz: {str(e)}", "danger")
     
-    return render_template('createQuiz.html')
+    return render_template('CreateQuiz/createQuiz.html')
 
 @quiz_bp.route('/api/quizzes', methods=['POST'])
 @login_required
@@ -231,7 +231,7 @@ def view_quiz(quiz_id):
         flash("You don't have permission to view this quiz.", "danger")
         return redirect(url_for('home'))
     
-    return render_template('viewQuiz.html', quiz=quiz)
+    return render_template('CreateQuiz/viewQuiz.html', quiz=quiz)
 
 
 @quiz_bp.route('/myquizzes')
@@ -247,7 +247,7 @@ def my_quizzes():
 @login_required
 def preview_quiz():
     """Preview the quiz before creating it"""
-    return render_template('previewQuiz.html')
+    return render_template('CreateQuiz/previewQuiz.html')
 
 
 @quiz_bp.route('/save_quiz', methods=['POST'])
