@@ -1,6 +1,10 @@
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 import os
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
 
 load_dotenv()
 
@@ -27,3 +31,10 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 db = SQLAlchemy()
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    secure=True
+)
