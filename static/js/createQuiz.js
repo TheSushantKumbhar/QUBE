@@ -1,7 +1,4 @@
-
 document.addEventListener('DOMContentLoaded', function () {
-    // We no longer need the page1 to page2 transition since they're separate pages now
-
     // Page navigation
     document.getElementById('nextToPage3').addEventListener('click', function () {
         if (!validateForm()) {
@@ -153,54 +150,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-    // // Save quiz button in preview
-    // document.getElementById('saveQuiz').addEventListener('click', function () {
-    //     // Set flag to skip the beforeunload warning
-    //     window.skipBeforeUnloadWarning = true;
-
-    //     // Get quiz data from localStorage
-    //     const quizData = JSON.parse(localStorage.getItem('previewQuizData'));
-
-    //     // Submit the form with quiz data
-    //     document.getElementById('quizData').value = JSON.stringify(quizData);
-    //     document.getElementById('quizForm').submit();
-    // });
-
-
-
-    // // Save quiz button in preview
-    // document.getElementById('saveQuiz').addEventListener('click', function () {
-    //     // Set flag to skip the beforeunload warning
-    //     window.skipBeforeUnloadWarning = true;
-
-    //     // Get quiz data from localStorage
-    //     const quizData = JSON.parse(localStorage.getItem('previewQuizData'));
-
-    //     // Submit the form with quiz data
-    //     document.getElementById('quizData').value = JSON.stringify(quizData);
-
-    //     // Clear the form after successful submission
-    //     document.getElementById('quizForm').addEventListener('submit', function () {
-    //         // Clear localStorage
-    //         localStorage.removeItem('previewQuizData');
-
-    //         // This will run after form submission
-    //         setTimeout(function () {
-    //             // Clear form fields
-    //             document.getElementById('quizTitle').value = '';
-    //             document.getElementById('quizSubject').value = '';
-    //             document.getElementById('questionsContainer').innerHTML = '';
-
-    //             // Return to page 2 for a fresh start
-    //             document.getElementById('page4').classList.add('hidden');
-    //             document.getElementById('page3').classList.add('hidden');
-    //             document.getElementById('page2').classList.remove('hidden');
-    //         }, 100);
-    //     });
-
-    //     document.getElementById('quizForm').submit();
-    // });
-
     // Save quiz button in preview
     document.getElementById('saveQuiz').addEventListener('click', function () {
         // Set flag to skip the beforeunload warning
@@ -258,10 +207,6 @@ document.addEventListener('DOMContentLoaded', function () {
             option.querySelector('.option-label').textContent = `Option ${index + 1}:`;
         });
     }
-
-
-
-
 
     // Modified addQuestion function to prevent duplication
     function addQuestion() {
@@ -853,23 +798,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 300);
         }
     });
-
-    // // Modify the beforeunload event listener to respect the skipBeforeUnloadWarning flag
-    // window.addEventListener('beforeunload', function (e) {
-    //     // Skip the warning if we're intentionally navigating away
-    //     if (window.skipBeforeUnloadWarning) {
-    //         return;
-    //     }
-
-    //     const hasQuestions = document.querySelectorAll(".question-block").length > 0;
-    //     const hasTitle = document.getElementById("quizTitle") && document.getElementById("quizTitle").value.trim() !== '';
-
-    //     if (hasQuestions || hasTitle) {
-    //         e.preventDefault();
-    //         e.returnValue = '';
-    //         return '';
-    //     }
-    // });
 
     window.addEventListener('beforeunload', function (e) {
         // Skip the warning if we're intentionally navigating away
