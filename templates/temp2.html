@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://kit.fontawesome.com/YOUR_KIT_CODE.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/output.css" />
+    <title>Create Quiz</title>
+</head>
+
+<body class="flex bg-gray-100">
+    <nav class="bg-indigo-500 h-screen w-56 shadow-md fixed left-0 top-0 p-6 flex flex-col">
+        <div class="flex items-center justify-center">
+            <a href="/" class="text-2xl font-bold text-white">Q U B E</a>
+        </div>
+        <div class="mt-12 flex flex-col space-y-6">
+            <a href="/" class="flex items-center text-white hover:text-blue-500 transition duration-300">
+                <i class="fas fa-home mr-3"></i> Home
+            </a>
+            <a href="/explore" class="flex items-center text-white hover:text-blue-600 transition duration-300">
+                <i class="fas fa-search mr-3"></i> Explore Quizzes
+            </a>
+            <a href="/live" class="flex items-center text-white hover:text-blue-600 transition duration-300">
+                <i class="fas fa-bolt mr-3"></i> Live Quizzes
+            </a>
+            <a href="{{ url_for('quiz.create_quiz_page')}}"
+                class="flex items-center text-white hover:text-blue-600 transition duration-300">
+                <i class="fas fa-plus-circle mr-3"></i> Create Quiz
+            </a>
+            <a href="/analytics" class="flex items-center text-white hover:text-blue-600 transition duration-300">
+                <i class="fas fa-chart-bar mr-3"></i> Analytics
+            </a>
+        </div>
+    </nav>
+
+    <div class="ml-56 w-full pb-16">
+        <div class="flex items-center justify-between bg-indigo-300 px-6 py-4">
+            <h2 class="text-white text-xl font-semibold">Create Quiz</h2>
+        </div>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="p-4">
+            {% for category, message in messages %}
+            <div
+                class="p-4 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-800{% elif category == 'danger' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div id="page1" class="p-6">
+            <h2 class="text-2xl font-bold text-center">Welcome to Create Quiz</h2>
+            <div class="flex justify-center mt-6">
+                <button id="startQuiz"
+                    class="bg-indigo-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-indigo-700">Create
+                    Quiz</button>
+            </div>
+        </div>
+
+        <div id="page2" class="p-6 hidden">
+            <h2 class="text-xl font-semibold">Quiz Details</h2>
+            <div class="mt-4">
+                <label class="block font-medium">Quiz Title</label>
+                <input type="text" id="quizTitle" class="w-full border p-2 rounded-md" placeholder="Enter quiz title" />
+            </div>
+            <div class="mt-4">
+                <label class="block font-medium">Subject</label>
+                <input type="text" id="quizSubject" class="w-full border p-2 rounded-md" placeholder="Enter subject" />
+            </div>
+            <div class="flex justify-between mt-6">
+                <button id="backToPage1"
+                    class="bg-gray-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-500">Back</button>
+                <button id="nextToPage3"
+                    class="bg-indigo-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-indigo-700">Next</button>
+            </div>
+        </div>
+
+        <div id="page3" class="p-6 hidden overflow-auto pb-24">
+            <h2 class="text-xl font-semibold">Create Questions</h2>
+            <div id="questionsContainer"></div>
+            <div class="fixed bottom-0 left-56 w-[calc(100%-14rem)] bg-indigo-300 p-4 flex justify-between">
+                <button id="backToPage2"
+                    class="bg-gray-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-500">Back</button>
+                <button id="addQuestion"
+                    class="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-700">Add
+                    Question</button>
+                <button id="createQuiz"
+                    class="bg-green-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-green-700">Create
+                    Quiz</button>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/createQuiz.js"></script>
+</body>
+
+</html>
