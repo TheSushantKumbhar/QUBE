@@ -152,23 +152,31 @@ def update_profile():
             session['username'] = username
 
         # Handle profile picture upload to Cloudinary
-        if profile_pic and allowed_file(profile_pic.filename):
-            # Delete the old profile picture from Cloudinary if it exists
-            if user.profile_pic and "res.cloudinary.com" in user.profile_pic:
-                public_id = user.profile_pic.split("/")[-1].split(".")[0]  # Extract public_id from URL
-                cloudinary.uploader.destroy(public_id)  # Delete old image from Cloudinary
-
-            # Upload new profile picture to Cloudinary
-            upload_result = cloudinary.uploader.upload(profile_pic)
-            new_profile_pic_url = upload_result['secure_url']  # Get the new Cloudinary image URL
-
-            # Store new Cloudinary URL in database
-            user.profile_pic = new_profile_pic_url
-            session['profile_pic'] = new_profile_pic_url  # Update session
+        if profile_pic and profile_pic.filename != '':
+            try:
+                # Upload new profile picture to Cloudinary
+                upload_result = cloudinary.uploader.upload(
+                    profile_pic,
+                    folder="profile_pics",
+                    overwrite=True,
+                    invalidate=True
+                )
+                
+                # Get the new Cloudinary image URL
+                new_profile_pic_url = upload_result['secure_url']
+                
+                # Store new Cloudinary URL in database
+                user.profile_pic = new_profile_pic_url
+                session['profile_pic'] = new_profile_pic_url  # Update session
+                
+            except Exception as e:
+                flash(f"Error uploading image: {str(e)}", "danger")
+                print(f"Cloudinary upload error: {str(e)}")
 
         db.session.commit()
         flash("Profile updated successfully!", "success")
 
+        # Force a refresh to see the new image by redirecting
         return redirect(url_for('auth.update_profile'))
 
     return render_template('authentication/profile.html', user=user)

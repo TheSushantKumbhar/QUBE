@@ -13,40 +13,62 @@
                 reader.onload = function(e) {
                     document.getElementById('profile-preview').src = e.target.result;
                     document.getElementById('upload-box-text').classList.add('hidden');
+                    document.getElementById('image-updated-notice').classList.remove('hidden');
                 };
                 reader.readAsDataURL(file);
             }
         }
     </script>
 </head>
-<body class="bg-gray-100 flex justify-center items-center h-screen">
-
-    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 class="text-2xl font-bold mb-4 text-center">Profile</h2>
-
-        <p class="text-center mt-2 text-gray-600">Email: {{ user.email }}</p>
-
-        <!-- Image Upload Box -->
-        <div class="mt-4">
-            <label for="profile_pic" class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center cursor-pointer hover:border-blue-500">
-                <img id="profile-preview" 
-                     src="{{ user.profile_pic or url_for('static', filename='profile_pics/default.jpg') }}" 
-                     alt="Profile Picture" 
-                     class="w-24 h-24 rounded-full object-cover mb-2">
-                <p id="upload-box-text" class="text-gray-500">Click to upload a new image</p>
-                <input type="file" id="profile_pic" name="profile_pic" accept=".png, .jpg, .jpeg" class="hidden" onchange="previewImage(event)">
-            </label>
+<body class="bg-gradient-to-b from-blue-50 to-indigo-100 min-h-screen flex justify-center items-center p-4">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <div class="text-center mb-6">
+            <h2 class="text-3xl font-bold text-indigo-700">Your Profile</h2>
+            <p class="text-gray-600 mt-2">{{ user.email }}</p>
         </div>
         
-        <!-- Profile Update Form -->
-        <form action="{{ url_for('auth.update_profile') }}" method="POST" enctype="multipart/form-data" class="mt-4 space-y-4">
-            <input type="text" name="username" value="{{ user.username }}" placeholder="Update Username" class="w-full p-2 border rounded-lg">
-
-            <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-lg">Save Changes</button>
+        <form action="{{ url_for('auth.update_profile') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <!-- Profile Picture Section -->
+            <div class="flex flex-col items-center">
+                <div class="relative group">
+                    <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-indigo-200 shadow-md">
+                        <img id="profile-preview" 
+                             src="{{ user.profile_pic or url_for('static', filename='profile_pics/default.jpg') }}?t={{ now }}" 
+                             alt="Profile Picture"
+                             class="w-full h-full object-cover">
+                    </div>
+                    
+                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <p id="upload-box-text" class="text-white text-sm font-medium">Update Photo</p>
+                    </div>
+                    
+                    <input type="file" id="profile_pic" name="profile_pic" accept=".png, .jpg, .jpeg" class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewImage(event)">
+                </div>
+                
+                <p id="image-updated-notice" class="mt-2 text-green-600 text-sm font-medium hidden">
+                    Image updated! Click Save to confirm.
+                </p>
+            </div>
+            
+            <!-- Username Input -->
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input type="text" id="username" name="username" value="{{ user.username }}" 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition shadow-md">
+                Save Changes
+            </button>
+            
+            <!-- Logout Link -->
+            <div class="text-center pt-4 border-t border-gray-200">
+                <a href="{{ url_for('auth.logout') }}" class="text-red-600 hover:text-red-800 font-medium transition">
+                    Logout
+                </a>
+            </div>
         </form>
-
-        <a href="{{ url_for('auth.logout') }}" class="block text-center text-red-600 mt-4">Logout</a>
     </div>
-
 </body>
 </html>
