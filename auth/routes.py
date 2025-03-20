@@ -7,6 +7,8 @@ from models.models import User
 from extensions import db
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
+import cloudinary
+import cloudinary.uploader
 
 load_dotenv()
 
@@ -42,19 +44,18 @@ def signup():
             # Firebase authentication first - only add to Postgres if this succeeds
             firebase_user = auth.create_user_with_email_and_password(email, password)
             
-            # Handle profile picture upload
-            profile_pic_filename = None
-            if profile_pic and allowed_file(profile_pic.filename):
-                filename = secure_filename(profile_pic.filename)
-                profile_pic_path = os.path.join("static/profile_pics", filename)
-                profile_pic.save(profile_pic_path)
-                profile_pic_filename = f'profile_pics/{filename}'
-                flash(" Profile picture uploaded successfully!", "success")
+            # Upload profile picture to Cloudinary
+            profile_pic_url = None
+            if profile_pic:
+                upload_result = cloudinary.uploader.upload(profile_pic, folder="profile_pics")
+                profile_pic_url = upload_result["secure_url"]  # Get the uploaded image URL
 
             # Save user in PostgreSQL ONLY AFTER Firebase authentication succeeds
-            new_user = User(email=email, username=username, profile_pic=profile_pic_filename)
+            new_user = User(email=email, username=username, profile_pic=profile_pic_url)
             db.session.add(new_user)
             db.session.commit()
+
+            session['profile_pic'] = profile_pic_url
 
             flash("Account created! You can now log in.", "success")
             return redirect(url_for('auth.login'))
@@ -78,30 +79,29 @@ def login():
         try:
             # Firebase authentication
             firebase_user = auth.sign_in_with_email_and_password(email, password)
-            
-            # Only check database after successful Firebase authentication
+
+            # Check if user exists in PostgreSQL
             db_user = User.query.filter_by(email=email).first()
+
             if not db_user:
-                # This is a case where user exists in Firebase but not in Postgres
-                # You might want to create the user in PostgreSQL here or handle differently
-                flash("User authenticated but not found in the database. Please contact support.", "warning")
-                return redirect(url_for('auth.login'))
+                # Automatically create the user in PostgreSQL if missing
+                db_user = User(email=email, username=None, profile_pic=None)
+                db.session.add(db_user)
+                db.session.commit()
 
             # Set session variables
             session['user'] = db_user.email
-            session['username'] = db_user.username
-            
-            if db_user.profile_pic:
-                session['profile_pic'] = url_for('static', filename=db_user.profile_pic)
-            else:
-                session['profile_pic'] = url_for('static', filename='profile_pics/default.jpg')
+            session['username'] = db_user.username if db_user.username else "User"
+
+            # If profile pic is stored in Cloudinary, use the direct URL
+            session['profile_pic'] = db_user.profile_pic if db_user.profile_pic else "/static/profile_pics/default.jpg"
 
             flash("Login successful!", "success")
             return redirect(url_for('home'))
 
         except Exception as e:
-            # Don't expose full error message to users in production
             flash("Invalid email or password. Please try again.", "danger")
+            print(f"Login error: {str(e)}")  # Log error for debugging
 
     return render_template('authentication/login.html')
 
@@ -151,24 +151,20 @@ def update_profile():
             user.username = username
             session['username'] = username
 
-        # Handle profile picture upload
+        # Handle profile picture upload to Cloudinary
         if profile_pic and allowed_file(profile_pic.filename):
-            filename = secure_filename(profile_pic.filename)
-            profile_pic_path = os.path.join("static/profile_pics", filename)
+            # Delete the old profile picture from Cloudinary if it exists
+            if user.profile_pic and "res.cloudinary.com" in user.profile_pic:
+                public_id = user.profile_pic.split("/")[-1].split(".")[0]  # Extract public_id from URL
+                cloudinary.uploader.destroy(public_id)  # Delete old image from Cloudinary
 
-            # Delete the old profile picture if it exists and is not the default
-            if user.profile_pic and "default.jpg" not in user.profile_pic:
-                old_pic_path = os.path.join("static", user.profile_pic)
-                if os.path.exists(old_pic_path):
-                    os.remove(old_pic_path)
+            # Upload new profile picture to Cloudinary
+            upload_result = cloudinary.uploader.upload(profile_pic)
+            new_profile_pic_url = upload_result['secure_url']  # Get the new Cloudinary image URL
 
-            profile_pic.save(profile_pic_path)
-
-            # Store relative path for profile picture in the database
-            user.profile_pic = f'profile_pics/{filename}'
-
-            # Update session immediately so navbar updates
-            session['profile_pic'] = url_for('static', filename=user.profile_pic)
+            # Store new Cloudinary URL in database
+            user.profile_pic = new_profile_pic_url
+            session['profile_pic'] = new_profile_pic_url  # Update session
 
         db.session.commit()
         flash("Profile updated successfully!", "success")
@@ -176,5 +172,3 @@ def update_profile():
         return redirect(url_for('auth.update_profile'))
 
     return render_template('authentication/profile.html', user=user)
-
-
