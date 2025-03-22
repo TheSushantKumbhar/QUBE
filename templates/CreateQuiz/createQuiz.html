@@ -18,6 +18,7 @@
     {% endwith %}
 
     <div id="page2" class="p-6">
+        <!-- <img src="{{ url_for('static', filename='images/question.gif') }}" alt="Quiz Icon" class="h-40 w-40 mr-4 ml-80 flex items-center"> -->
         <h2 class="text-xl font-semibold">Quiz Details</h2>
         <div class="mt-4">
             <label class="block font-medium">Quiz Title</label>
@@ -58,16 +59,22 @@
         </div>
     </div>
 
-    <!-- New Page 4 for Preview -->
+    <!-- Page 4 for Preview -->
     <div id="page4" class="hidden">
         <div class="w-full bg-gradient-to-b from-indigo-50 to-white min-h-screen pb-10">
             <!-- Header Banner -->
             <div>
-                <div class="max-w-6xl bg-indigo-600 px-6 py-5 mt-6 rounded-lg shadow-lg mx-auto flex flex-col md:flex-row items-center justify-between">
-                    <div class="mb-4 md:mb-0">
-                        <h2 class="text-white text-2xl md:text-3xl font-bold tracking-tight">Quiz Preview</h2>
-                        <p class="text-indigo-100 text-sm mt-1">Review your quiz before publishing</p>
+                <div
+                    class="max-w-6xl bg-indigo-600 px-6 py-5 mt-6 rounded-lg shadow-lg mx-auto flex flex-col md:flex-row items-center justify-between">
+                    
+                    <div class="mb-4 md:mb-0 flex items-center">
+                        <img src="{{ url_for('static', filename='images/question.gif') }}" alt="Quiz Icon" class="h-12 w-12 mr-4">
+                        <div>
+                            <h2 class="text-white text-2xl md:text-3xl font-bold tracking-tight">Quiz Preview</h2>
+                            <p class="text-indigo-100 text-sm mt-1">Review your quiz before publishing</p>
+                        </div>
                     </div>
+                    
                     <div class="flex gap-3">
                         <button id="backToEdit"
                             class="bg-white text-indigo-700 px-5 py-2.5 rounded-lg shadow-md hover:bg-gray-100 transition font-medium flex items-center">
@@ -86,13 +93,15 @@
 
             <div class="flex gap-6 justify-center items-start mt-6">
                 <!-- Quiz Info Box -->
-                <div class="w-1/3 min-h-[180px] bg-white shadow-lg rounded-2xl px-6 py-5 border border-gray-100 flex flex-col justify-center ml-6 mb-6">
+                <div
+                    class="w-1/3 min-h-[180px] bg-white shadow-lg rounded-2xl px-6 py-5 border border-gray-100 flex flex-col justify-center ml-6 mb-6">
                     <h1 id="previewTitle" class="text-2xl font-bold text-center text-gray-800 mb-2">Quiz Title</h1>
                     <p id="previewSubject" class="text-center text-gray-600 mb-4 text-lg">Subject</p>
-                </div>  
-            
+                </div>
+
                 <!-- Stats Box -->
-                <div class="w-1/3 min-h-[180px] bg-white shadow-lg rounded-2xl px-6 py-5 flex flex-col justify-center items-center gap-4 text-gray-500 mb-6">
+                <div
+                    class="w-1/3 min-h-[180px] bg-white shadow-lg rounded-2xl px-6 py-5 flex flex-col justify-center items-center gap-4 text-gray-500 mb-6">
                     <span class="flex items-center bg-indigo-50 rounded-full px-4 py-2">
                         <i class="fas fa-question-circle mr-2 text-indigo-600"></i>
                         <span id="questionCount" class="font-medium">0</span> questions
@@ -102,15 +111,19 @@
                         Created: <span id="creationDate" class="ml-1 font-medium"></span>
                     </span>
                 </div>
-            
+
                 <!-- Profile Box -->
-                <div class="w-1/3 min-h-[180px] bg-white shadow-lg rounded-2xl px-6 py-5 flex flex-col justify-center items-center text-gray-800 mr-6 mb-6">
-                    <img src="https://via.placeholder.com/80" alt="Profile Photo" class="w-16 h-16 rounded-full mb-3">
-                    <p id="username" class="text-lg font-semibold">Username</p>
+                <div
+                    class="w-1/3 min-h-[180px] bg-white shadow-lg rounded-2xl  flex flex-row justify-center items-center text-gray-800 mr-6 mb-6 gap-5">
+                
+                        <img src="{{session['profile_pic']}}" alt="Profile Photo" class="w-20 h-20 rounded-full mb-3 object-cover">
+                        <p id="username" class="text-lg bg-purple-50 px-4 py-2 font-semibold rounded-full">{{
+                            session['username'] }}</p>
+                    
                 </div>
             </div>
-            
-            
+
+
 
             <!-- Quiz content section -->
             <div id="previewContainer" class="max-w-4xl mx-auto">
