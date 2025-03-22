@@ -7,47 +7,54 @@ import uuid
 import traceback
 from werkzeug.utils import secure_filename
 import json
-
-# Configure upload settings
-UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+import base64
 
 # Create blueprint
 quiz_bp = Blueprint('quiz', __name__)
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
 
-# def save_image(file_data):
-#     """Save base64 image or uploaded file and return the path"""
-#     if file_data and file_data.startswith('data:image'):
-#         import base64
-#         format_type = file_data.split(';')[0].split('/')[1]
-#         file_data = file_data.split(',')[1]
-#         filename = secure_filename(f"{uuid.uuid4()}.{format_type}")
-#         file_path = os.path.join(UPLOAD_FOLDER, filename)
+def upload_to_cloudinary(file_data):
+    """Upload image to Cloudinary and return the URL"""
+    if not file_data:
+        return None
         
-#         with open(file_path, "wb") as f:
-#             f.write(base64.b64decode(file_data))
+    try:
+        # Handle base64 encoded images
+        if isinstance(file_data, str) and file_data.startswith('data:image'):
+            # Generate a unique filename
+            filename = f"quiz_image_{uuid.uuid4()}"
+            
+            # Upload to Cloudinary
+            result = cloudinary.uploader.upload(
+                file_data,
+                public_id=filename,
+                folder="quiz_images"
+            )
+            
+            # Return the secure URL
+            return result['secure_url']
+            
+        # Handle file objects (if you're receiving actual file uploads)
+        elif hasattr(file_data, 'filename'):
+            filename = f"quiz_image_{uuid.uuid4()}"
+            
+            result = cloudinary.uploader.upload(
+                file_data,
+                public_id=filename,
+                folder="quiz_images"
+            )
+            
+            return result['secure_url']
+            
+    except Exception as e:
+        print(f"Cloudinary upload error: {str(e)}")
+        traceback.print_exc()
         
-#         return f"/static/uploads/Quiz_pics"
-#     return None
-
-def save_image(file_data):
-    """Save base64 image or uploaded file and return the path"""
-    if file_data and file_data.startswith('data:image'):
-        import base64
-        format_type = file_data.split(';')[0].split('/')[1]
-        file_data = file_data.split(',')[1]
-        filename = secure_filename(f"{uuid.uuid4()}.{format_type}")
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
-        
-        with open(file_path, "wb") as f:
-            f.write(base64.b64decode(file_data))
-        
-        # This line is incorrect, it should return the path to the saved file
-        return f"/static/uploads/uploads"  # Fixed path
     return None
 
 def get_current_user():
@@ -96,7 +103,7 @@ def create_quiz_page():
             db.session.flush()
             
             for q_index, question_data in enumerate(data['questions']):
-                question_image_url = save_image(question_data['image']) if question_data.get('image') else None
+                question_image_url = upload_to_cloudinary(question_data.get('image'))
                 new_question = Question(
                     quiz_id=new_quiz.id,
                     text=question_data['text'],
@@ -108,7 +115,7 @@ def create_quiz_page():
                 db.session.flush()
                 
                 for o_index, option_data in enumerate(question_data['options']):
-                    option_image_url = save_image(option_data['image']) if option_data.get('image') else None
+                    option_image_url = upload_to_cloudinary(option_data.get('image'))
                     new_option = Option(
                         question_id=new_question.id,
                         text=option_data['text'],
@@ -148,7 +155,7 @@ def create_quiz_api():
         db.session.flush()
         
         for q_index, question_data in enumerate(data['questions']):
-            question_image_url = save_image(question_data['image']) if question_data.get('image') else None
+            question_image_url = upload_to_cloudinary(question_data.get('image'))
             new_question = Question(
                 quiz_id=new_quiz.id,
                 text=question_data['text'],
@@ -160,7 +167,7 @@ def create_quiz_api():
             db.session.flush()
             
             for o_index, option_data in enumerate(question_data['options']):
-                option_image_url = save_image(option_data['image']) if option_data.get('image') else None
+                option_image_url = upload_to_cloudinary(option_data.get('image'))
                 new_option = Option(
                     question_id=new_question.id,
                     text=option_data['text'],
@@ -275,7 +282,7 @@ def save_quiz():
         db.session.flush()
 
         for q_index, question_data in enumerate(data['questions']):
-            question_image_url = save_image(question_data['image']) if question_data.get('image') else None
+            question_image_url = upload_to_cloudinary(question_data.get('image'))
             new_question = Question(
                 quiz_id=new_quiz.id,
                 text=question_data['text'],
@@ -287,7 +294,7 @@ def save_quiz():
             db.session.flush()
 
             for o_index, option_data in enumerate(question_data['options']):
-                option_image_url = save_image(option_data['image']) if option_data.get('image') else None
+                option_image_url = upload_to_cloudinary(option_data.get('image'))
                 new_option = Option(
                     question_id=new_question.id,
                     text=option_data['text'],
