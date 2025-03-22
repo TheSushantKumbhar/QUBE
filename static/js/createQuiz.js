@@ -166,6 +166,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Submit the form
         document.getElementById('quizForm').submit();
+
+        
     });
 
     // Add this to help check if we're coming back after a successful save
