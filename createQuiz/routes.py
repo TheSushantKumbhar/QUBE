@@ -247,7 +247,7 @@ def my_quizzes():
     """View user's quizzes"""
     user = get_current_user()
     quizzes = Quiz.query.filter_by(user_id=user.id).all()
-    return render_template('myQuizzes.html', quizzes=quizzes)
+    return render_template('createQuiz/myQuizzes.html', quizzes=quizzes)
 
 
 @quiz_bp.route('/preview')
@@ -255,7 +255,7 @@ def my_quizzes():
 def preview_quiz():
     """Preview the quiz before creating it"""
     return render_template('CreateQuiz/previewQuiz.html')
-
+    
 
 @quiz_bp.route('/save_quiz', methods=['POST'])
 @login_required
@@ -306,7 +306,7 @@ def save_quiz():
 
         db.session.commit()
         flash("Quiz saved successfully!", "success")
-        return redirect(url_for('quiz.view_quiz', quiz_id=new_quiz.id))
+        return redirect(url_for('quiz.my_quizzes'))
 
     except Exception as e:
         db.session.rollback()
