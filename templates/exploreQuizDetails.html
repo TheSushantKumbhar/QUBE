@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ quiz.title }} - Details{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-10 px-6">
+    <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="bg-indigo-600 text-white py-4 px-6">
+            <h2 class="text-2xl font-semibold">{{ quiz.title }}</h2>
+        </div>
+        <div class="p-6">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="bg-{{ category }}-100 text-{{ category }}-800 px-4 py-3 rounded mb-4">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <h5 class="text-gray-600 text-lg mb-3">{{ quiz.subject }}</h5>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p><strong>Creator:</strong> {{ creator.username or creator.email }}</p>
+                    <p><strong>Created on:</strong> {{ quiz.created_at.strftime('%B %d, %Y') }}</p>
+                    <p><strong>Number of questions:</strong> {{ quiz.questions|length }}</p>
+                </div>
+                <div>
+                    {% if quiz.always_available %}
+                        <div class="bg-green-100 text-green-800 px-4 py-3 rounded">
+                            <i class="fas fa-check-circle"></i> This quiz is always available
+                        </div>
+                    {% else %}
+                        <p><strong>Available times:</strong> {{ quiz.start_time.strftime('%I:%M %p') }} - {{ quiz.end_time.strftime('%I:%M %p') }}</p>
+                        {% if current_time %}
+                            <p><strong>Current time:</strong> {{ current_time.strftime('%I:%M %p') }}</p>
+                            {% if quiz.start_time <= current_time <= quiz.end_time %}
+                                <div class="bg-green-100 text-green-800 px-4 py-3 rounded">
+                                    <i class="fas fa-check-circle"></i> This quiz is currently available
+                                </div>
+                            {% else %}
+                                <div class="bg-yellow-100 text-yellow-800 px-4 py-3 rounded">
+                                    <i class="fas fa-clock"></i> This quiz is not available at this time
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                {% if current_user %}
+                    {% if user_attempt %}
+                        <a href="{{ url_for('quiz.take_quiz', attempt_id=user_attempt.id) }}" class="block w-full text-center bg-green-500 text-white py-2 rounded hover:bg-green-600">
+                            <i class="fas fa-play-circle"></i> Resume Quiz Attempt
+                        </a>
+                    {% else %}
+                        {% if quiz.always_available or (quiz.start_time <= current_time <= quiz.end_time) %}
+                            <form action="{{ url_for('quiz.start_explore_quiz', quiz_id=quiz.id) }}" method="POST">
+                                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
+                                    <i class="fas fa-play-circle"></i> Start Quiz
+                                </button>
+                            </form>
+                        {% else %}
+                            <button type="button" class="w-full bg-gray-400 text-white py-2 rounded" disabled>
+                                <i class="fas fa-clock"></i> Quiz Not Available At This Time
+                            </button>
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="block w-full text-center bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+                        <i class="fas fa-sign-in-alt"></i> Log in to take this quiz
+                    </a>
+                {% endif %}
+                
+                <a href="{{ url_for('quiz.explore_quizzes') }}" class="block w-full text-center bg-gray-500 text-white py-2 rounded hover:bg-gray-600">
+                    <i class="fas fa-arrow-left"></i> Back to Explore
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
