@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Explore Public Quizzes{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-gray-100">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Explore Public Quizzes</h1>
+        <p class="text-gray-600 mt-2">Discover and take quizzes created by the community</p>
+    </div>
+    
+    <!-- Current Time Card -->
+    <div class="mb-8">
+        <div class="bg-white rounded-xl shadow-sm p-4 max-w-xs border border-indigo-100">
+            <h5 class="text-lg font-semibold text-indigo-800 mb-1">Current Time</h5>
+            <p class="text-indigo-700">{{ current_time.strftime('%I:%M %p') }}</p>
+        </div>
+    </div>
+    
+    <!-- Quizzes Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% if quizzes %}
+            {% for quiz in quizzes %}
+                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        {% if quiz.always_available %}
+                            <span class="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full">Always Available</span>
+                        {% else %}
+                            {% if quiz.start_time <= current_time <= quiz.end_time %}
+                                <span class="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full">Available Now</span>
+                            {% else %}
+                                <span class="bg-yellow-500 text-white text-xs font-semibold px-3 py-1 rounded-full">Not Available Now</span>
+                            {% endif %}
+                        {% endif %}
+                        <span class="text-gray-500 text-sm"><i class="fas fa-question-circle mr-1"></i> {{ quiz.questions|length }}</span>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-1">{{ quiz.title }}</h3>
+                        <h4 class="text-md text-indigo-600 mb-3">{{ quiz.subject }}</h4>
+                        <div class="text-sm text-gray-500 space-y-1">
+                            <p class="flex items-center"><i class="fas fa-user mr-2"></i> {{ quiz.user.username or quiz.user.email }}</p>
+                            {% if not quiz.always_available %}
+                                <p class="flex items-center"><i class="fas fa-clock mr-2"></i> {{ quiz.start_time.strftime('%I:%M %p') }} - {{ quiz.end_time.strftime('%I:%M %p') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-end">
+                        <a href="{{ url_for('quiz.explore_quiz_details', quiz_id=quiz.id) }}" class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 text-sm">
+                            <span>View Details</span>
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-span-3">
+                <div class="bg-white rounded-xl shadow p-6 text-center">
+                    <div class="text-indigo-400 text-6xl mb-4">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">No quizzes found</h3>
+                    <p class="text-gray-600">No public quizzes available right now. Check back later!</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
