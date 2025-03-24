@@ -14,9 +14,12 @@ class Quiz(db.Model):
     is_public = db.Column(db.Boolean, default=False)
     is_live = db.Column(db.Boolean, default=False)
     
+    always_available = db.Column(db.Boolean, default=True)
+    start_time = db.Column(db.Time, nullable=True)
+    end_time = db.Column(db.Time, nullable=True)
+    
     user = db.relationship("User", backref=db.backref("quizzes", cascade="all, delete-orphan"))
     questions = db.relationship("Question", backref="quiz", cascade="all, delete-orphan")
-
 
 class Question(db.Model):
     __tablename__ = "questions"
