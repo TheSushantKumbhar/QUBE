@@ -17,7 +17,7 @@
         </div>
         <div class="mt-12 flex flex-col space-y-6">
             <a href="/" class="flex items-center text-white hover:text-blue-500"><i class="fas fa-home mr-3"></i> Home</a>
-            <a href="/explore" class="flex items-center text-white hover:text-blue-600"><i class="fas fa-search mr-3"></i> Explore</a>
+            <a href="{{ url_for('quiz.explore_quizzes')}}" class="flex items-center text-white hover:text-blue-600"><i class="fas fa-search mr-3"></i> Explore</a>
             <a href="/live" class="flex items-center text-white hover:text-blue-600"><i class="fas fa-bolt mr-3"></i> Live</a>
             <a href="{{ url_for('quiz.quiz_categories')}}" class="flex items-center text-white hover:text-blue-600"><i class="fas fa-plus-circle mr-3"></i> Create Quiz</a>
             <a href="/analytics" class="flex items-center text-white hover:text-blue-600"><i class="fas fa-chart-bar mr-3"></i> Analytics</a>
