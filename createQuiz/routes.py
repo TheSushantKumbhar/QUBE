@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, session
-from models.quizModel import Quiz, Question, Option
+from models.quizModel import Quiz, Question, Option,QuizAttempt,UserAnswer
 from models.models import User
 from extensions import db
 import os
@@ -11,6 +11,7 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 import base64
+from datetime import datetime, timedelta
 
 # Create blueprint
 quiz_bp = Blueprint('quiz', __name__)
@@ -226,19 +227,6 @@ def get_quiz(quiz_id):
         return jsonify({'success': False, 'message': f'Error retrieving quiz: {str(e)}'}), 500
 
 
-@quiz_bp.route('/view/<int:quiz_id>')
-@login_required
-def view_quiz(quiz_id):
-    """View a quiz"""
-    quiz = Quiz.query.get_or_404(quiz_id)
-    user = get_current_user()
-    
-    # Check if user has access to this quiz
-    if not quiz.is_public and quiz.user_id != user.id:
-        flash("You don't have permission to view this quiz.", "danger")
-        return redirect(url_for('home'))
-    
-    return render_template('CreateQuiz/viewQuiz.html', quiz=quiz)
 
 
 @quiz_bp.route('/myquizzes')
@@ -313,3 +301,353 @@ def save_quiz():
         traceback.print_exc()
         flash(f"Error saving quiz: {str(e)}", "danger")
         return redirect(url_for('quiz.create_quiz_page'))
+    
+
+
+# Add these routes to your existing createquiz/routes.py file
+
+@quiz_bp.route('/view/<int:quiz_id>')
+@login_required
+def view_quiz(quiz_id):
+    """View a quiz with management options"""
+    quiz = Quiz.query.get_or_404(quiz_id)
+    user = get_current_user()
+    
+    # Check if user has access to this quiz
+    if quiz.user_id != user.id and not quiz.is_public:
+        flash("You don't have permission to view this quiz.", "danger")
+        return redirect(url_for('quiz.my_quizzes'))
+    
+    return render_template('CreateQuiz/viewQuiz.html', quiz=quiz, current_user=user)
+
+
+@quiz_bp.route('/update_settings/<int:quiz_id>', methods=['POST'])
+@login_required
+def update_quiz_settings(quiz_id):
+    """Update quiz settings (public/private, scheduled times)"""
+    quiz = Quiz.query.get_or_404(quiz_id)
+    user = get_current_user()
+    
+    # Check if user owns this quiz
+    if quiz.user_id != user.id:
+        return jsonify({'success': False, 'message': 'You do not have permission to modify this quiz'}), 403
+    
+    try:
+        # Update quiz settings
+        quiz.is_public = 'is_public' in request.form
+        quiz.is_live = 'is_live' in request.form
+        quiz.always_available = request.form.get('always_available') == 'true'
+        
+        # If not always available, update the time restrictions
+        if not quiz.always_available:
+            start_time_str = request.form.get('start_time')
+            end_time_str = request.form.get('end_time')
+            
+            if start_time_str and end_time_str:
+                # Convert time strings to datetime objects
+                from datetime import datetime, time
+                
+                # Parse the time strings (format: HH:MM)
+                hours, minutes = map(int, start_time_str.split(':'))
+                start_time = time(hour=hours, minute=minutes)
+                
+                hours, minutes = map(int, end_time_str.split(':'))
+                end_time = time(hour=hours, minute=minutes)
+                
+                quiz.start_time = start_time
+                quiz.end_time = end_time
+            else:
+                return jsonify({'success': False, 'message': 'Start and end times are required'}), 400
+        else:
+            # Reset time restrictions if always available
+            quiz.start_time = None
+            quiz.end_time = None
+        
+        db.session.commit()
+        return jsonify({'success': True}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@quiz_bp.route('/edit/<int:quiz_id>')
+@login_required
+def edit_quiz(quiz_id):
+    """Edit an existing quiz"""
+    quiz = Quiz.query.get_or_404(quiz_id)
+    user = get_current_user()
+    
+    # Check if user owns this quiz
+    if quiz.user_id != user.id:
+        flash("You don't have permission to edit this quiz.", "danger")
+        return redirect(url_for('quiz.my_quizzes'))
+    
+    # Fetch quiz data to pre-populate the form
+    questions = []
+    for question in sorted(quiz.questions, key=lambda q: q.position):
+        options = []
+        for option in sorted(question.options, key=lambda o: o.position):
+            options.append({
+                'id': option.id,
+                'text': option.text,
+                'image_url': option.image_url,
+                'isCorrect': option.is_correct
+            })
+        
+        questions.append({
+            'id': question.id,
+            'text': question.text,
+            'image_url': question.image_url,
+            'type': question.question_type,
+            'options': options
+        })
+    
+    quiz_data = {
+        'id': quiz.id,
+        'title': quiz.title,
+        'subject': quiz.subject,
+        'questions': questions
+    }
+    
+    return render_template('CreateQuiz/editQuiz.html', quiz=quiz, quiz_data=json.dumps(quiz_data))
+
+
+@quiz_bp.route('/delete/<int:quiz_id>', methods=['POST'])
+@login_required
+def delete_quiz(quiz_id):
+    """Delete a quiz"""
+    quiz = Quiz.query.get_or_404(quiz_id)
+    user = get_current_user()
+    
+    # Check if user owns this quiz
+    if quiz.user_id != user.id:
+        flash("You don't have permission to delete this quiz.", "danger")
+        return redirect(url_for('quiz.my_quizzes'))
+    
+    try:
+        db.session.delete(quiz)
+        db.session.commit()
+        flash("Quiz deleted successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        traceback.print_exc()
+        flash(f"Error deleting quiz: {str(e)}", "danger")
+    
+    return redirect(url_for('quiz.my_quizzes'))
+
+
+# Add these to your quiz_bp Blueprint in createquiz/routes.py
+@quiz_bp.route('/explore')
+def explore_quizzes():
+    """
+    Explore page that shows all public quizzes
+    Any user can view this page, even if not logged in
+    """
+    # Get all public quizzes that are live
+    public_quizzes = Quiz.query.filter(
+        Quiz.is_public == True,
+        Quiz.is_live == True
+    ).order_by(Quiz.created_at.desc()).all()
+    
+    # Get current user if logged in
+    current_user = get_current_user()
+    
+    # Get current time for checking availability
+    from datetime import datetime
+    current_time = (datetime.utcnow() + timedelta(hours=5, minutes=30)).time()
+    
+    return render_template('explore.html', 
+                          quizzes=public_quizzes,
+                          current_user=current_user,
+                          current_time=current_time)
+
+@quiz_bp.route('/explore/details/<int:quiz_id>')
+def explore_quiz_details(quiz_id):
+    """View details of a public quiz from the explore page"""
+    quiz = Quiz.query.get_or_404(quiz_id)
+    
+    # Check if quiz is public
+    if not quiz.is_public:
+        flash("This quiz is not available for public viewing.", "danger")
+        return redirect(url_for('quiz.explore_quizzes'))
+    
+    # Get quiz creator info
+    creator = User.query.get(quiz.user_id)
+    
+    # Get current user if logged in
+    current_user = get_current_user()
+    
+    # Check if there's a current quiz attempt by this user
+    user_attempt = None
+    if current_user:
+        user_attempt = QuizAttempt.query.filter_by(
+            quiz_id=quiz.id,
+            user_id=current_user.id,
+            completed_at=None
+        ).first()
+    
+    return render_template('exploreQuizDetails.html', quiz=quiz,creator=creator, current_user=current_user,user_attempt=user_attempt)
+
+
+@quiz_bp.route('/explore/start/<int:quiz_id>', methods=['POST'])
+@login_required
+def start_explore_quiz(quiz_id):
+    """Start attempting a public quiz"""
+    quiz = Quiz.query.get_or_404(quiz_id)
+    user = get_current_user()
+    
+    # Check if quiz is public and live
+    if not quiz.is_public or not quiz.is_live:
+        flash("This quiz is not available for public attempts.", "danger")
+        return redirect(url_for('quiz.explore_quizzes'))
+    
+    # Check if quiz is available at the current time
+    if not quiz.always_available:
+        from datetime import datetime
+        current_time = (datetime.utcnow() + timedelta(hours=5, minutes=30)).time()
+        
+        # Check if current time is within quiz availability window
+        if not (quiz.start_time <= current_time <= quiz.end_time):
+            flash("This quiz is not available at this time.", "warning")
+            return redirect(url_for('quiz.explore_quiz_details', quiz_id=quiz.id))
+    
+    # Check if there's an existing incomplete attempt
+    existing_attempt = QuizAttempt.query.filter_by(
+        quiz_id=quiz.id,
+        user_id=user.id,
+        completed_at=None
+    ).first()
+    
+    if existing_attempt:
+        # Resume existing attempt
+        return redirect(url_for('quiz.take_quiz', attempt_id=existing_attempt.id))
+    
+    # Create new attempt
+    new_attempt = QuizAttempt(
+        quiz_id=quiz.id,
+        user_id=user.id
+    )
+    db.session.add(new_attempt)
+    
+    try:
+        db.session.commit()
+        return redirect(url_for('quiz.take_quiz', attempt_id=new_attempt.id))
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error starting quiz: {str(e)}", "danger")
+        return redirect(url_for('quiz.explore_quiz_details', quiz_id=quiz.id))
+    
+@quiz_bp.route('/quiz/take/<int:attempt_id>')
+@login_required
+def take_quiz(attempt_id):
+    """Take a quiz based on an attempt ID"""
+    attempt = QuizAttempt.query.get_or_404(attempt_id)
+    user = get_current_user()
+    
+    # Check if this attempt belongs to the current user
+    if attempt.user_id != user.id:
+        flash("You don't have permission to access this quiz attempt.", "danger")
+        return redirect(url_for('quiz.explore_quizzes'))
+    
+    # Check if attempt is already completed
+    if attempt.completed_at:
+        flash("This quiz attempt has already been completed.", "info")
+        return redirect(url_for('quiz.explore_quiz_details', quiz_id=attempt.quiz_id))
+    
+    # Get the quiz
+    quiz = attempt.quiz
+    
+    # Check if quiz is still available (time restrictions)
+    if not quiz.always_available:
+        from datetime import datetime
+        current_time = (datetime.utcnow() + timedelta(hours=5, minutes=30)).time()
+        
+        # Check if current time is within quiz availability window
+        if not (quiz.start_time <= current_time <= quiz.end_time):
+            flash("This quiz is not available at this time.", "warning")
+            return redirect(url_for('quiz.explore_quiz_details', quiz_id=quiz.id))
+    
+    # Get current time for template
+    from datetime import datetime
+    current_time = (datetime.utcnow() + timedelta(hours=5, minutes=30)).time()
+    
+    return render_template('solveQuiz/takeQuiz.html', 
+                          quiz=quiz, 
+                          attempt=attempt,
+                          current_time=current_time)
+
+@quiz_bp.route('/quiz/submit/<int:attempt_id>', methods=['POST'])
+@login_required
+def submit_quiz(attempt_id):
+    """Submit answers for a quiz attempt"""
+    attempt = QuizAttempt.query.get_or_404(attempt_id)
+    user = get_current_user()
+    
+    # Check if this attempt belongs to the current user
+    if attempt.user_id != user.id:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+    
+    # Check if attempt is already completed
+    if attempt.completed_at:
+        return jsonify({'success': False, 'message': 'This attempt has already been completed'}), 400
+    
+    try:
+        data = request.json
+        answers = data.get('answers', {})
+        
+        # Calculate score
+        total_questions = 0
+        correct_answers = 0
+        
+        for question_id, option_ids in answers.items():
+            question = Question.query.get(int(question_id))
+            if not question:
+                continue
+                
+            total_questions += 1
+            
+            # Get correct options for this question
+            correct_options = [o.id for o in question.options if o.is_correct]
+            
+            # Convert option_ids to integers for comparison
+            user_option_ids = [int(o_id) for o_id in option_ids]
+            
+            # For single choice questions
+            if question.question_type == 'single':
+                if len(user_option_ids) == 1 and user_option_ids[0] in correct_options:
+                    correct_answers += 1
+            # For multiple choice questions
+            else:
+                # All selected options must be correct and all correct options must be selected
+                if sorted(user_option_ids) == sorted(correct_options):
+                    correct_answers += 1
+            
+            # Save user answers
+            for option_id in user_option_ids:
+                user_answer = UserAnswer(
+                    attempt_id=attempt.id,
+                    question_id=question.id,
+                    option_id=option_id
+                )
+                db.session.add(user_answer)
+        
+        # Update attempt
+        score_percentage = int((correct_answers / total_questions) * 100) if total_questions > 0 else 0
+        attempt.score = score_percentage
+        attempt.completed_at = datetime.utcnow()
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True, 
+            'score': score_percentage,
+            'correctAnswers': correct_answers,
+            'totalQuestions': total_questions
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
