@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taking {{ quiz.title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    keyframes: {
+                        pulse: {
+                            '0%, 100%': { opacity: 1 },
+                            '50%': { opacity: 0.7 },
+                        }
+                    },
+                    animation: {
+                        pulse: 'pulse 1s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-full transition-colors duration-300">
+    <div class="container mx-auto px-4 py-4">
+        <div class="flex justify-end mb-4">
+            <button id="theme-toggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700">
+                <i class="fas fa-sun text-yellow-500 dark:hidden"></i>
+                <i class="fas fa-moon text-blue-300 hidden dark:block"></i>
+            </button>
+        </div>
+        <div class="flex flex-col md:flex-row gap-4">
+            <!-- Quiz content - main area -->
+            <div class="w-full md:w-3/4">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                    <div class="bg-blue-600 dark:bg-blue-800 text-white p-4 flex justify-between items-center">
+                        <h2 class="text-xl font-bold m-0">{{ quiz.title }}</h2>
+                        <div id="quiz-timer" class="text-lg font-bold py-2 px-4 bg-white bg-opacity-20 dark:bg-opacity-20 rounded">
+                            <i class="fas fa-clock mr-2"></i><span id="timer-display">00:00:00</span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div id="quiz-container" data-attempt-id="{{ attempt.id }}">
+                            <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-5">
+                                <p class="mb-2"><i class="fas fa-info-circle mr-2"></i>Answer all questions to the best of your ability. Use the navigation buttons or question numbers to move between questions.</p>
+                                <p class="mb-0"><i class="fas fa-flag mr-2"></i>Flag questions you want to review later.</p>
+                            </div>
+                            
+                            <div id="quiz-progress" class="mb-4">
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <p class="text-center mt-2 dark:text-gray-200">
+                                    Question <span id="current-question">1</span> of <span id="total-questions">{{ quiz.questions|length }}</span>
+                                    <span class="ml-2 bg-green-600 text-white text-xs font-medium px-2.5 py-0.5 rounded" id="answered-count">0 Answered</span>
+                                </p>
+                            </div>
+                            
+                            <form id="quiz-form">
+                                {% for question in quiz.questions|sort(attribute='position') %}
+                                    <div class="question-container {% if loop.first %}block{% else %}hidden{% endif %}" id="question-{{ question.id }}">
+                                        <div class="flex justify-between items-center mb-4">
+                                            <h4 class="text-lg font-medium dark:text-white">Question {{ loop.index }}: {{ question.text }}</h4>
+                                            <button type="button" class="flag-btn text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400" data-question="{{ question.id }}">
+                                                <i class="fas fa-flag"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        {% if question.image_url %}
+                                            <div class="mb-3">
+                                                <img src="{{ question.image_url }}" alt="Question image" class="rounded max-w-full h-auto">
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="mt-4 space-y-3">
+                                            {% for option in question.options|sort(attribute='position') %}
+                                                <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                                                    <div class="p-4">
+                                                        <div class="flex items-start">
+                                                            <div class="flex items-center h-5">
+                                                                <input 
+                                                                    class="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 focus:ring-blue-500 dark:focus:ring-blue-600 rounded {% if question.question_type != 'single' %}rounded{% else %}rounded-full{% endif %}" 
+                                                                    type="{% if question.question_type == 'single' %}radio{% else %}checkbox{% endif %}" 
+                                                                    name="question-{{ question.id }}" 
+                                                                    id="option-{{ option.id }}" 
+                                                                    value="{{ option.id }}">
+                                                            </div>
+                                                            <label class="ml-2 w-full text-sm font-medium text-gray-900 dark:text-gray-300" for="option-{{ option.id }}">
+                                                                {{ option.text }}
+                                                                {% if option.image_url %}
+                                                                    <div class="mt-2">
+                                                                        <img src="{{ option.image_url }}" alt="Option image" class="rounded max-h-40">
+                                                                    </div>
+                                                                {% endif %}
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        
+                                        <div class="flex justify-between mt-6">
+                                            <button type="button" class="prev-question px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" {% if loop.first %}disabled{% endif %}>
+                                                <i class="fas fa-arrow-left mr-2"></i>Previous
+                                            </button>
+                                            <button type="button" class="next-question px-4 py-2 {% if loop.last %}bg-green-600 hover:bg-green-700{% else %}bg-blue-600 hover:bg-blue-700{% endif %} text-white rounded transition-colors">
+                                                {% if loop.last %}
+                                                    <i class="fas fa-paper-plane mr-2"></i>Submit
+                                                {% else %}
+                                                    Next<i class="fas fa-arrow-right ml-2"></i>
+                                                {% endif %}
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar with question navigation and controls -->
+            <div class="w-full md:w-1/4">
+                <div class="space-y-4">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                        <div class="bg-gray-600 dark:bg-gray-700 text-white p-4">
+                            <h5 class="font-medium m-0">Quiz Navigator</h5>
+                        </div>
+                        <div class="p-4">
+                            <div class="question-navigation">
+                                <p class="dark:text-gray-300">Jump to question:</p>
+                                <div class="flex flex-wrap">
+                                    {% for question in quiz.questions|sort(attribute='position') %}
+                                        <button type="button" 
+                                            class="question-number-btn w-10 h-10 m-1 font-bold flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 {% if loop.first %}ring-2 ring-blue-500 dark:ring-blue-400{% endif %}" 
+                                            data-question-index="{{ loop.index0 }}" 
+                                            aria-label="Go to question {{ loop.index }}">
+                                            {{ loop.index }}
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <p class="mb-2 dark:text-gray-300">Legend:</p>
+                                <div class="flex items-center mb-2">
+                                    <div class="w-10 h-10 mr-2 flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300">1</div>
+                                    <span class="dark:text-gray-300">Not answered</span>
+                                </div>
+                                <div class="flex items-center mb-2">
+                                    <div class="w-10 h-10 mr-2 flex items-center justify-center bg-green-600 border border-green-600 rounded text-white">2</div>
+                                    <span class="dark:text-gray-300">Answered</span>
+                                </div>
+                                <div class="flex items-center mb-2">
+                                    <div class="w-10 h-10 mr-2 flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 relative">
+                                        <span>3</span>
+                                        <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                                    </div>
+                                    <span class="dark:text-gray-300">Flagged for review</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 mr-2 flex items-center justify-center border-2 border-blue-500 dark:border-blue-400 rounded text-gray-700 dark:text-gray-300">4</div>
+                                    <span class="dark:text-gray-300">Current question</span>
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="w-full mt-5 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded transition-colors" id="review-flagged">
+                                <i class="fas fa-flag mr-2"></i>Review Flagged Questions
+                            </button>
+                            
+                            <button type="button" class="w-full mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors" id="submit-quiz">
+                                <i class="fas fa-paper-plane mr-2"></i>Submit Quiz
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                        <div class="bg-blue-500 dark:bg-blue-600 text-white p-4">
+                            <h5 class="font-medium m-0">Quiz Summary</h5>
+                        </div>
+                        <div class="p-4">
+                            <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                                <li class="py-3 flex justify-between items-center">
+                                    <span class="dark:text-gray-300">Total Questions</span>
+                                    <span class="bg-blue-600 text-white text-xs font-medium px-2.5 py-0.5 rounded">{{ quiz.questions|length }}</span>
+                                </li>
+                                <li class="py-3 flex justify-between items-center">
+                                    <span class="dark:text-gray-300">Answered</span>
+                                    <span class="bg-green-600 text-white text-xs font-medium px-2.5 py-0.5 rounded" id="sidebar-answered">0</span>
+                                </li>
+                                <li class="py-3 flex justify-between items-center">
+                                    <span class="dark:text-gray-300">Unanswered</span>
+                                    <span class="bg-red-600 text-white text-xs font-medium px-2.5 py-0.5 rounded" id="sidebar-unanswered">{{ quiz.questions|length }}</span>
+                                </li>
+                                <li class="py-3 flex justify-between items-center">
+                                    <span class="dark:text-gray-300">Flagged</span>
+                                    <span class="bg-yellow-500 text-white text-xs font-medium px-2.5 py-0.5 rounded" id="sidebar-flagged">0</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="submitConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
+            <div class="bg-blue-600 dark:bg-blue-700 text-white p-4 rounded-t-lg">
+                <h5 class="font-medium">Confirm Submission</h5>
+            </div>
+            <div class="p-6">
+                <p class="dark:text-gray-300">Are you sure you want to submit your quiz?</p>
+                <div id="unanswered-warning" class="mt-4 mb-4 p-4 bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-100 rounded hidden">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>You have <span id="unanswered-count"></span> unanswered questions.
+                </div>
+                <p class="dark:text-gray-300">You cannot change your answers after submission.</p>
+            </div>
+            <div class="flex p-4 border-t border-gray-200 dark:border-gray-700">
+                <button type="button" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded mr-2 transition-colors" id="cancel-submit">Cancel</button>
+                <button type="button" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors" id="confirm-submit">Submit Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Theme toggling
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        // Check for saved theme preference or respect OS preference
+        if (localStorage.getItem('theme') === 'dark' || 
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        // Toggle theme
+        themeToggle.addEventListener('click', function() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Initialize variables
+        const questions = document.querySelectorAll('.question-container');
+        const totalQuestions = questions.length;
+        let currentQuestionIndex = 0;
+        const answeredQuestions = new Set();
+        const flaggedQuestions = new Set();
+        
+        // Timer variables
+        let timerSeconds = 0;
+        let timerInterval;
+        const startTime = new Date();
+        const timerDisplay = document.getElementById('timer-display');
+        const quizTimer = document.getElementById('quiz-timer');
+        
+        // Modal setup
+        const submitModal = document.getElementById('submitConfirmModal');
+        const cancelSubmit = document.getElementById('cancel-submit');
+        
+        // Start the timer
+        startTimer();
+        
+        // Initialize question navigation
+        initializeQuestionNavigation();
+        
+        // Handle option selection to mark questions as answered
+        document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const questionId = this.name.split('-')[1];
+                const questionContainer = document.getElementById('question-' + questionId);
+                const questionIndex = Array.from(questions).indexOf(questionContainer);
+                
+                // For radio buttons, a selection means the question is answered
+                if (this.type === 'radio') {
+                    answeredQuestions.add(questionIndex);
+                } 
+                // For checkboxes, we need to check if any checkbox in the group is checked
+                else {
+                    const checkboxes = document.querySelectorAll(`input[name="${this.name}"]:checked`);
+                    if (checkboxes.length > 0) {
+                        answeredQuestions.add(questionIndex);
+                    } else {
+                        answeredQuestions.delete(questionIndex);
+                    }
+                }
+                
+                updateQuestionStatus();
+            });
+        });
+        
+        // Flag buttons
+        document.querySelectorAll('.flag-btn').forEach((button, index) => {
+            button.addEventListener('click', function() {
+                this.classList.toggle('text-red-500');
+                this.classList.toggle('dark:text-red-400');
+                if (this.classList.contains('text-red-500')) {
+                    flaggedQuestions.add(index);
+                } else {
+                    flaggedQuestions.delete(index);
+                }
+                updateQuestionStatus();
+            });
+        });
+        
+        // Review flagged questions button
+        document.getElementById('review-flagged').addEventListener('click', () => {
+            if (flaggedQuestions.size === 0) {
+                alert('No questions have been flagged for review.');
+                return;
+            }
+            
+            // Go to the first flagged question
+            const firstFlagged = Math.min(...Array.from(flaggedQuestions));
+            goToQuestion(firstFlagged);
+        });
+        
+        // Navigation buttons
+        document.querySelectorAll('.next-question').forEach((button, index) => {
+            button.addEventListener('click', () => {
+                if (index === totalQuestions - 1) {
+                    // This is the last question's "Submit" button
+                    document.getElementById('submit-quiz').click();
+                } else if (currentQuestionIndex < totalQuestions - 1) {
+                    goToQuestion(currentQuestionIndex + 1);
+                }
+            });
+        });
+        
+        document.querySelectorAll('.prev-question').forEach((button) => {
+            button.addEventListener('click', () => {
+                if (currentQuestionIndex > 0) {
+                    goToQuestion(currentQuestionIndex - 1);
+                }
+            });
+        });
+        
+        // Submit quiz button
+        document.getElementById('submit-quiz').addEventListener('click', () => {
+            const unansweredCount = totalQuestions - answeredQuestions.size;
+            const unansweredWarning = document.getElementById('unanswered-warning');
+            const unansweredCountEl = document.getElementById('unanswered-count');
+            
+            if (unansweredCount > 0) {
+                unansweredWarning.classList.remove('hidden');
+                unansweredCountEl.textContent = unansweredCount;
+            } else {
+                unansweredWarning.classList.add('hidden');
+            }
+            
+            submitModal.classList.remove('hidden');
+        });
+        
+        // Cancel submit button in modal
+        cancelSubmit.addEventListener('click', () => {
+            submitModal.classList.add('hidden');
+        });
+        
+        // Confirm submit button in modal
+        document.getElementById('confirm-submit').addEventListener('click', () => {
+            submitQuiz();
+            submitModal.classList.add('hidden');
+        });
+        
+        // Function to go to a specific question
+        function goToQuestion(index) {
+            // Hide current question and show new one
+            questions[currentQuestionIndex].classList.add('hidden');
+            questions[currentQuestionIndex].classList.remove('block');
+            currentQuestionIndex = index;
+            questions[currentQuestionIndex].classList.remove('hidden');
+            questions[currentQuestionIndex].classList.add('block');
+            updateProgress();
+            
+            // Update current question indicator in the sidebar
+            document.querySelectorAll('.question-number-btn').forEach((btn, idx) => {
+                if (idx === currentQuestionIndex) {
+                    btn.classList.add('ring-2', 'ring-blue-500', 'dark:ring-blue-400');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-blue-500', 'dark:ring-blue-400');
+                }
+            });
+            
+            // Adjust previous button for first question
+            const prevButtons = document.querySelectorAll('.prev-question');
+            prevButtons.forEach(btn => {
+                btn.disabled = currentQuestionIndex === 0;
+            });
+        }
+        
+        // Initialize question navigation sidebar
+        function initializeQuestionNavigation() {
+            document.querySelectorAll('.question-number-btn').forEach((btn, index) => {
+                btn.addEventListener('click', function() {
+                    goToQuestion(index);
+                });
+            });
+        }
+        
+        // Update progress bar and indicators
+        function updateProgress() {
+            const progressBar = document.querySelector('.bg-blue-600.h-2\\.5');
+            const currentQuestionSpan = document.getElementById('current-question');
+            const answeredCountSpan = document.getElementById('answered-count');
+            const progressPercentage = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            
+            progressBar.style.width = progressPercentage + '%';
+            
+            currentQuestionSpan.textContent = currentQuestionIndex + 1;
+            answeredCountSpan.textContent = answeredQuestions.size + ' Answered';
+        }
+        
+        // Update question status indicators (answered, flagged)
+        function updateQuestionStatus() {
+            document.querySelectorAll('.question-number-btn').forEach((btn, index) => {
+                // Reset classes first
+                btn.className = 'question-number-btn w-10 h-10 m-1 font-bold flex items-center justify-center rounded';
+                
+                // Add base classes
+                if (index === currentQuestionIndex) {
+                    btn.classList.add('ring-2', 'ring-blue-500', 'dark:ring-blue-400');
+                }
+                
+                // Answered state
+                if (answeredQuestions.has(index)) {
+                    btn.classList.add('bg-green-600', 'border', 'border-green-600', 'text-white');
+                } else {
+                    btn.classList.add('border', 'border-gray-300', 'dark:border-gray-600', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+                }
+                
+                // Flagged state
+                if (flaggedQuestions.has(index)) {
+                    // Add a red dot indicator for flagged questions
+                    if (!btn.querySelector('.flag-indicator')) {
+                        const flagIndicator = document.createElement('span');
+                        flagIndicator.className = 'flag-indicator absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full';
+                        btn.style.position = 'relative';
+                        btn.appendChild(flagIndicator);
+                    }
+                } else {
+                    // Remove flag indicator if exists
+                    const flagIndicator = btn.querySelector('.flag-indicator');
+                    if (flagIndicator) {
+                        btn.removeChild(flagIndicator);
+                    }
+                }
+            });
+            
+            // Update sidebar counts
+            document.getElementById('sidebar-answered').textContent = answeredQuestions.size;
+            document.getElementById('sidebar-unanswered').textContent = totalQuestions - answeredQuestions.size;
+            document.getElementById('sidebar-flagged').textContent = flaggedQuestions.size;
+        }
+        
+        // Timer function
+        function startTimer() {
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+        
+        function updateTimer() {
+            timerSeconds++;
+            
+            const hours = Math.floor(timerSeconds / 3600);
+            const minutes = Math.floor((timerSeconds % 3600) / 60);
+            const seconds = timerSeconds % 60;
+            
+            timerDisplay.textContent = 
+                (hours < 10 ? '0' + hours : hours) + ':' +
+                (minutes < 10 ? '0' + minutes : minutes) + ':' +
+                (seconds < 10 ? '0' + seconds : seconds);
+            
+            // Add warning colors based on time
+            if (timerSeconds > 2700) { // 45 minutes - warning
+                quizTimer.classList.remove('bg-white', 'bg-opacity-20');
+                quizTimer.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-800', 'dark:text-yellow-100');
+            }
+            if (timerSeconds > 3300) { // 55 minutes - danger
+                quizTimer.classList.remove('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-800', 'dark:text-yellow-100');
+                quizTimer.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-800', 'dark:text-red-100', 'animate-pulse');
+            }
+        }
+        
+        // Submit quiz function
+        function submitQuiz() {
+            // Stop the timer
+            clearInterval(timerInterval);
+            
+            const attemptId = document.getElementById('quiz-container').dataset.attemptId;
+            const answers = {};
+            const completionTime = Math.floor((new Date() - startTime) / 1000);
+            
+            questions.forEach((question) => {
+                const questionId = question.id.split('-')[1];
+                const selectedOptions = Array.from(
+                    question.querySelectorAll('input:checked')
+                ).map(input => input.value);
+                
+                answers[questionId] = selectedOptions;
+            });
+            
+            fetch(`/quiz/submit/${attemptId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    answers: answers,
+                    completionTime: completionTime
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Create success message element
+                    const resultMessage = document.createElement('div');
+                    resultMessage.className = 'p-4 mb-4 text-sm text-green-800 bg-green-100 dark:bg-green-800 dark:text-green-100 rounded-lg';
+                    resultMessage.innerHTML = `
+                        <h4 class="text-lg font-medium mb-2"><i class="fas fa-check-circle mr-2"></i>Quiz Submitted Successfully!</h4>
+                        <p>Your answers have been recorded. You'll be redirected to the results page shortly.</p>
+                        <div class="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                            <div class="bg-green-600 h-2.5 rounded-full w-full"></div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('quiz-container').innerHTML = '';
+                    document.getElementById('quiz-container').appendChild(resultMessage);
+                    
+                    // Redirect after a short delay
+                    setTimeout(() => {
+                        window.location.href = `/quiz/results/${attemptId}`;
+                    }, 3000);
+                } else {
+                    alert('Error submitting quiz: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting the quiz. Please try again.');
+            });
+        }
+    });
+    </script>
+</body>
+</html>
