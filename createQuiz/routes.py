@@ -12,6 +12,7 @@ import cloudinary.uploader
 import cloudinary.api
 import base64
 from datetime import datetime, timedelta
+from sqlalchemy.exc import SQLAlchemyError
 
 # Create blueprint
 quiz_bp = Blueprint('quiz', __name__)
@@ -581,73 +582,161 @@ def take_quiz(attempt_id):
 @quiz_bp.route('/quiz/submit/<int:attempt_id>', methods=['POST'])
 @login_required
 def submit_quiz(attempt_id):
-    """Submit answers for a quiz attempt"""
+    try:
+        print(f"Received submission for attempt {attempt_id}")
+        print(f"Request headers: {dict(request.headers)}")
+        print(f"Request data: {request.get_json()}")
+
+        if not request.is_json:
+            return jsonify({'success': False, 'message': 'Invalid request. JSON payload required.'}), 400
+
+        data = request.get_json()
+        answers = data.get('answers', {})
+        # completion_time = data.get('completionTime')
+
+        if not answers or not isinstance(answers, dict):
+            return jsonify({'success': False, 'message': 'Invalid or missing answers.'}), 400
+
+        attempt = QuizAttempt.query.get_or_404(attempt_id)
+        user = get_current_user()
+
+        if attempt.user_id != user.id:
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+
+        if attempt.completed_at:
+            return jsonify({'success': False, 'message': 'This attempt has already been completed'}), 400
+
+        # Clear previous answers
+        UserAnswer.query.filter_by(attempt_id=attempt.id).delete()
+        db.session.flush()  # Ensure deletion is processed before adding new answers
+
+        total_questions = 0
+        correct_answers = 0
+        incorrect_answers = 0
+
+        for question_id, option_ids in answers.items():
+            try:
+                question_id = int(question_id)
+                question = Question.query.get(question_id)
+                if not question or question.quiz_id != attempt.quiz_id:
+                    print(f"Invalid question ID {question_id} for quiz {attempt.quiz_id}")
+                    continue
+
+                total_questions += 1
+                correct_options = {o.id for o in question.options if o.is_correct}
+                user_option_ids = set(int(o_id) for o_id in option_ids if str(o_id).isdigit())
+
+                # Determine correctness
+                if question.question_type == 'single':
+                    is_correct = len(user_option_ids) == 1 and user_option_ids.issubset(correct_options)
+                else:
+                    is_correct = user_option_ids == correct_options
+
+                if is_correct:
+                    correct_answers += 1
+                else:
+                    incorrect_answers += 1
+
+                # Save user answers
+                for option_id in user_option_ids:
+                    option = Option.query.get(option_id)
+                    if option and option.question_id == question_id:  # Validate option exists and belongs to question
+                        user_answer = UserAnswer(
+                            attempt_id=attempt.id,
+                            question_id=question.id,
+                            option_id=option_id
+                        )
+                        db.session.add(user_answer)
+                    else:
+                        print(f"Invalid option ID {option_id} for question {question_id}")
+
+            except ValueError as ve:
+                print(f"ValueError processing question {question_id}: {ve}")
+                continue
+
+        # Update attempt details
+        now = datetime.utcnow()  # Use UTC and handle timezone in app config if needed
+        score_percentage = int((correct_answers / total_questions) * 100) if total_questions > 0 else 0
+        attempt.score = score_percentage
+        attempt.completed_at = now
+
+        # Commit all changes
+        db.session.commit()
+        print(f"Successfully saved attempt {attempt_id} with score {score_percentage}%")
+
+        return jsonify({
+            'success': True,
+            'score': score_percentage,
+            'correctAnswers': correct_answers,
+            'totalQuestions': total_questions,
+            'incorrectAnswers': incorrect_answers,
+            'redirectUrl': url_for('quiz.quiz_results', attempt_id=attempt.id)
+        }), 200
+
+    except SQLAlchemyError as db_error:
+        db.session.rollback()
+        print(f"Database error: {str(db_error)}")
+        return jsonify({'success': False, 'message': 'Database error occurred'}), 500
+    except Exception as e:
+        db.session.rollback()
+        print(f"Unexpected error: {traceback.format_exc()}")
+        return jsonify({'success': False, 'message': f'An unexpected error occurred: {str(e)}'}), 500
+
+@quiz_bp.route('/quiz/results/<int:attempt_id>')
+@login_required
+def quiz_results(attempt_id):
+    """Display quiz results for a specific attempt"""
     attempt = QuizAttempt.query.get_or_404(attempt_id)
     user = get_current_user()
     
     # Check if this attempt belongs to the current user
     if attempt.user_id != user.id:
-        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        flash("You don't have permission to view these results.", "danger")
+        return redirect(url_for('quiz.explore_quizzes'))
     
-    # Check if attempt is already completed
-    if attempt.completed_at:
-        return jsonify({'success': False, 'message': 'This attempt has already been completed'}), 400
+    # Check if attempt is completed
+    if not attempt.completed_at:
+        flash("This quiz attempt is not yet completed.", "warning")
+        return redirect(url_for('quiz.explore_quizzes'))
     
-    try:
-        data = request.json
-        answers = data.get('answers', {})
+    # Get detailed results
+    questions = []
+    for question in attempt.quiz.questions:
+        user_answers = UserAnswer.query.filter_by(
+            attempt_id=attempt.id, 
+            question_id=question.id
+        ).all()
         
-        # Calculate score
-        total_questions = 0
-        correct_answers = 0
+        user_answer_ids = {ua.option_id for ua in user_answers}
+        correct_option_ids = {o.id for o in question.options if o.is_correct}
         
-        for question_id, option_ids in answers.items():
-            question = Question.query.get(int(question_id))
-            if not question:
-                continue
-                
-            total_questions += 1
-            
-            # Get correct options for this question
-            correct_options = [o.id for o in question.options if o.is_correct]
-            
-            # Convert option_ids to integers for comparison
-            user_option_ids = [int(o_id) for o_id in option_ids]
-            
-            # For single choice questions
-            if question.question_type == 'single':
-                if len(user_option_ids) == 1 and user_option_ids[0] in correct_options:
-                    correct_answers += 1
-            # For multiple choice questions
-            else:
-                # All selected options must be correct and all correct options must be selected
-                if sorted(user_option_ids) == sorted(correct_options):
-                    correct_answers += 1
-            
-            # Save user answers
-            for option_id in user_option_ids:
-                user_answer = UserAnswer(
-                    attempt_id=attempt.id,
-                    question_id=question.id,
-                    option_id=option_id
-                )
-                db.session.add(user_answer)
+        is_correct = user_answer_ids == correct_option_ids
         
-        # Update attempt
-        score_percentage = int((correct_answers / total_questions) * 100) if total_questions > 0 else 0
-        attempt.score = score_percentage
-        attempt.completed_at = datetime.utcnow()
+        question_details = {
+            'text': question.text,
+            'image_url': question.image_url,
+            'type': question.question_type,
+            'user_answers': [
+                {
+                    'text': option.text, 
+                    'image_url': option.image_url,
+                    'is_correct': option.is_correct
+                } for option in question.options if option.id in user_answer_ids
+            ],
+            'correct_answers': [
+                {
+                    'text': option.text, 
+                    'image_url': option.image_url
+                } for option in question.options if option.is_correct
+            ],
+            'is_correct': is_correct
+        }
         
-        db.session.commit()
-        
-        return jsonify({
-            'success': True, 
-            'score': score_percentage,
-            'correctAnswers': correct_answers,
-            'totalQuestions': total_questions
-        }), 200
-        
-    except Exception as e:
-        db.session.rollback()
-        traceback.print_exc()
-        return jsonify({'success': False, 'message': str(e)}), 500
+        questions.append(question_details)
+    
+    return render_template(
+        'solveQuiz/results.html', 
+        attempt=attempt, 
+        quiz=attempt.quiz, 
+        questions=questions
+    )
