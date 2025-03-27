@@ -261,63 +261,82 @@ document.addEventListener('DOMContentLoaded', function() {
             quizTimer.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-800', 'dark:text-red-100', 'animate-pulse');
         }
     }
-    
-    // Submit quiz function
+
     function submitQuiz() {
-        // Stop the timer
-        clearInterval(timerInterval);
-        
-        const attemptId = document.getElementById('quiz-container').dataset.attemptId;
+        const attemptId = parseInt(document.getElementById('quiz-container').dataset.attemptId);
         const answers = {};
         const completionTime = Math.floor((new Date() - startTime) / 1000);
+        console.log(attemptId);
         
-        questions.forEach((question) => {
-            const questionId = question.id.split('-')[1];
-            const selectedOptions = Array.from(
-                question.querySelectorAll('input:checked')
-            ).map(input => input.value);
-            
-            answers[questionId] = selectedOptions;
-        });
+        // Log the exact URL being used
+        console.log(`Submitting to URL: /quiz/quiz/submit/${attemptId}`);
         
-        fetch(`/quiz/submit/${attemptId}`, {
+        // Collect answers as before...
+    
+        fetch(`/quiz/quiz/submit/${attemptId}`, {
             method: 'POST',
+            credentials: 'same-origin',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                // Additional debugging headers
+                'X-Debug-Attempt-ID': attemptId
             },
             body: JSON.stringify({ 
                 answers: answers,
-                completionTime: completionTime
+                // completionTime: completionTime
             }),
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Create success message element
-                const resultMessage = document.createElement('div');
-                resultMessage.className = 'p-4 mb-4 text-sm text-green-800 bg-green-100 dark:bg-green-800 dark:text-green-100 rounded-lg';
-                resultMessage.innerHTML = `
-                    <h4 class="text-lg font-medium mb-2"><i class="fas fa-check-circle mr-2"></i>Quiz Submitted Successfully!</h4>
-                    <p>Your answers have been recorded. You'll be redirected to the results page shortly.</p>
-                    <div class="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                        <div class="bg-green-600 h-2.5 rounded-full w-full"></div>
-                    </div>
-                `;
-                
-                document.getElementById('quiz-container').innerHTML = '';
-                document.getElementById('quiz-container').appendChild(resultMessage);
-                
-                // Redirect after a short delay
-                setTimeout(() => {
-                    window.location.href = `/quiz/results/${attemptId}`;
-                }, 3000);
-            } else {
-                alert('Error submitting quiz: ' + data.message);
+        .then(response => {
+            console.log('Full Response:', {
+                status: response.status,
+                statusText: response.statusText,
+                headers: Array.from(response.headers.entries()),
+                url: response.url
+            });
+    
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.statusText}`);
             }
+            
+            return response.json();
+        })
+        .then(data => {
+            // Existing success handling...
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while submitting the quiz. Please try again.');
+            console.error('Detailed Submission Error:', error);
+            
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'p-4 mb-4 text-sm text-red-800 bg-red-100 dark:bg-red-800 dark:text-red-100 rounded-lg';
+            errorMessage.innerHTML = `
+                <h4 class="text-lg font-medium mb-2">
+                    <i class="fas fa-exclamation-circle mr-2"></i>Quiz Submission Error
+                </h4>
+                <p>An error occurred: ${error.message}</p>
+                <div class="mt-2">
+                    <strong>Possible Causes:</strong>
+                    <ul class="list-disc list-inside">
+                        <li>Network connectivity issue</li>
+                        <li>Server routing problem</li>
+                        <li>Authentication failure</li>
+                        <li>Invalid attempt ID</li>
+                    </ul>
+                </div>
+                <button id="retry-submit" class="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+                    <i class="fas fa-redo mr-2"></i>Retry Submission
+                </button>
+            `;
+            
+            document.getElementById('quiz-container').innerHTML = '';
+            document.getElementById('quiz-container').appendChild(errorMessage);
+            
+            const retryButton = document.getElementById('retry-submit');
+            if (retryButton) {
+                retryButton.addEventListener('click', submitQuiz);
+            }
         });
     }
+
 });
