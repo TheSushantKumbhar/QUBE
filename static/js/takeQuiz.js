@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', function() {
     // Theme toggling
     const themeToggle = document.getElementById('theme-toggle');
@@ -131,17 +130,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         submitModal.classList.remove('hidden');
+        submitModal.classList.add('flex');
     });
     
     // Cancel submit button in modal
     cancelSubmit.addEventListener('click', () => {
         submitModal.classList.add('hidden');
+        submitModal.classList.remove('flex');
     });
     
     // Confirm submit button in modal
     document.getElementById('confirm-submit').addEventListener('click', () => {
         submitQuiz();
         submitModal.classList.add('hidden');
+        submitModal.classList.remove('flex');
     });
     
     // Function to go to a specific question
@@ -264,50 +266,83 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function submitQuiz() {
         const attemptId = parseInt(document.getElementById('quiz-container').dataset.attemptId);
-        const answers = {};
+        const submitUrl = document.getElementById('quiz-container').dataset.submitUrl;
         const completionTime = Math.floor((new Date() - startTime) / 1000);
-        console.log(attemptId);
         
-        // Log the exact URL being used
-        console.log(`Submitting to URL: /quiz/quiz/submit/${attemptId}`);
+        // Collect all answers - THIS IS THE FIX
+        const answers = {};
+        document.querySelectorAll('.question-container').forEach(container => {
+            const questionId = container.id.split('-')[1];
+            const selectedInputs = container.querySelectorAll('input:checked');
+            
+            if (selectedInputs.length > 0) {
+                answers[questionId] = Array.from(selectedInputs).map(input => {
+                    return input.value;
+                });
+            }
+        });
         
-        // Collect answers as before...
+        // Show loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+        loadingIndicator.innerHTML = `
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                <p class="mt-4 dark:text-gray-300">Submitting your quiz...</p>
+            </div>
+        `;
+        document.body.appendChild(loadingIndicator);
+        
+        // Stop the timer
+        clearInterval(timerInterval);
+        
+        console.log('Submitting answers:', answers);
+        console.log(`Submitting to URL: ${submitUrl}`);
     
-        fetch(`/quiz/quiz/submit/${attemptId}`, {
+        fetch(submitUrl, {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                // Additional debugging headers
-                'X-Debug-Attempt-ID': attemptId
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({ 
                 answers: answers,
-                // completionTime: completionTime
+                completionTime: completionTime
             }),
         })
         .then(response => {
-            console.log('Full Response:', {
-                status: response.status,
-                statusText: response.statusText,
-                headers: Array.from(response.headers.entries()),
-                url: response.url
-            });
-    
+            console.log('Response status:', response.status);
+            
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.statusText}`);
+                throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
             }
             
             return response.json();
         })
         .then(data => {
-            // Existing success handling...
+            console.log('Submission successful:', data);
+            
+            // Remove loading indicator
+            document.body.removeChild(loadingIndicator);
+            
+            if (data.success && data.redirectUrl) {
+                // Redirect to results page
+                window.location.href = data.redirectUrl;
+            } else {
+                throw new Error('Invalid response format');
+            }
         })
         .catch(error => {
-            console.error('Detailed Submission Error:', error);
+            console.error('Submission Error:', error);
             
+            // Remove loading indicator
+            if (document.body.contains(loadingIndicator)) {
+                document.body.removeChild(loadingIndicator);
+            }
+            
+            // Show error message
             const errorMessage = document.createElement('div');
             errorMessage.className = 'p-4 mb-4 text-sm text-red-800 bg-red-100 dark:bg-red-800 dark:text-red-100 rounded-lg';
             errorMessage.innerHTML = `
@@ -338,5 +373,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
 });
