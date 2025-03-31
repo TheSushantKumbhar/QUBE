@@ -459,7 +459,7 @@ def explore_quizzes():
     from datetime import datetime
     current_time = (datetime.utcnow() + timedelta(hours=5, minutes=30)).time()
     
-    return render_template('explore.html', 
+    return render_template('explore/explore.html', 
                           quizzes=public_quizzes,
                           current_user=current_user,
                           current_time=current_time)
@@ -489,7 +489,7 @@ def explore_quiz_details(quiz_id):
             completed_at=None
         ).first()
     
-    return render_template('exploreQuizDetails.html', quiz=quiz,creator=creator, current_user=current_user,user_attempt=user_attempt)
+    return render_template('explore/exploreQuizDetails.html', quiz=quiz,creator=creator, current_user=current_user,user_attempt=user_attempt)
 
 
 @quiz_bp.route('/explore/start/<int:quiz_id>', methods=['POST'])
