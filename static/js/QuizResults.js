@@ -37,8 +37,11 @@
      const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
      
      // Count correct and incorrect answers
-     const correctCount = {{ questions|selectattr('is_correct', 'eq', true)|list|length }};
-     const incorrectCount = {{ questions|selectattr('is_correct', 'eq', false)|list|length }};
+    //  const correctCount = {{ questions|selectattr('is_correct', 'eq', true)|list|length }};
+    //  const incorrectCount = {{ questions|selectattr('is_correct', 'eq', false)|list|length }};
+    const questions = JSON.parse('{{ questions | tojson | safe }}');
+    const correctCount = questions.filter(q => q.is_correct === true).length;
+    const incorrectCount = questions.filter(q => q.is_correct === false).length;
      
      const ctx = document.getElementById('resultsChart').getContext('2d');
      
