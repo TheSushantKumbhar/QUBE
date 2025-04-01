@@ -4,36 +4,53 @@
     <title>Login</title>
     <link rel="stylesheet" href="/static/css/output.css">
 </head>
-<body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
-    <div class="container mx-auto mt-6 px-4">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div id="flash-messages" class="fixed top-4 right-5 space-y-2 z-50">
-                    {% for category, message in messages %}
-                        <div class="px-4 py-3 rounded-lg shadow-md text-white 
-                            {% if category == 'success' %} bg-indigo-300 {% elif category == 'danger' %} bg-indigo-600 {% elif category == 'info' %} bg-indigo-200 {% else %} bg-indigo-200 {% endif %}">
-                            {{ message }}
+<body class="flex items-center justify-center h-screen bg-gradient-to-r from-gray-200 to-indigo-200">
+    <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-lg overflow-hidden flex flex-row-reverse">
+        
+        <!-- Sign In Form (On Right Side) -->
+        <div class="w-1/2 p-8 transition-all duration-500 ease-in-out flex items-center justify-center" id="formContainer" style="min-height: 400px;">
+            <div id="signInForm" class="w-full">
+                <h1 class="text-2xl font-semibold mb-4">Sign In</h1>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div id="flash-messages" class="fixed top-4 right-5 space-y-2 z-50">
+                            {% for category, message in messages %}
+                                <div class="px-4 py-3 rounded-lg shadow-md text-white 
+                                    {% if category == 'success' %} bg-indigo-300 {% elif category == 'danger' %} bg-indigo-600 {% elif category == 'info' %} bg-indigo-200 {% else %} bg-indigo-200 {% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
                         </div>
-                    {% endfor %}
-                </div>
-                <script>
-                    setTimeout(() => {
-                        document.getElementById('flash-messages').style.display = 'none';
-                    }, 3000);
-                </script>
-            {% endif %}
-        {% endwith %}
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
-        <h2 class="text-xl font-bold mb-4 text-center">Login</h2>
-        <form action="{{ url_for('auth.login') }}" method="POST" class="space-y-4">
-            <input type="email" name="email" placeholder="Email" required class="w-full p-2 border rounded">
-            <input type="password" name="password" placeholder="Password" required class="w-full p-2 border rounded">
-            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded">Login</button>
-        </form>
-        <div class="mt-4 text-center">
-            <a href="{{ url_for('auth.signup') }}" class="text-blue-500">Create an Account</a> |
-            <a href="{{ url_for('auth.reset_password') }}" class="text-blue-500">Forgot Password?</a>
+                        <script>
+                            setTimeout(() => {
+                                document.getElementById('flash-messages').style.display = 'none';
+                            }, 3000);
+                        </script>
+                    {% endif %}
+                {% endwith %}
+
+                <form action="{{ url_for('auth.login') }}" method="POST" class="space-y-4">
+                    <input type="email" name="email" placeholder="Email" required class="w-full p-2 mt-2 border rounded">
+                    <input type="password" name="password" placeholder="Password" required class="w-full p-2 mt-2 border rounded">
+                    
+                    <!-- Forgot Password Link -->
+                    <div class="text-left">
+                        <a href="{{ url_for('auth.reset_password') }}" class="text-xs text-indigo-600 mt-2 inline-block">Forgot Your Password?</a>
+                    </div>
+                    
+                    <button type="submit" class="w-full mt-4 py-2 bg-indigo-600 text-white rounded">Sign In</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Toggle Section (On Left Side) -->
+        <div class="absolute left-0 w-1/2 h-full bg-indigo-600 text-white flex flex-col items-center justify-center p-8">
+            <h1 class="text-2xl font-semibold">Hello, Friend!</h1>
+            <p class="text-sm mt-2">Register with your details to use all site features</p>
+            <a href="{{ url_for('auth.signup') }}">
+                <button class="mt-4 py-2 px-6 border rounded bg-white text-indigo-600">Sign Up</button>
+            </a>
         </div>
     </div>
 </body>
