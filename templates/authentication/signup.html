@@ -1,52 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="/static/css/output.css">
 </head>
-<body class="bg-gray-100 flex justify-center items-center h-screen">
-  <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-    <h2 class="text-2xl font-bold mb-4 text-center">Sign Up</h2>
+<body class="flex items-center justify-center h-screen bg-gradient-to-r from-gray-200 to-indigo-200">
+    <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-lg overflow-hidden flex flex-row-reverse">
+        
+        <!-- Sign Up Form (On Right Side) -->
+        <div class="w-1/2 p-8 transition-all duration-500 ease-in-out flex items-center justify-center" id="formContainer" style="min-height: 400px;">
+            <div id="signUpForm" class="w-full">
+                <h1 class="text-2xl font-semibold mb-4">Create Account</h1>
 
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %}
-    <div class="fixed top-4 right-6 space-y-2 z-50">
-      {% for category, message in messages %}
-      <div class="px-4 py-2 rounded-md shadow-md
-         text-white {% if category == 'success' %} bg-green-500 {% elif category == 'danger' %}
-          bg-red-500 {% else %} bg-gray-500 {% endif %}">
-        {{ message }}
-      </div>
-      {% endfor %}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div id="flash-messages" class="fixed top-4 right-5 space-y-2 z-50">
+                            {% for category, message in messages %}
+                                <div class="px-4 py-3 rounded-lg shadow-md text-white 
+                                    {% if category == 'success' %} bg-green-500 {% elif category == 'danger' %} bg-red-500 {% else %} bg-gray-500 {% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <script>
+                            setTimeout(() => {
+                                document.getElementById('flash-messages').style.display = 'none';
+                            }, 3000);
+                        </script>
+                    {% endif %}
+                {% endwith %}
+
+                <form action="{{ url_for('auth.signup') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <input type="email" name="email" placeholder="Email" required class="w-full p-2 border rounded">
+                    <input type="text" name="username" placeholder="Username (Optional)" class="w-full p-2 border rounded">
+                    <input type="password" name="password" placeholder="Password" required class="w-full p-2 border rounded">
+                    <input type="password" name="confirm_password" placeholder="Confirm Password" required class="w-full p-2 border rounded">
+                    <input type="file" name="profile_pic" accept=".png, .jpg, .jpeg" class="w-full">
+                    <button type="submit" class="w-full mt-4 py-2 bg-indigo-600 text-white rounded">Sign Up</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Toggle Section (On Left Side) -->
+        <div class="absolute left-0 w-1/2 h-full bg-indigo-600 text-white flex flex-col items-center justify-center p-8">
+            <h1 class="text-2xl font-semibold">Welcome Back!</h1>
+            <p class="text-sm mt-2">To keep connected with us, please login</p>
+            <a href="{{ url_for('auth.login') }}">
+                <button class="mt-4 py-2 px-6 border rounded bg-white text-indigo-600">Sign In</button>
+            </a>
+        </div>
     </div>
-    {% endif %} {% endwith %}
-
-    <form action="{{ url_for('auth.signup') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-      <input type="email" name="email" placeholder="Email" required class="w-full p-2 border rounded-lg" /><br />
-
-      <input type="text" name="username" placeholder="Username (Optional)" class="w-full p-2 border rounded-lg" /><br />
-
-      <input type="password" name="password" placeholder="Password" required
-        class="w-full p-2 border rounded-lg" /><br />
-
-      <input type="password" name="confirm_password" placeholder="Confirm Password" required
-        class="w-full p-2 border rounded-lg" /><br />
-
-      <input type="file" name="profile_pic" accept=".png, .jpg, .jpeg" class="w-full" /><br />
-
-      <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-lg">
-        Sign Up
-      </button>
-    </form>
-
-    <p class="text-center mt-4">
-      Already have an account?
-      <a href="{{ url_for('auth.login') }}" class="text-blue-600">Login</a>
-    </p>
-  </div>
 </body>
-
 </html>
