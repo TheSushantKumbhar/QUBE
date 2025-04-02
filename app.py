@@ -22,8 +22,8 @@ migrate.init_app(app, db)
 
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(quiz_bp, url_prefix='/quiz')
-from liveQuiz.routes import live_quiz  
-app.register_blueprint(live_quiz, url_prefix="/live_quiz")
+from liveQuiz.routes import live
+app.register_blueprint(live, url_prefix="/live")
 
 
 
