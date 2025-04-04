@@ -12,6 +12,8 @@ from models.models import User
 
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
 
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
 app.config["SECRET_KEY"] = "your_secret_key_here"       
@@ -36,4 +38,3 @@ def home():
 if __name__ == '__main__':
     app.run(debug=True)
 
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
