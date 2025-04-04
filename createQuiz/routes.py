@@ -449,7 +449,6 @@ def explore_quizzes():
     # Get all public quizzes that are live
     public_quizzes = Quiz.query.filter(
         Quiz.is_public == True,
-        Quiz.is_live == True
     ).order_by(Quiz.created_at.desc()).all()
     
     # Get current user if logged in
@@ -740,3 +739,4 @@ def quiz_results(attempt_id):
         quiz=attempt.quiz, 
         questions=questions
     )
+
