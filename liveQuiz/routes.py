@@ -28,9 +28,10 @@ def live_home():
     return render_template('liveQuiz/liveQuizHome.html')
 
 
-@live.route('/CreateQuiz',mothods=['GET','POST'])
+@live.route('/CreateQuiz',methods=['GET','POST'])
+@login_required
 def Create_Quiz():
     user = get_current_user()
     quizzes = Quiz.query.filter_by(user_id=user.id).all()
-    return render_template('liveQuiz/createQuiz.html')
+    return render_template('liveQuiz/createQuiz.html',quizzes=quizzes)
 
