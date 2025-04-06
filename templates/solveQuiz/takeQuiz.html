@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="dark h-full">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="/static/css/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body class="bg-gray-100 dark:bg-gray-900 min-h-full transition-colors duration-300">
     <div class="container mx-auto px-4 py-4">
         <div class="flex justify-end mb-4">
@@ -21,83 +23,101 @@
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
                     <div class="bg-blue-600 dark:bg-blue-800 text-white p-4 flex justify-between items-center">
                         <h2 class="text-xl font-bold m-0">{{ quiz.title }}</h2>
-                        <div id="quiz-timer" class="text-lg font-bold py-2 px-4 bg-white bg-opacity-20 dark:bg-opacity-20 rounded">
+                        <div id="quiz-timer"
+                            class="text-lg font-bold py-2 px-4 bg-white bg-opacity-20 dark:bg-opacity-20 rounded">
                             <i class="fas fa-clock mr-2"></i><span id="timer-display">00:00:00</span>
                         </div>
                     </div>
                     <div class="p-4">
-                        <div id="quiz-container" data-attempt-id="{{ attempt.id }}" data-submit-url="{{ url_for('quiz.submit_quiz', attempt_id=attempt.id) }}">
+                        <div id="quiz-container" data-attempt-id="{{ attempt.id }}"
+                            data-submit-url="{{ url_for('quiz.submit_quiz', attempt_id=attempt.id) }}">
                             <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-5">
-                                <p class="mb-2"><i class="fas fa-info-circle mr-2"></i>Answer all questions to the best of your ability. Use the navigation buttons or question numbers to move between questions.</p>
-                                <p class="mb-0"><i class="fas fa-flag mr-2"></i>Flag questions you want to review later.</p>
+                                <p class="mb-2"><i class="fas fa-info-circle mr-2"></i>Answer all questions to the best
+                                    of your ability. Use the navigation buttons or question numbers to move between
+                                    questions.</p>
+                                <p class="mb-0"><i class="fas fa-flag mr-2"></i>Flag questions you want to review later.
+                                </p>
                             </div>
-                            
+
                             <div id="quiz-progress" class="mb-4">
                                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                                     <div class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
                                 </div>
                                 <p class="text-center mt-2 dark:text-gray-200">
-                                    Question <span id="current-question">1</span> of <span id="total-questions">{{ quiz.questions|length }}</span>
-                                    <span class="ml-2 bg-green-600 text-white text-xs font-medium px-2.5 py-0.5 rounded" id="answered-count">0 Answered</span>
+                                    Question <span id="current-question">1</span> of <span id="total-questions">{{
+                                        quiz.questions|length }}</span>
+                                    <span class="ml-2 bg-green-600 text-white text-xs font-medium px-2.5 py-0.5 rounded"
+                                        id="answered-count">0 Answered</span>
                                 </p>
                             </div>
-                            
+
                             <form id="quiz-form">
                                 {% for question in quiz.questions|sort(attribute='position') %}
-                                    <div class="question-container {% if loop.first %}block{% else %}hidden{% endif %}" id="question-{{ question.id }}">
-                                        <div class="flex justify-between items-center mb-4">
-                                            <h4 class="text-lg font-medium dark:text-white">Question {{ loop.index }}: {{ question.text }}</h4>
-                                            <button type="button" class="flag-btn text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400" data-question="{{ question.id }}">
-                                                <i class="fas fa-flag"></i>
-                                            </button>
-                                        </div>
-                                        
-                                        {% if question.image_url %}
-                                            <div class="mb-3">
-                                                <img src="{{ question.image_url }}" alt="Question image" class="rounded max-w-full h-auto">
-                                            </div>
-                                        {% endif %}
-                                        
-                                        <div class="mt-4 space-y-3">
-                                            {% for option in question.options|sort(attribute='position') %}
-                                                <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                                                    <div class="p-4">
-                                                        <div class="flex items-start">
-                                                            <div class="flex items-center h-5">
-                                                                <input 
-                                                                    class="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 focus:ring-blue-500 dark:focus:ring-blue-600 rounded {% if question.question_type != 'single' %}rounded{% else %}rounded-full{% endif %}" 
-                                                                    type="{% if question.question_type == 'single' %}radio{% else %}checkbox{% endif %}" 
-                                                                    name="question-{{ question.id }}" 
-                                                                    id="option-{{ option.id }}" 
-                                                                    value="{{ option.id }}">
-                                                            </div>
-                                                            <label class="ml-2 w-full text-sm font-medium text-gray-900 dark:text-gray-300" for="option-{{ option.id }}">
-                                                                {{ option.text }}
-                                                                {% if option.image_url %}
-                                                                    <div class="mt-2">
-                                                                        <img src="{{ option.image_url }}" alt="Option image" class="rounded max-h-40">
-                                                                    </div>
-                                                                {% endif %}
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                        
-                                        <div class="flex justify-between mt-6">
-                                            <button type="button" class="prev-question px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" {% if loop.first %}disabled{% endif %}>
-                                                <i class="fas fa-arrow-left mr-2"></i>Previous
-                                            </button>
-                                            <button type="button" class="next-question px-4 py-2 {% if loop.last %}bg-green-600 hover:bg-green-700{% else %}bg-blue-600 hover:bg-blue-700{% endif %} text-white rounded transition-colors">
-                                                {% if loop.last %}
-                                                    <i class="fas fa-paper-plane mr-2"></i>Submit
-                                                {% else %}
-                                                    Next<i class="fas fa-arrow-right ml-2"></i>
-                                                {% endif %}
-                                            </button>
-                                        </div>
+                                <div class="question-container {% if loop.first %}block{% else %}hidden{% endif %}"
+                                    id="question-{{ question.id }}">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h4 class="text-lg font-medium dark:text-white">Question {{ loop.index }}: {{
+                                            question.text }}</h4>
+                                        <button type="button"
+                                            class="flag-btn text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+                                            data-question="{{ question.id }}">
+                                            <i class="fas fa-flag"></i>
+                                        </button>
                                     </div>
+
+                                    {% if question.image_url %}
+                                    <div class="mb-3">
+                                        <img src="{{ question.image_url }}" alt="Question image"
+                                            class="rounded max-w-full h-auto">
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="mt-4 space-y-3">
+                                        {% for option in question.options|sort(attribute='position') %}
+                                        <div
+                                            class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                                            <div class="p-4">
+                                                <div class="flex items-start">
+                                                    <div class="flex items-center h-5">
+                                                        <input
+                                                            class="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-500 focus:ring-blue-500 dark:focus:ring-blue-600 rounded {% if question.question_type != 'single' %}rounded{% else %}rounded-full{% endif %}"
+                                                            type="{% if question.question_type == 'single' %}radio{% else %}checkbox{% endif %}"
+                                                            name="question-{{ question.id }}"
+                                                            id="option-{{ option.id }}" value="{{ option.id }}">
+                                                    </div>
+                                                    <label
+                                                        class="ml-2 w-full text-sm font-medium text-gray-900 dark:text-gray-300"
+                                                        for="option-{{ option.id }}">
+                                                        {{ option.text }}
+                                                        {% if option.image_url %}
+                                                        <div class="mt-2">
+                                                            <img src="{{ option.image_url }}" alt="Option image"
+                                                                class="rounded max-h-40">
+                                                        </div>
+                                                        {% endif %}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="flex justify-between mt-6">
+                                        <button type="button"
+                                            class="prev-question px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            {% if loop.first %}disabled{% endif %}>
+                                            <i class="fas fa-arrow-left mr-2"></i>Previous
+                                        </button>
+                                        <button type="button"
+                                            class="next-question px-4 py-2 {% if loop.last %}bg-green-600 hover:bg-green-700{% else %}bg-blue-600 hover:bg-blue-700{% endif %} text-white rounded transition-colors">
+                                            {% if loop.last %}
+                                            <i class="fas fa-paper-plane mr-2"></i>Submit
+                                            {% else %}
+                                            Next<i class="fas fa-arrow-right ml-2"></i>
+                                            {% endif %}
+                                        </button>
+                                    </div>
+                                </div>
                                 {% endfor %}
                             </form>
                         </div>
@@ -115,49 +135,60 @@
                                 <p class="dark:text-gray-300">Jump to question:</p>
                                 <div class="flex flex-wrap">
                                     {% for question in quiz.questions|sort(attribute='position') %}
-                                        <button type="button" 
-                                            class="question-number-btn w-10 h-10 m-1 font-bold flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 {% if loop.first %}ring-2 ring-blue-500 dark:ring-blue-400{% endif %}" 
-                                            data-question-index="{{ loop.index0 }}" 
-                                            aria-label="Go to question {{ loop.index }}">
-                                            {{ loop.index }}
-                                        </button>
+                                    <button type="button"
+                                        class="question-number-btn w-10 h-10 m-1 font-bold flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 {% if loop.first %}ring-2 ring-blue-500 dark:ring-blue-400{% endif %}"
+                                        data-question-index="{{ loop.index0 }}"
+                                        aria-label="Go to question {{ loop.index }}">
+                                        {{ loop.index }}
+                                    </button>
                                     {% endfor %}
                                 </div>
                             </div>
-                            
+
                             <div class="mt-4">
                                 <p class="mb-2 dark:text-gray-300">Legend:</p>
                                 <div class="flex items-center mb-2">
-                                    <div class="w-10 h-10 mr-2 flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300">1</div>
+                                    <div
+                                        class="w-10 h-10 mr-2 flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300">
+                                        1</div>
                                     <span class="dark:text-gray-300">Not answered</span>
                                 </div>
                                 <div class="flex items-center mb-2">
-                                    <div class="w-10 h-10 mr-2 flex items-center justify-center bg-green-600 border border-green-600 rounded text-white">2</div>
+                                    <div
+                                        class="w-10 h-10 mr-2 flex items-center justify-center bg-green-600 border border-green-600 rounded text-white">
+                                        2</div>
                                     <span class="dark:text-gray-300">Answered</span>
                                 </div>
                                 <div class="flex items-center mb-2">
-                                    <div class="w-10 h-10 mr-2 flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 relative">
+                                    <div
+                                        class="w-10 h-10 mr-2 flex items-center justify-center border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 relative">
                                         <span>3</span>
                                         <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
                                     </div>
                                     <span class="dark:text-gray-300">Flagged for review</span>
                                 </div>
                                 <div class="flex items-center">
-                                    <div class="w-10 h-10 mr-2 flex items-center justify-center border-2 border-blue-500 dark:border-blue-400 rounded text-gray-700 dark:text-gray-300">4</div>
+                                    <div
+                                        class="w-10 h-10 mr-2 flex items-center justify-center border-2 border-blue-500 dark:border-blue-400 rounded text-gray-700 dark:text-gray-300">
+                                        4</div>
                                     <span class="dark:text-gray-300">Current question</span>
                                 </div>
                             </div>
-                            
-                            <button type="button" class="w-full mt-5 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded transition-colors" id="review-flagged">
+
+                            <button type="button"
+                                class="w-full mt-5 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded transition-colors"
+                                id="review-flagged">
                                 <i class="fas fa-flag mr-2"></i>Review Flagged Questions
                             </button>
-                            
-                            <button type="button" class="w-full mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors" id="submit-quiz">
+
+                            <button type="button"
+                                class="w-full mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+                                id="submit-quiz">
                                 <i class="fas fa-paper-plane mr-2"></i>Submit Quiz
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
                         <div class="bg-blue-500 dark:bg-blue-600 text-white p-4">
                             <h5 class="font-medium m-0">Quiz Summary</h5>
@@ -166,19 +197,23 @@
                             <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                                 <li class="py-3 flex justify-between items-center">
                                     <span class="dark:text-gray-300">Total Questions</span>
-                                    <span class="bg-blue-600 text-white text-xs font-medium px-2.5 py-0.5 rounded">{{ quiz.questions|length }}</span>
+                                    <span class="bg-blue-600 text-white text-xs font-medium px-2.5 py-0.5 rounded">{{
+                                        quiz.questions|length }}</span>
                                 </li>
                                 <li class="py-3 flex justify-between items-center">
                                     <span class="dark:text-gray-300">Answered</span>
-                                    <span class="bg-green-600 text-white text-xs font-medium px-2.5 py-0.5 rounded" id="sidebar-answered">0</span>
+                                    <span class="bg-green-600 text-white text-xs font-medium px-2.5 py-0.5 rounded"
+                                        id="sidebar-answered">0</span>
                                 </li>
                                 <li class="py-3 flex justify-between items-center">
                                     <span class="dark:text-gray-300">Unanswered</span>
-                                    <span class="bg-red-600 text-white text-xs font-medium px-2.5 py-0.5 rounded" id="sidebar-unanswered">{{ quiz.questions|length }}</span>
+                                    <span class="bg-red-600 text-white text-xs font-medium px-2.5 py-0.5 rounded"
+                                        id="sidebar-unanswered">{{ quiz.questions|length }}</span>
                                 </li>
                                 <li class="py-3 flex justify-between items-center">
                                     <span class="dark:text-gray-300">Flagged</span>
-                                    <span class="bg-yellow-500 text-white text-xs font-medium px-2.5 py-0.5 rounded" id="sidebar-flagged">0</span>
+                                    <span class="bg-yellow-500 text-white text-xs font-medium px-2.5 py-0.5 rounded"
+                                        id="sidebar-flagged">0</span>
                                 </li>
                             </ul>
                         </div>
@@ -188,24 +223,32 @@
         </div>
     </div>
 
-    <div id="submitConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden  items-center justify-center p-4">
+    <div id="submitConfirmModal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden  items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
             <div class="bg-blue-600 dark:bg-blue-700 text-white p-4 rounded-t-lg">
                 <h5 class="font-medium">Confirm Submission</h5>
             </div>
             <div class="p-6">
                 <p class="dark:text-gray-300">Are you sure you want to submit your quiz?</p>
-                <div id="unanswered-warning" class="mt-4 mb-4 p-4 bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-100 rounded hidden">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>You have <span id="unanswered-count"></span> unanswered questions.
+                <div id="unanswered-warning"
+                    class="mt-4 mb-4 p-4 bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-100 rounded hidden">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>You have <span id="unanswered-count"></span>
+                    unanswered questions.
                 </div>
                 <p class="dark:text-gray-300">You cannot change your answers after submission.</p>
             </div>
             <div class="flex p-4 border-t border-gray-200 dark:border-gray-700">
-                <button type="button" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded mr-2 transition-colors" id="cancel-submit">Cancel</button>
-                <button type="button" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors" id="confirm-submit">Submit Quiz</button>
+                <button type="button"
+                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded mr-2 transition-colors"
+                    id="cancel-submit">Cancel</button>
+                <button type="button"
+                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+                    id="confirm-submit">Submit Quiz</button>
             </div>
         </div>
     </div>
     <script src="/static/js/takeQuiz.js"></script>
 </body>
+
 </html>
