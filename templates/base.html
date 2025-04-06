@@ -13,26 +13,26 @@
             width: 10px;
             height: 10px;
         }
-        
+
         ::-webkit-scrollbar-track {
-            background: #e5e7eb; 
+            background: #e5e7eb;
             border-radius: 8px;
         }
-        
+
         ::-webkit-scrollbar-thumb {
             background: #6366f1;
             border-radius: 8px;
             border: 2px solid #e5e7eb;
         }
-        
+
         ::-webkit-scrollbar-thumb:hover {
-            background: #4f46e5; 
+            background: #4f46e5;
         }
-        
+
         * {
             scrollbar-width: thin;
             scrollbar-color: #6366f1 #e5e7eb;
-        } 
+        }
 
         /* Hide scrollbar but allow scrolling */
         /* ::-webkit-scrollbar {
@@ -90,7 +90,7 @@
             <!-- Page Content (Dynamic Section) -->
             <div class="p-6">
                 {% block content %}
-               
+
                 {% endblock %}
             </div>
         </div>
@@ -107,17 +107,9 @@
             const navTexts = document.querySelectorAll('.nav-text');
             let sidebarOpen = true;
 
-            // Function to adjust container size based on window size
-            function adjustContainerSize() {
-                const windowHeight = window.innerHeight;
-                contentContainer.style.height = (windowHeight - 24) + 'px'; // 32px for the margins (16px * 2)
-            }
-
-            // Call once on load
-            adjustContainerSize();
-
-            // Adjust on window resize
-            window.addEventListener('resize', adjustContainerSize);
+            // Use CSS-based sizing instead of JavaScript calculations
+            // This single line will replace the adjustContainerSize function
+            contentContainer.style.height = 'calc(100vh - 24px)';
 
             toggleBtn.addEventListener('click', function () {
                 if (sidebarOpen) {
