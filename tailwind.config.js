@@ -10,7 +10,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./templates/**/*.html", "./static/css/**/*.css"],
-  darkMode: 'class', // Enables dark mode using the 'class' strategy
+  darkMode: 'class', 
   theme: {
     extend: {
       keyframes: {
