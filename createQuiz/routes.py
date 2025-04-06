@@ -206,7 +206,7 @@ def get_quiz(quiz_id):
             'subject': quiz.subject,
             'created_at': quiz.created_at.isoformat(),
             'is_public': quiz.is_public,
-            'is_live': quiz.is_live,
+            # 'is_live': quiz.is_live,
             'questions': []
         }
         
@@ -336,7 +336,7 @@ def update_quiz_settings(quiz_id):
     try:
         # Update quiz settings
         quiz.is_public = 'is_public' in request.form
-        quiz.is_live = 'is_live' in request.form
+        # quiz.is_live = 'is_live' in request.form
         quiz.always_available = request.form.get('always_available') == 'true'
         
         # If not always available, update the time restrictions
@@ -449,7 +449,7 @@ def explore_quizzes():
     # Get all public quizzes that are live
     public_quizzes = Quiz.query.filter(
         Quiz.is_public == True,
-        Quiz.is_live == True,
+        # Quiz.is_live == True,
     ).order_by(Quiz.created_at.desc()).all()
     
     # Get current user if logged in
@@ -500,7 +500,7 @@ def start_explore_quiz(quiz_id):
     user = get_current_user()
     
     # Check if quiz is public and live
-    if not quiz.is_public or not quiz.is_live:
+    if not quiz.is_public :
         flash("This quiz is not available for public attempts.", "danger")
         return redirect(url_for('quiz.explore_quizzes'))
     
