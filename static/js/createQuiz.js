@@ -569,79 +569,211 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Function to display selected image for questions
-    function displayImage(dropZone, file) {
-        const preview = dropZone.querySelector('.image-preview');
+    // Replace the displayImage function with this updated version
+function displayImage(dropZone, file) {
+    const preview = dropZone.querySelector('.image-preview');
+    preview.innerHTML = '';
+    preview.classList.remove('hidden');
+    
+    // Show loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.textContent = 'Uploading image...';
+    loadingIndicator.classList.add('text-indigo-500', 'text-center', 'py-2');
+    preview.appendChild(loadingIndicator);
+    
+    // Hide the upload text
+    dropZone.querySelector('p').classList.add('hidden');
+    dropZone.querySelector('.text-xs').classList.add('hidden');
+    
+    // Upload the image to server first
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    fetch('/quiz/upload_image', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Remove loading indicator
         preview.innerHTML = '';
-        preview.classList.remove('hidden');
-
-        // Create image element
-        const img = document.createElement('img');
-        img.classList.add('max-h-40', 'mx-auto');
-
-        // Create remove button
-        const removeBtn = document.createElement('button');
-        removeBtn.textContent = 'Remove Image';
-        removeBtn.classList.add('mt-2', 'text-red-500', 'text-sm');
-        removeBtn.onclick = function (e) {
-            e.stopPropagation(); // Prevent opening file dialog when removing
-            preview.classList.add('hidden');
-            preview.innerHTML = '';
+        
+        if (data.success) {
+            // Create image element
+            const img = document.createElement('img');
+            img.classList.add('max-h-40', 'mx-auto');
+            img.src = data.url; // Use the URL returned from server
+            
+            // Create remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Remove Image';
+            removeBtn.classList.add('mt-2', 'text-red-500', 'text-sm');
+            removeBtn.onclick = function (e) {
+                e.stopPropagation();
+                preview.classList.add('hidden');
+                preview.innerHTML = '';
+                dropZone.querySelector('p').classList.remove('hidden');
+                dropZone.querySelector('.text-xs').classList.remove('hidden');
+                // Reset file input
+                dropZone.querySelector('.file-input').value = '';
+            };
+            
+            preview.appendChild(img);
+            preview.appendChild(removeBtn);
+        } else {
+            // Show error
+            preview.innerHTML = `<div class="text-red-500 text-center">Upload failed: ${data.message}</div>`;
+            // Show upload text again
             dropZone.querySelector('p').classList.remove('hidden');
             dropZone.querySelector('.text-xs').classList.remove('hidden');
-            // Reset file input
-            dropZone.querySelector('.file-input').value = '';
-        };
+        }
+    })
+    .catch(error => {
+        preview.innerHTML = '<div class="text-red-500 text-center">Upload failed</div>';
+        console.error('Error:', error);
+        // Show upload text again
+        dropZone.querySelector('p').classList.remove('hidden');
+        dropZone.querySelector('.text-xs').classList.remove('hidden');
+    });
+}
 
-        // Set image source
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            img.src = e.target.result;
+// Replace the displayOptionImage function with this updated version
+function displayOptionImage(dropZone, file) {
+    const preview = dropZone.querySelector('.option-image-preview');
+    preview.innerHTML = '';
+    preview.classList.remove('hidden');
+    
+    // Show loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.textContent = 'Uploading...';
+    loadingIndicator.classList.add('text-indigo-500', 'text-center', 'py-1', 'text-sm');
+    preview.appendChild(loadingIndicator);
+    
+    // Hide the upload text
+    dropZone.querySelector('p').classList.add('hidden');
+    
+    // Upload the image to server first
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    fetch('/quiz/upload_image', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Remove loading indicator
+        preview.innerHTML = '';
+        
+        if (data.success) {
+            // Create image element
+            const img = document.createElement('img');
+            img.classList.add('max-h-32', 'mx-auto');
+            img.src = data.url; // Use the URL returned from server
+            
+            // Create remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Remove';
+            removeBtn.classList.add('mt-1', 'text-red-500', 'text-xs');
+            removeBtn.onclick = function (e) {
+                e.stopPropagation();
+                preview.classList.add('hidden');
+                preview.innerHTML = '';
+                dropZone.querySelector('p').classList.remove('hidden');
+                // Reset file input
+                dropZone.querySelector('.option-file-input').value = '';
+            };
+            
             preview.appendChild(img);
             preview.appendChild(removeBtn);
+        } else {
+            // Show error
+            preview.innerHTML = `<div class="text-red-500 text-xs text-center">Failed: ${data.message}</div>`;
+            // Show upload text again
+            dropZone.querySelector('p').classList.remove('hidden');
+        }
+    })
+    .catch(error => {
+        preview.innerHTML = '<div class="text-red-500 text-xs text-center">Upload failed</div>';
+        console.error('Error:', error);
+        // Show upload text again
+        dropZone.querySelector('p').classList.remove('hidden');
+    });
+}
 
-            // Hide the upload text
-            dropZone.querySelector('p').classList.add('hidden');
-            dropZone.querySelector('.text-xs').classList.add('hidden');
-        };
-        reader.readAsDataURL(file);
-    }
+    // Function to display selected image for questions
+    // function displayImage(dropZone, file) {
+    //     const preview = dropZone.querySelector('.image-preview');
+    //     preview.innerHTML = '';
+    //     preview.classList.remove('hidden');
+
+    //     // Create image element
+    //     const img = document.createElement('img');
+    //     img.classList.add('max-h-40', 'mx-auto');
+
+    //     // Create remove button
+    //     const removeBtn = document.createElement('button');
+    //     removeBtn.textContent = 'Remove Image';
+    //     removeBtn.classList.add('mt-2', 'text-red-500', 'text-sm');
+    //     removeBtn.onclick = function (e) {
+    //         e.stopPropagation(); // Prevent opening file dialog when removing
+    //         preview.classList.add('hidden');
+    //         preview.innerHTML = '';
+    //         dropZone.querySelector('p').classList.remove('hidden');
+    //         dropZone.querySelector('.text-xs').classList.remove('hidden');
+    //         // Reset file input
+    //         dropZone.querySelector('.file-input').value = '';
+    //     };
+
+    //     // Set image source
+    //     const reader = new FileReader();
+    //     reader.onload = function (e) {
+    //         img.src = e.target.result;
+    //         preview.appendChild(img);
+    //         preview.appendChild(removeBtn);
+
+    //         // Hide the upload text
+    //         dropZone.querySelector('p').classList.add('hidden');
+    //         dropZone.querySelector('.text-xs').classList.add('hidden');
+    //     };
+    //     reader.readAsDataURL(file);
+    // }
 
     // Function to display selected image for options
-    function displayOptionImage(dropZone, file) {
-        const preview = dropZone.querySelector('.option-image-preview');
-        preview.innerHTML = '';
-        preview.classList.remove('hidden');
+    // function displayOptionImage(dropZone, file) {
+    //     const preview = dropZone.querySelector('.option-image-preview');
+    //     preview.innerHTML = '';
+    //     preview.classList.remove('hidden');
 
-        // Create image element
-        const img = document.createElement('img');
-        img.classList.add('max-h-32', 'mx-auto');
+    //     // Create image element
+    //     const img = document.createElement('img');
+    //     img.classList.add('max-h-32', 'mx-auto');
 
-        // Create remove button
-        const removeBtn = document.createElement('button');
-        removeBtn.textContent = 'Remove';
-        removeBtn.classList.add('mt-1', 'text-red-500', 'text-xs');
-        removeBtn.onclick = function (e) {
-            e.stopPropagation(); // Prevent opening file dialog when removing
-            preview.classList.add('hidden');
-            preview.innerHTML = '';
-            dropZone.querySelector('p').classList.remove('hidden');
-            // Reset file input
-            dropZone.querySelector('.option-file-input').value = '';
-        };
+    //     // Create remove button
+    //     const removeBtn = document.createElement('button');
+    //     removeBtn.textContent = 'Remove';
+    //     removeBtn.classList.add('mt-1', 'text-red-500', 'text-xs');
+    //     removeBtn.onclick = function (e) {
+    //         e.stopPropagation(); // Prevent opening file dialog when removing
+    //         preview.classList.add('hidden');
+    //         preview.innerHTML = '';
+    //         dropZone.querySelector('p').classList.remove('hidden');
+    //         // Reset file input
+    //         dropZone.querySelector('.option-file-input').value = '';
+    //     };
 
-        // Set image source
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            img.src = e.target.result;
-            preview.appendChild(img);
-            preview.appendChild(removeBtn);
+    //     // Set image source
+    //     const reader = new FileReader();
+    //     reader.onload = function (e) {
+    //         img.src = e.target.result;
+    //         preview.appendChild(img);
+    //         preview.appendChild(removeBtn);
 
-            // Hide the upload text
-            dropZone.querySelector('p').classList.add('hidden');
-        };
-        reader.readAsDataURL(file);
-    }
+    //         // Hide the upload text
+    //         dropZone.querySelector('p').classList.add('hidden');
+    //     };
+    //     reader.readAsDataURL(file);
+    // }
 
     // Function to generate quiz data from the form
     function generateQuizData() {
