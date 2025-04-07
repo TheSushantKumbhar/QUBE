@@ -8,11 +8,14 @@ from extensions import db, migrate
 from config import SQLALCHEMY_DATABASE_URI
 from models.db_init import create_database
 from models.models import User   
+from liveQuiz.websockets import socketio  
+
 
 from apscheduler.schedulers.background import BackgroundScheduler 
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+socketio.init_app(app) 
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
@@ -27,8 +30,6 @@ app.register_blueprint(quiz_bp, url_prefix='/quiz')
 from liveQuiz.routes import live
 app.register_blueprint(live, url_prefix="/live")
 
-
-
 create_database(app)
 
 @app.route('/')
@@ -36,20 +37,25 @@ def home():
     return render_template('Homepage/index.html',username=session.get('user'))
 
 def keep_db_alive():
-    try:
-        with app.app_context():
-            db.session.execute("SELECT 1")
+    with app.app_context():
+        try:
+            db.session.execute('SELECT 1')  # Lightweight dummy query
             db.session.commit()
-            print("DB keep-alive successful")
-    except Exception as e:
-        db.session.rollback()
-        print(f"DB keep-alive failed: {e}")
+            print("DB keep-alive successful.")
+        except Exception as e:
+            db.session.rollback()
+            print("DB keep-alive error:", str(e))
 
+# ---- SCHEDULER SETUP ----
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=keep_db_alive, trigger="interval", minutes=4)
 scheduler.start()
 
+# Shut down the scheduler when exiting the app
+import atexit
+atexit.register(lambda: scheduler.shutdown())
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)
 

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}{{ quiz.title }} Live Quiz Settings{% endblock %}
+{% block content %}
+
+<div class="w-full bg-gradient-to-b from-indigo-50 to-white min-h-screen pb-10">
+    <!-- Header Banner -->
+    <div>
+        <div class="max-w-6xl bg-indigo-600 px-6 py-5 mt-6 rounded-lg shadow-lg mx-auto flex flex-col md:flex-row items-center justify-between">
+            <div class="mb-4 md:mb-0 flex items-center">
+                <i class="fas fa-clipboard-check text-white text-4xl mr-4"></i>
+                <div>
+                    <h2 class="text-white text-2xl md:text-3xl font-bold tracking-tight">{{ quiz.title }}</h2>
+                    <p class="text-indigo-100 text-sm mt-1">{{ quiz.subject }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Settings -->
+    <div class="max-w-6xl mx-auto mt-8 px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left column: Question Preview -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-question-circle text-indigo-600 mr-2"></i> Question Preview
+                    </h3>
+
+                    <div class="mt-4 space-y-4">
+                        {% if quiz.questions %}
+                            {% for question in quiz.questions %}
+                            <div class="bg-indigo-50 p-4 rounded-lg">
+                                <p class="font-medium text-indigo-800 mb-2">Q{{ loop.index }}: {{ question.text }}</p>
+
+                                {% if question.image_url %}
+                                <div class="mb-3">
+                                    <img src="{{ question.image_url }}" alt="Question image" class="rounded-md max-h-40 object-contain">
+                                </div>
+                                {% endif %}
+
+                                <div class="ml-4 space-y-1">
+                                    {% for option in question.options %}
+                                    <div class="flex items-start">
+                                        <span class="inline-flex items-center justify-center h-5 w-5 rounded-full text-xs {{ 'bg-green-500 text-white' if option.is_correct else 'bg-gray-200 text-gray-700' }} mr-2 mt-0.5">
+                                            {{ loop.index }}
+                                        </span>
+                                        <p>{{ option.text }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-gray-500 italic">No questions in this quiz.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column: Controls -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-broadcast-tower text-indigo-600 mr-2"></i> Live Quiz Settings
+                    </h3>
+                    
+                    <form id="liveQuizSettingsForm" action="{{ url_for('live.create_live_room', quiz_id=quiz.id) }}" method="POST">
+                        <div>
+                            <!-- Time per Question Setting -->
+                            <div class="mb-6">
+                                <label for="question_time" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Time per Question (seconds)
+                                </label>
+                                <div class="flex items-center">
+                                    <input type="number" name="question_time" id="question_time" min="10" max="300" value="30"
+                                        class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">Set how much time participants will have to answer each question</p>
+                            </div>
+
+                            <!-- Create Room Button -->
+                            <button type="submit" id="createRoomBtn" class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 transition flex items-center justify-center">
+                                <i class="fas fa-play-circle mr-2"></i> Create Room & Go to Host View
+                            </button>
+                            
+                            <!-- Quiz Details Summary -->
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <h4 class="font-medium text-gray-700 mb-3">Quiz Summary</h4>
+                                <div class="space-y-3">
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <p class="text-sm text-gray-500">Questions</p>
+                                        <p class="font-medium">{{ quiz.questions|length }}</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <p class="text-sm text-gray-500">Status</p>
+                                        <div class="flex gap-2 mt-1">
+                                            <span class="px-2 py-1 {{ 'bg-green-100 text-green-800' if quiz.is_public else 'bg-gray-100 text-gray-800' }} text-xs rounded-full">
+                                                {{ 'Public' if quiz.is_public else 'Private' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form submission feedback
+        const form = document.getElementById('liveQuizSettingsForm');
+        const createRoomBtn = document.getElementById('createRoomBtn');
+        
+        form.addEventListener('submit', function() {
+            createRoomBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating Room...';
+            createRoomBtn.disabled = true;
+        });
+    });
+</script>
+
+{% endblock %}
