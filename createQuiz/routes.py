@@ -59,6 +59,7 @@ def upload_to_cloudinary(file_data):
         
     return None
 
+
 def get_current_user():
     """Fetch the logged-in user from session"""
     user_email = session.get('user')
@@ -78,11 +79,31 @@ def login_required(func):
     return wrapper
 
 
+
+@quiz_bp.route('/upload_image', methods=['POST'])
+@login_required
+def upload_image():
+    if 'image' not in request.files and 'image_data' not in request.form:
+        return jsonify({'success': False, 'message': 'No image provided'}), 400
+        
+    try:
+        if 'image' in request.files:
+            image_url = upload_to_cloudinary(request.files['image'])
+        else:
+            image_url = upload_to_cloudinary(request.form['image_data'])
+            
+        if not image_url:
+            return jsonify({'success': False, 'message': 'Failed to upload image'}), 500
+            
+        return jsonify({'success': True, 'url': image_url}), 200
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @quiz_bp.route('/quizCategories',methods=['GET','POST'])
 @login_required
 def quiz_categories():
     return render_template('CreateQuiz/quizCategories.html')
-
 
 @quiz_bp.route('/create', methods=['GET', 'POST'])
 @login_required
@@ -105,7 +126,11 @@ def create_quiz_page():
             db.session.flush()
             
             for q_index, question_data in enumerate(data['questions']):
-                question_image_url = upload_to_cloudinary(question_data.get('image'))
+                # Check if image is already a URL or needs to be uploaded
+                question_image_url = question_data.get('image')
+                if question_image_url and question_image_url.startswith('data:image'):
+                    question_image_url = upload_to_cloudinary(question_image_url)
+                
                 new_question = Question(
                     quiz_id=new_quiz.id,
                     text=question_data['text'],
@@ -117,7 +142,11 @@ def create_quiz_page():
                 db.session.flush()
                 
                 for o_index, option_data in enumerate(question_data['options']):
-                    option_image_url = upload_to_cloudinary(option_data.get('image'))
+                    # Check if option image is already a URL or needs to be uploaded
+                    option_image_url = option_data.get('image')
+                    if option_image_url and option_image_url.startswith('data:image'):
+                        option_image_url = upload_to_cloudinary(option_image_url)
+                    
                     new_option = Option(
                         question_id=new_question.id,
                         text=option_data['text'],
@@ -138,6 +167,7 @@ def create_quiz_page():
     
     return render_template('CreateQuiz/createQuiz.html')
 
+
 @quiz_bp.route('/api/quizzes', methods=['POST'])
 @login_required
 def create_quiz_api():
@@ -157,7 +187,11 @@ def create_quiz_api():
         db.session.flush()
         
         for q_index, question_data in enumerate(data['questions']):
-            question_image_url = upload_to_cloudinary(question_data.get('image'))
+            # Check if image is already a URL or needs to be uploaded
+            question_image_url = question_data.get('image')
+            if question_image_url and question_image_url.startswith('data:image'):
+                question_image_url = upload_to_cloudinary(question_image_url)
+            
             new_question = Question(
                 quiz_id=new_quiz.id,
                 text=question_data['text'],
@@ -169,7 +203,11 @@ def create_quiz_api():
             db.session.flush()
             
             for o_index, option_data in enumerate(question_data['options']):
-                option_image_url = upload_to_cloudinary(option_data.get('image'))
+                # Check if option image is already a URL or needs to be uploaded
+                option_image_url = option_data.get('image')
+                if option_image_url and option_image_url.startswith('data:image'):
+                    option_image_url = upload_to_cloudinary(option_image_url)
+                
                 new_option = Option(
                     question_id=new_question.id,
                     text=option_data['text'],
@@ -244,8 +282,7 @@ def my_quizzes():
 def preview_quiz():
     """Preview the quiz before creating it"""
     return render_template('CreateQuiz/previewQuiz.html')
-    
-
+        
 @quiz_bp.route('/save_quiz', methods=['POST'])
 @login_required
 def save_quiz():
@@ -271,7 +308,13 @@ def save_quiz():
         db.session.flush()
 
         for q_index, question_data in enumerate(data['questions']):
-            question_image_url = upload_to_cloudinary(question_data.get('image'))
+            # Use the image URL directly if it's already a URL, no need to re-upload
+            question_image_url = question_data.get('image')
+            
+            # Only upload if it's raw image data (begins with data:image)
+            if question_image_url and question_image_url.startswith('data:image'):
+                question_image_url = upload_to_cloudinary(question_image_url)
+                
             new_question = Question(
                 quiz_id=new_quiz.id,
                 text=question_data['text'],
@@ -283,7 +326,13 @@ def save_quiz():
             db.session.flush()
 
             for o_index, option_data in enumerate(question_data['options']):
-                option_image_url = upload_to_cloudinary(option_data.get('image'))
+                # Use the image URL directly if it's already a URL
+                option_image_url = option_data.get('image')
+                
+                # Only upload if it's raw image data (begins with data:image)
+                if option_image_url and option_image_url.startswith('data:image'):
+                    option_image_url = upload_to_cloudinary(option_image_url)
+                    
                 new_option = Option(
                     question_id=new_question.id,
                     text=option_data['text'],
@@ -302,8 +351,6 @@ def save_quiz():
         traceback.print_exc()
         flash(f"Error saving quiz: {str(e)}", "danger")
         return redirect(url_for('quiz.create_quiz_page'))
-    
-
 
 # Add these routes to your existing createquiz/routes.py file
 
