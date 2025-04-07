@@ -137,7 +137,7 @@
 </div>
 
 <!-- Hidden form for submission -->
-<form id="quizForm" method="POST" action="{{ url_for('quiz.save_quiz') }}" class="hidden">
+<form id="quizForm" method="POST" action="{{ url_for('quiz.save_quiz') }}" enctype="multipart/form-data" class="hidden">
     <input type="hidden" name="quiz_data" id="quizData">
     {% if csrf_token %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
