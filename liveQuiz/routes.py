@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for,session
 from createQuiz.routes import login_required
 from utils.auth_helpers import get_current_user
 from models.quizModel import Quiz  # adjust according to your project structure
@@ -10,8 +10,7 @@ from liveQuiz.websockets import socketio
 # Home route (optional, could be in main app.py)
 @live.route('/')
 def live_home():
-    return render_template('liveQuiz/liveQuizHome.html')
-
+    return render_template('liveQuiz/liveQuizHome.html',username=session.get('username'),profile_pic=session.get('profile_pic'))
 
 # Host quiz selection page
 @live.route('/host', methods=['GET'])
