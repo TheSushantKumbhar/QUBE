@@ -33,8 +33,8 @@
             // Apply remembered state before page renders
             const sidebarState = localStorage.getItem('sidebarOpen');
             if (sidebarState === 'false') {
-                document.documentElement.style.setProperty('--sidebar-width', '4rem');
-                document.documentElement.style.setProperty('--content-margin', '4rem');
+                document.documentElement.style.setProperty('--sidebar-width', '6rem');
+                document.documentElement.style.setProperty('--content-margin', '6rem');
                 document.documentElement.classList.add('sidebar-collapsed');
             }
         })();
@@ -147,6 +147,7 @@
             cursor: pointer;
             padding: 8px;
             border-radius: 8px;
+            margin-right: 5px;
             transition: background-color 0.15s ease;
         }
 
@@ -171,6 +172,7 @@
             margin-right: 0;
             width: 32px;
             height: 32px;
+            display: block !important; /* Force display */
         }
 
         /* Profile capsule styles */
@@ -182,6 +184,7 @@
             display: flex;
             justify-content: center;
             z-index: 30;
+            margin-bottom: 15px;
         }
         
         .profile-capsule {
@@ -190,7 +193,7 @@
             align-items: center;
             padding: 0.5rem;
             border-radius: 2rem;
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.192);
             cursor: pointer;
             transition: all 0.2s ease;
             width: 80%;
@@ -234,7 +237,8 @@
             color: #1f2937;
         }
         
-        .profile-capsule:hover .drop-up {
+        /* Only show drop-up when not in collapsed mode */
+        body:not(.sidebar-collapsed) .profile-capsule:hover .drop-up {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
@@ -262,7 +266,7 @@
             background-color: #374151;
         }
         
-        /* For collapsed sidebar */
+        /* For collapsed sidebar - make profile capsule a direct link */
         .sidebar-collapsed .profile-info {
             display: none;
         }
@@ -272,16 +276,6 @@
             padding: 0.25rem;
         }
         
-        .sidebar-collapsed .drop-up {
-            width: 12rem;
-            left: 50%;
-            transform: translateX(-50%) translateY(10px);
-        }
-        
-        .sidebar-collapsed .profile-capsule:hover .drop-up {
-            transform: translateX(-50%) translateY(0);
-        }
-
         /* Dark mode toggle in dropdown */
         .dark-toggle-container {
             display: flex;
@@ -296,6 +290,27 @@
         
         .dark .dark-toggle-container:hover {
             background-color: #374151;
+        }
+
+        /* Hide dropdown elements in collapsed state */
+        .sidebar-collapsed .drop-up {
+            display: none;
+        }
+
+        /* Add styles for the PNG icons in the profile dropdown */
+        .drop-up-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            object-fit: contain;
+        }
+
+        .use-png-icons .drop-up .fa-icon {
+            display: none;
+        }
+
+        .use-png-icons .drop-up .drop-up-icon {
+            display: block;
         }
     </style>
 </head>
@@ -318,8 +333,9 @@
             <div class="mt-12 flex flex-col space-y-3 w-full">
                 <a href="/" class="nav-item text-white hover:text-blue-500">
                     <span class="nav-icon">
-                        <i class="fa-icon fas fa-home"></i>
-                        <img src="/static/images/home2.png" class="png-icon" alt="Home">
+                        <!-- <i class="fa-icon fas fa-home"></i> -->
+                        <!-- <img src="/static/images/home2.png" class="png-icon" alt="Home"> -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                     </span>
                     <span class="nav-text ml-3">Home</span>
                 </a>
@@ -340,7 +356,7 @@
                 <a href="{{ url_for('quiz.quiz_categories')}}" class="nav-item text-white hover:text-blue-600">
                     <span class="nav-icon">
                         <i class="fa-icon fas fa-plus-circle"></i>
-                        <img src="/static/images/icons/create.png" class="png-icon" alt="Create Quiz">
+                        <img src="" class="png-icon" alt="Create Quiz">
                     </span>
                     <span class="nav-text ml-3">Create Quiz</span>
                 </a>
@@ -353,27 +369,30 @@
                 </a>
             </div>
             
-            <!-- Profile Capsule Container -->
+            <!-- Profile Capsule Container (will be transformed to direct link when collapsed) -->
             <div class="profile-container">
-                <div class="profile-capsule">
-                    <img src="/static/images/default-profile.jpg" alt="Profile" class="profile-image">
+                <div id="profile-element" class="profile-capsule">
+                    <img src="{{profile_pic}}" alt="Profile" class="profile-image">
                     <div class="profile-info">
-                        <div class="font-medium">John Doe</div>
-                        <div class="text-xs text-gray-300">Premium User</div>
+                        <div class="font-medium">{{username}}</div>
+                        <div class="text-xs text-gray-300"></div>
                     </div>
                 
-                    <!-- Drop-up Menu - Now a direct child of profile-capsule -->
+                    <!-- Drop-up Menu with PNG icon slots - only visible in expanded state -->
                     <div class="drop-up">
                         <a href="/profile" class="drop-up-item">
-                            <i class="fas fa-user-circle mr-3"></i>
+                            <i class="fa-icon fas fa-user-circle mr-3"></i>
+                            <img src="/static/images/icons/profile.png" class="drop-up-icon" alt="My Profile">
                             <span>My Profile</span>
                         </a>
                         <a href="/settings" class="drop-up-item">
-                            <i class="fas fa-cog mr-3"></i>
+                            <i class="fa-icon fas fa-cog mr-3"></i>
+                            <img src="/static/images/icons/settings.png" class="drop-up-icon" alt="Settings">
                             <span>Settings</span>
                         </a>
                         <div class="dark-toggle-container">
-                            <i class="fas fa-moon mr-3"></i>
+                            <i class="fa-icon fas fa-moon mr-3"></i>
+                            <img src="/static/images/icons/dark-mode.png" class="drop-up-icon" alt="Dark Mode">
                             <span>Dark Mode</span>
                             <div class="ml-auto">
                                 <button id="dark-toggle"
@@ -396,7 +415,8 @@
                             </div>
                         </div>
                         <a href="/logout" class="drop-up-item text-red-500">
-                            <i class="fas fa-sign-out-alt mr-3"></i>
+                            <i class="fa-icon fas fa-sign-out-alt mr-3"></i>
+                            <img src="/static/images/icons/logout.png" class="drop-up-icon" alt="Logout">
                             <span>Logout</span>
                         </a>
                     </div>
@@ -424,7 +444,10 @@
         (function() {
             const sidebarState = localStorage.getItem('sidebarOpen');
             if (sidebarState === 'false') {
-                // Don't use DOM methods here, use classList on documentElement
+                // Apply collapsed state to body and html
+                document.body.classList.add('sidebar-collapsed');
+                
+                // Hide text elements
                 const navTexts = document.getElementsByClassName('nav-text');
                 for (let i = 0; i < navTexts.length; i++) {
                     navTexts[i].style.display = 'none';
@@ -434,6 +457,12 @@
                 const logoText = document.querySelector('.logo-text');
                 if (logoText) {
                     logoText.style.display = 'none';
+                }
+                
+                // Ensure the logo image is always visible
+                const logoImage = document.querySelector('.logo-image');
+                if (logoImage) {
+                    logoImage.style.display = 'block';
                 }
             }
         })();
@@ -447,12 +476,24 @@
             const navTexts = document.querySelectorAll('.nav-text');
             const logoImage = document.querySelector('.logo-image');
             const logoText = document.querySelector('.logo-text');
+            const profileElement = document.getElementById('profile-element');
             
             // Use localStorage to remember sidebar state
             let sidebarOpen = localStorage.getItem('sidebarOpen') !== 'false';
             
             // Set content container height
             contentContainer.style.height = 'calc(100vh - 24px)';
+
+            // Handle profile click in collapsed state
+            profileElement.addEventListener('click', function(e) {
+                if (document.body.classList.contains('sidebar-collapsed')) {
+                    // If sidebar is collapsed, navigate directly to profile page
+                    window.location.href = '/auth/profile';
+                    // Prevent any default behavior or bubble
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
 
             // Function to toggle sidebar with optimized performance
             function toggleSidebar() {
@@ -464,6 +505,7 @@
                     document.documentElement.style.setProperty('--sidebar-width', '13rem');
                     document.documentElement.style.setProperty('--content-margin', '13rem');
                     document.documentElement.classList.remove('sidebar-collapsed');
+                    document.body.classList.remove('sidebar-collapsed');
                     sidebar.classList.remove('sidebar-collapsed');
                     
                     // Show logo image and text
@@ -487,9 +529,10 @@
                     logoText.style.display = 'none';
                     
                     // Immediately start width transition
-                    document.documentElement.style.setProperty('--sidebar-width', '4rem');
-                    document.documentElement.style.setProperty('--content-margin', '4rem');
+                    document.documentElement.style.setProperty('--sidebar-width', '6rem');
+                    document.documentElement.style.setProperty('--content-margin', '6rem');
                     document.documentElement.classList.add('sidebar-collapsed');
+                    document.body.classList.add('sidebar-collapsed');
                     sidebar.classList.add('sidebar-collapsed');
                 }
             }

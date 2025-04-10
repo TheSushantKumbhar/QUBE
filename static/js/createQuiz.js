@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    gsap.from("body", { opacity: 0, duration: 2 });
+    
     // Page navigation
     document.getElementById('nextToPage3').addEventListener('click', function () {
         if (!validateForm()) {

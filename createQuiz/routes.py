@@ -165,7 +165,7 @@ def create_quiz_page():
             traceback.print_exc()
             flash(f"Error creating quiz: {str(e)}", "danger")
     
-    return render_template('CreateQuiz/createQuiz.html')
+    return render_template('CreateQuiz/createQuiz.html',username=session.get('username'),profile_pic=session.get('profile_pic'))
 
 
 @quiz_bp.route('/api/quizzes', methods=['POST'])

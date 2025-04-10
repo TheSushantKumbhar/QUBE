@@ -33,7 +33,7 @@ create_database(app)
 
 @app.route('/')
 def home():
-    return render_template('Homepage/index.html',username=session.get('user'))
+    return render_template('Homepage/index.html',username=session.get('username'),profile_pic=session.get('profile_pic'))
 
 @app.context_processor
 def inject_current_user():
