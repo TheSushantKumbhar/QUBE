@@ -14,13 +14,13 @@
             --sidebar-width: 13rem;
             --content-margin: 13rem;
         }
-        
+
         #sidebar {
             width: var(--sidebar-width);
             transition: width 0.15s ease-out;
             will-change: width;
         }
-        
+
         #main-content {
             margin-left: var(--content-margin);
             transition: margin-left 0.15s ease-out;
@@ -29,7 +29,7 @@
     </style>
     <!-- Apply initial state -->
     <script>
-        (function() {
+        (function () {
             // Apply remembered state before page renders
             const sidebarState = localStorage.getItem('sidebarOpen');
             if (sidebarState === 'false') {
@@ -70,7 +70,7 @@
         body {
             opacity: 0;
         }
-        
+
         body.loaded {
             opacity: 1;
             transition: opacity 0.1s ease;
@@ -113,12 +113,12 @@
             justify-content: center;
             padding: 0.75rem 0;
         }
-        
+
         .sidebar-collapsed .nav-icon {
             margin: 0 auto;
             padding: 0;
         }
-        
+
         .sidebar-collapsed .png-icon {
             margin-right: 0;
             width: 24px;
@@ -134,7 +134,7 @@
         .use-png-icons .fa-icon {
             display: none;
         }
-        
+
         .use-png-icons .png-icon {
             display: block;
         }
@@ -172,7 +172,8 @@
             margin-right: 0;
             width: 32px;
             height: 32px;
-            display: block !important; /* Force display */
+            display: block !important;
+            /* Force display */
         }
 
         /* Profile capsule styles */
@@ -186,7 +187,7 @@
             z-index: 30;
             margin-bottom: 15px;
         }
-        
+
         .profile-capsule {
             position: relative;
             display: flex;
@@ -198,11 +199,11 @@
             transition: all 0.2s ease;
             width: 80%;
         }
-        
+
         .profile-capsule:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
-        
+
         .profile-image {
             width: 2.5rem;
             height: 2.5rem;
@@ -210,7 +211,7 @@
             object-fit: cover;
             border: 2px solid #ffffff;
         }
-        
+
         .profile-info {
             margin-left: 0.75rem;
             color: white;
@@ -218,11 +219,12 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
+
         /* Drop-up menu styles - now appears on hover */
         .drop-up {
             position: absolute;
-            bottom: calc(100% + 8px); /* Position above the profile capsule with gap */
+            bottom: calc(100% + 8px);
+            /* Position above the profile capsule with gap */
             left: 0;
             width: 100%;
             background-color: #fff;
@@ -236,46 +238,46 @@
             overflow: hidden;
             color: #1f2937;
         }
-        
+
         /* Only show drop-up when not in collapsed mode */
         body:not(.sidebar-collapsed) .profile-capsule:hover .drop-up {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
-        
+
         .drop-up-item {
             display: flex;
             align-items: center;
             padding: 0.75rem 1rem;
             transition: background-color 0.15s ease;
         }
-        
+
         .drop-up-item:hover {
             background-color: #f3f4f6;
         }
-        
+
         /* Dark mode styles for drop-up */
         .dark .drop-up {
             background-color: #1f2937;
             box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.3), 0 -2px 4px rgba(0, 0, 0, 0.2);
             color: #f3f4f6;
         }
-        
+
         .dark .drop-up-item:hover {
             background-color: #374151;
         }
-        
+
         /* For collapsed sidebar - make profile capsule a direct link */
         .sidebar-collapsed .profile-info {
             display: none;
         }
-        
+
         .sidebar-collapsed .profile-capsule {
             width: auto;
             padding: 0.25rem;
         }
-        
+
         /* Dark mode toggle in dropdown */
         .dark-toggle-container {
             display: flex;
@@ -283,11 +285,11 @@
             padding: 0.75rem 1rem;
             cursor: pointer;
         }
-        
+
         .dark-toggle-container:hover {
             background-color: #f3f4f6;
         }
-        
+
         .dark .dark-toggle-container:hover {
             background-color: #374151;
         }
@@ -335,36 +337,71 @@
                     <span class="nav-icon">
                         <!-- <i class="fa-icon fas fa-home"></i> -->
                         <!-- <img src="/static/images/home2.png" class="png-icon" alt="Home"> -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-house-icon lucide-house">
+                            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+                            <path
+                                d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        </svg>
                     </span>
                     <span class="nav-text ml-3">Home</span>
                 </a>
                 <a href="{{ url_for('quiz.explore_quizzes')}}" class="nav-item text-white hover:text-blue-600">
                     <span class="nav-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe-icon lucide-globe"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-globe-icon lucide-globe">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                            <path d="M2 12h20" />
+                        </svg>
                     </span>
                     <span class="nav-text ml-3">Explore</span>
                 </a>
                 <a href="{{url_for('live.live_home')}}" class="nav-item text-white hover:text-blue-600">
                     <span class="nav-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-router-icon lucide-router"><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6.01 18H6"/><path d="M10.01 18H10"/><path d="M15 10v4"/><path d="M17.84 7.17a4 4 0 0 0-5.66 0"/><path d="M20.66 4.34a8 8 0 0 0-11.31 0"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-router-icon lucide-router">
+                            <rect width="20" height="8" x="2" y="14" rx="2" />
+                            <path d="M6.01 18H6" />
+                            <path d="M10.01 18H10" />
+                            <path d="M15 10v4" />
+                            <path d="M17.84 7.17a4 4 0 0 0-5.66 0" />
+                            <path d="M20.66 4.34a8 8 0 0 0-11.31 0" />
+                        </svg>
                     </span>
                     <span class="nav-text ml-3">Live</span>
                 </a>
                 <a href="{{ url_for('quiz.quiz_categories')}}" class="nav-item text-white hover:text-blue-600">
                     <span class="nav-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-plus-icon lucide-badge-plus"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><line x1="12" x2="12" y1="8" y2="16"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-badge-plus-icon lucide-badge-plus">
+                            <path
+                                d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+                            <line x1="12" x2="12" y1="8" y2="16" />
+                            <line x1="8" x2="16" y1="12" y2="12" />
+                        </svg>
                     </span>
                     <span class="nav-text ml-3">Create Quiz</span>
                 </a>
                 <a href="/analytics" class="nav-item text-white hover:text-blue-600">
                     <span class="nav-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-column-increasing-icon lucide-chart-column-increasing"><path d="M13 17V9"/><path d="M18 17V5"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M8 17v-3"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-chart-column-increasing-icon lucide-chart-column-increasing">
+                            <path d="M13 17V9" />
+                            <path d="M18 17V5" />
+                            <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                            <path d="M8 17v-3" />
+                        </svg>
                     </span>
                     <span class="nav-text ml-3">Analytics</span>
                 </a>
             </div>
-            
+
             <!-- Profile Capsule Container (will be transformed to direct link when collapsed) -->
             <div class="profile-container">
                 <div id="profile-element" class="profile-capsule">
@@ -373,41 +410,52 @@
                         <div class="font-medium">{{username}}</div>
                         <div class="text-xs text-gray-300"></div>
                     </div>
-                
+
                     <!-- Drop-up Menu with PNG icon slots - only visible in expanded state -->
                     <div class="drop-up">
-                        <a href="/profile" class="drop-up-item">
+                        <a href="{{url_for('auth.update_profile')}}" class="drop-up-item">
                             <i class="fa-icon fas fa-user-circle mr-3"></i>
                             <img src="/static/images/icons/profile.png" class="drop-up-icon" alt="My Profile">
                             <span>My Profile</span>
                         </a>
-                        <a href="/settings" class="drop-up-item">
+                        <a href="{{url_for('quiz.my_quizzes')}}" class="drop-up-item">
                             <i class="fa-icon fas fa-cog mr-3"></i>
                             <img src="/static/images/icons/settings.png" class="drop-up-icon" alt="Settings">
-                            <span>Settings</span>
+                            <span>My quizzes</span>
                         </a>
-                        <div class="dark-toggle-container">
+                        <div class="dark-toggle-container flex flex-row">
                             <i class="fa-icon fas fa-moon mr-3"></i>
-                            <img src="/static/images/icons/dark-mode.png" class="drop-up-icon" alt="Dark Mode">
-                            <span>Dark Mode</span>
-                            <div class="ml-auto">
-                                <button id="dark-toggle"
-                                    class="flex items-center justify-center w-10 h-10 rounded-full focus:outline-none bg-gray-200 dark:bg-gray-700 transition-colors">
-                                    <!-- Sun icon (shows in dark mode) -->
-                                    <svg id="sun-icon" class="hidden dark:block w-6 h-6 text-yellow-400" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
-                                        </path>
-                                    </svg>
-                                    <!-- Moon icon (shows in light mode) -->
-                                    <svg id="moon-icon" class="block dark:hidden w-6 h-6 text-gray-800" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
-                                        </path>
-                                    </svg>
-                                </button>
+                            <!-- <img src="/static/images/icons/dark-mode.png" class="drop-up-icon" alt="Dark Mode"> -->
+
+
+                            <div class="flex flex-row justify-start items-center">
+                                <div class="mr-3">
+                                    <button id="dark-toggle"
+                                        class="flex items-center justify-center w-10 h-10 rounded-full focus:outline-none bg-gray-200 dark:bg-gray-700 transition-colors">
+                                        <!-- Sun icon (shows in dark mode) -->
+                                        <svg id="sun-icon" class="hidden dark:block w-6 h-6 text-yellow-400" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                                            </path>
+                                        </svg>
+                                        <!-- Moon icon (shows in light mode) -->
+                                        <svg id="moon-icon" class="block dark:hidden w-6 h-6 text-gray-800" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path str3oke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <!-- <div>
+                                    <span>Dark Mode</span>
+                                </div> -->
+                                <div>
+                                    <p>Dark Mode</p>
+                                </div>
                             </div>
                         </div>
                         <a href="/logout" class="drop-up-item text-red-500">
@@ -424,8 +472,7 @@
     <!-- Main Content Wrapper -->
     <div id="main-content" class="w-full">
         <!-- White Content Container -->
-        <div id="content-container"
-            class="bg-gray-100 rounded-2xl mt-3 mr-3 mb-3 h-95vh overflow-auto shadow-lg">
+        <div id="content-container" class="bg-gray-100 rounded-2xl mt-3 mr-3 mb-3 h-95vh overflow-auto shadow-lg">
             <!-- Page Content (Dynamic Section) -->
             <div class="p-6">
                 {% block content %}
@@ -435,128 +482,7 @@
         </div>
     </div>
     <script src="/static/js/darkMode.js"></script>
-    <script>
-        // Set state immediately before any rendering
-        (function() {
-            const sidebarState = localStorage.getItem('sidebarOpen');
-            if (sidebarState === 'false') {
-                // Apply collapsed state to body and html
-                document.body.classList.add('sidebar-collapsed');
-                
-                // Hide text elements
-                const navTexts = document.getElementsByClassName('nav-text');
-                for (let i = 0; i < navTexts.length; i++) {
-                    navTexts[i].style.display = 'none';
-                }
-                
-                // Make sure the logo image is visible but text is hidden in collapsed state
-                const logoText = document.querySelector('.logo-text');
-                if (logoText) {
-                    logoText.style.display = 'none';
-                }
-                
-                // Ensure the logo image is always visible
-                const logoImage = document.querySelector('.logo-image');
-                if (logoImage) {
-                    logoImage.style.display = 'block';
-                }
-            }
-        })();
-
-        // Main initialization - keep this minimal for fast loading
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            const contentContainer = document.getElementById('content-container');
-            const logoBtn = document.getElementById('logo-button');
-            const navTexts = document.querySelectorAll('.nav-text');
-            const logoImage = document.querySelector('.logo-image');
-            const logoText = document.querySelector('.logo-text');
-            const profileElement = document.getElementById('profile-element');
-            
-            // Use localStorage to remember sidebar state
-            let sidebarOpen = localStorage.getItem('sidebarOpen') !== 'false';
-            
-            // Set content container height
-            contentContainer.style.height = 'calc(100vh - 24px)';
-
-            // Handle profile click in collapsed state
-            profileElement.addEventListener('click', function(e) {
-                if (document.body.classList.contains('sidebar-collapsed')) {
-                    // If sidebar is collapsed, navigate directly to profile page
-                    window.location.href = '/auth/profile';
-                    // Prevent any default behavior or bubble
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-            });
-
-            // Function to toggle sidebar with optimized performance
-            function toggleSidebar() {
-                sidebarOpen = !sidebarOpen;
-                localStorage.setItem('sidebarOpen', sidebarOpen);
-                
-                if (sidebarOpen) {
-                    // Expand sidebar
-                    document.documentElement.style.setProperty('--sidebar-width', '13rem');
-                    document.documentElement.style.setProperty('--content-margin', '13rem');
-                    document.documentElement.classList.remove('sidebar-collapsed');
-                    document.body.classList.remove('sidebar-collapsed');
-                    sidebar.classList.remove('sidebar-collapsed');
-                    
-                    // Show logo image and text
-                    logoImage.style.display = 'block';
-                    logoText.style.display = 'block';
-                    
-                    // Slight delay to show text after width change starts
-                    setTimeout(() => {
-                        navTexts.forEach(text => {
-                            text.style.display = 'inline';
-                        });
-                    }, 50);
-                } else {
-                    // Hide text first for smoother transition
-                    navTexts.forEach(text => {
-                        text.style.display = 'none';
-                    });
-                    
-                    // Ensure logo image stays visible but hide text
-                    logoImage.style.display = 'block';
-                    logoText.style.display = 'none';
-                    
-                    // Immediately start width transition
-                    document.documentElement.style.setProperty('--sidebar-width', '6rem');
-                    document.documentElement.style.setProperty('--content-margin', '6rem');
-                    document.documentElement.classList.add('sidebar-collapsed');
-                    document.body.classList.add('sidebar-collapsed');
-                    sidebar.classList.add('sidebar-collapsed');
-                }
-            }
-
-            // Add event listener to logo button
-            logoBtn.addEventListener('click', toggleSidebar);
-            
-            // Preload images for faster rendering
-            function preloadImages() {
-                const images = document.querySelectorAll('img');
-                for (let img of images) {
-                    const src = img.getAttribute('src');
-                    if (src) {
-                        const newImg = new Image();
-                        newImg.src = src;
-                    }
-                }
-            }
-            
-            // Preload images
-            preloadImages();
-            
-            // Show page once everything is initialized (faster fade-in)
-            requestAnimationFrame(() => {
-                document.body.classList.add('loaded');
-            });
-        });
-    </script>
+    <script src="/static/js/base.js"></script>
 </body>
 
 </html>
