@@ -1,25 +1,25 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Theme toggling
-    const themeToggle = document.getElementById('theme-toggle');
+    // const themeToggle = document.getElementById('theme-toggle');
     
-    // Check for saved theme preference or respect OS preference
-    if (localStorage.getItem('theme') === 'dark' || 
-        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
+    // // Check for saved theme preference or respect OS preference
+    // if (localStorage.getItem('theme') === 'dark' || 
+    //     (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    //     document.documentElement.classList.add('dark');
+    // } else {
+    //     document.documentElement.classList.remove('dark');
+    // }
     
-    // Toggle theme
-    themeToggle.addEventListener('click', function() {
-        if (document.documentElement.classList.contains('dark')) {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-        } else {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        }
-    });
+    // // Toggle theme
+    // themeToggle.addEventListener('click', function() {
+    //     if (document.documentElement.classList.contains('dark')) {
+    //         document.documentElement.classList.remove('dark');
+    //         localStorage.setItem('theme', 'light');
+    //     } else {
+    //         document.documentElement.classList.add('dark');
+    //         localStorage.setItem('theme', 'dark');
+    //     }
+    // });
 
     // Initialize variables
     const questions = document.querySelectorAll('.question-container');
