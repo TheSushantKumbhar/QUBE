@@ -405,7 +405,13 @@
             <!-- Profile Capsule Container (will be transformed to direct link when collapsed) -->
             <div class="profile-container">
                 <div id="profile-element" class="profile-capsule">
-                    <img src="{{profile_pic}}" alt="Profile" class="profile-image">
+
+                    <!-- <img src="{{profile_pic}}" alt="Profile" class="profile-image"> -->
+                    {% if profile_pic %}
+                    <img src="{{ profile_pic }}" alt="Profile" class="profile-image">
+                    {% else %}
+                    <img src="/static/images/default.png" alt="Profile" class="profile-image">
+                    {% endif %}
                     <div class="profile-info">
                         <div class="font-medium">{{username}}</div>
                         <div class="text-xs text-gray-300"></div>
@@ -420,7 +426,7 @@
                         </a>
                         <a href="{{url_for('quiz.my_quizzes')}}" class="drop-up-item">
                             <i class="fa-icon fas fa-cog mr-3"></i>
-                            <img src="/static/images/icons/settings.png" class="drop-up-icon" alt="Settings">
+                            <img src="/static/images/icons/settings.png" class="drop-up-icon" alt="my quizzes">
                             <span>My quizzes</span>
                         </a>
                         <div class="dark-toggle-container flex flex-row">
@@ -458,7 +464,7 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="/logout" class="drop-up-item text-red-500">
+                        <a href="{{url_for('auth.logout')}}" class="drop-up-item text-red-500">
                             <i class="fa-icon fas fa-sign-out-alt mr-3"></i>
                             <img src="/static/images/icons/logout.png" class="drop-up-icon" alt="Logout">
                             <span>Logout</span>
