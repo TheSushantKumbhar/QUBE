@@ -18,12 +18,12 @@ def live_home():
 def host_room():
     current_user = get_current_user()
     quizzes = Quiz.query.filter_by(user_id=current_user.id).all()
-    return render_template('liveQuiz/hostView.html', quizzes=quizzes,current_user = current_user)
+    return render_template('liveQuiz/hostView.html', quizzes=quizzes,current_user = current_user,username=session.get('username'),profile_pic=session.get('profile_pic'))
 
 # Join room page
 @live.route('/join', methods=['GET'])
 def join_room():
-    return render_template('liveQuiz/joinQuiz.html')    
+    return render_template('liveQuiz/joinQuiz.html',username=session.get('username'),profile_pic=session.get('profile_pic'))    
 
 # View created quizzes to host
 @live.route('/CreateQuiz', methods=['GET'])
@@ -31,4 +31,4 @@ def join_room():
 def create_Quiz():
     current_user = get_current_user()
     quizzes = Quiz.query.filter_by(user_id=current_user.id).all()
-    return render_template('liveQuiz/createQuiz.html', quizzes=quizzes)
+    return render_template('liveQuiz/createQuiz.html', quizzes=quizzes,username=session.get('username'),profile_pic=session.get('profile_pic'))
