@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 import cloudinary
 import cloudinary.uploader
-
+    
 load_dotenv()
 
 auth_bp = Blueprint('auth', __name__)
