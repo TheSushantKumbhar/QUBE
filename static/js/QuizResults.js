@@ -1,24 +1,3 @@
- // Theme toggling
- const themeToggle = document.getElementById('theme-toggle');
-        
- if (localStorage.getItem('theme') === 'dark' || 
-     (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-     document.documentElement.classList.add('dark');
- } else {
-     document.documentElement.classList.remove('dark');
- }
- 
- themeToggle.addEventListener('click', function() {
-     if (document.documentElement.classList.contains('dark')) {
-         document.documentElement.classList.remove('dark');
-         localStorage.setItem('theme', 'light');
-     } else {
-         document.documentElement.classList.add('dark');
-         localStorage.setItem('theme', 'dark');
-     }
-     updateChart(); // Redraw chart with new theme colors
- });
- 
  // Accordion functionality
  document.querySelectorAll('.accordion-header').forEach(header => {
      header.addEventListener('click', () => {
