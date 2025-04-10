@@ -2,21 +2,118 @@
 {% block title %}Live Quiz App{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto text-center mt-20">
-    <h1 class="text-4xl font-bold mb-8">Welcome to the Live Quiz Platform</h1>
+<div class="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 p-8 rounded-2xl shadow-lg">
+    <!-- Header Section -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-indigo-700 dark:text-indigo-400 mb-4">
+            Welcome to the Live Quiz Platform
+        </h1>
+        <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto text-lg">
+            Create engaging quiz experiences or join existing ones in real-time.
+        </p>
+    </div>
 
-    <div class="space-y-6">
-        <a href="{{ url_for('live.host_room') }}">
-            <button class="w-full bg-indigo-600 text-white text-lg px-6 py-3 rounded-lg shadow hover:bg-indigo-700 transition">
-                Host a Quiz
-            </button>
-        </a>
+    <!-- Main Options Grid -->
+    <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <!-- Host Quiz Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden">
+            <div class="h-40 bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-presentation">
+                    <path d="M2 3h20"></path>
+                    <path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path>
+                    <path d="m7 21 5-5 5 5"></path>
+                </svg>
+            </div>
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Host a Quiz</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">Create your own quiz room, invite participants, and control the quiz experience.</p>
+                <a href="{{ url_for('live.host_room') }}">
+                    <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-crown mr-2">
+                            <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z"></path>
+                            <path d="M4 22h16"></path>
+                        </svg>
+                        <span>Host a Quiz</span>
+                    </button>
+                </a>
+            </div>
+        </div>
 
-        <a href="{{ url_for('live.join_room') }}">
-            <button class="w-full bg-green-600 text-white text-lg px-6 py-3 rounded-lg shadow hover:bg-green-700 transition">
-                Join a Quiz Room
-            </button>
-        </a>
+        <!-- Join Quiz Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden">
+            <div class="h-40 bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Join a Quiz</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">Enter a room code to join an existing quiz session and compete with others.</p>
+                <a href="{{ url_for('live.join_room') }}">
+                    <button class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-in mr-2">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" x2="3" y1="12" y2="12"></line>
+                        </svg>
+                        <span>Join a Quiz</span>
+                    </button>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="mt-16">
+        <h2 class="text-2xl font-bold text-center text-indigo-700 dark:text-indigo-400 mb-8">How It Works</h2>
+        <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <!-- Step 1 -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-indigo-600 dark:text-indigo-400 font-bold text-xl">1</span>
+                </div>
+                <h3 class="font-bold text-xl text-center text-gray-800 dark:text-white mb-3">Create</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-center">Set up a new quiz room with your questions or choose from existing ones.</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-indigo-600 dark:text-indigo-400 font-bold text-xl">2</span>
+                </div>
+                <h3 class="font-bold text-xl text-center text-gray-800 dark:text-white mb-3">Share</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-center">Invite participants by sharing your unique room code with them.</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-indigo-600 dark:text-indigo-400 font-bold text-xl">3</span>
+                </div>
+                <h3 class="font-bold text-xl text-center text-gray-800 dark:text-white mb-3">Play</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-center">Start the quiz and enjoy real-time competition with instant results.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="mt-16">
+        <div class="bg-indigo-600 dark:bg-indigo-800 rounded-xl p-8 text-white shadow-lg flex flex-col sm:flex-row items-center max-w-4xl mx-auto">
+            <div class="sm:w-2/3 mb-6 sm:mb-0 sm:mr-6 text-center sm:text-left">
+                <h3 class="text-2xl font-bold mb-2">Ready to challenge your knowledge?</h3>
+                <p class="text-indigo-100">Join a live quiz session now or create your own quiz experience!</p>
+            </div>
+            <div class="sm:w-1/3">
+                <a href="{{ url_for('live.join_room') }}">
+                    <button class="w-full bg-white text-indigo-600 hover:bg-indigo-50 font-bold px-6 py-3 rounded-lg shadow transition">
+                        Get Started
+                    </button>
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
