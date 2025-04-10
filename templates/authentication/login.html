@@ -4,13 +4,16 @@
     <title>Login</title>
     <link rel="stylesheet" href="/static/css/output.css">
 </head>
-<body class="flex items-center justify-center h-screen bg-gradient-to-r from-gray-200 to-indigo-200">
+<body class="flex items-center justify-center h-screen 
+             bg-gradient-to-r from-gray-200 to-indigo-200 
+             dark:from-gray-700 dark:to-gray-900">
+
     <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-lg overflow-hidden flex flex-row-reverse">
         
         <!-- Sign In Form (On Right Side) -->
-        <div class="w-1/2 p-8 transition-all duration-500 ease-in-out flex items-center justify-center" id="formContainer" style="min-height: 400px;">
+        <div class="w-1/2 p-8 transition-all duration-500 ease-in-out flex items-center justify-center dark:bg-gray-200" id="formContainer" style="min-height: 400px;">
             <div id="signInForm" class="w-full">
-                <h1 class="text-2xl font-semibold mb-4">Sign In</h1>
+                <h1 class="text-2xl font-semibold mb-4 dark:text-gray-700">Sign In</h1>
 
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
@@ -31,27 +34,28 @@
                 {% endwith %}
 
                 <form action="{{ url_for('auth.login') }}" method="POST" class="space-y-4">
-                    <input type="email" name="email" placeholder="Email" required class="w-full p-2 mt-2 border rounded">
-                    <input type="password" name="password" placeholder="Password" required class="w-full p-2 mt-2 border rounded">
+                    <input type="email" name="email" placeholder="Email" required class="w-full p-2 mt-2 border rounded dark:bg-gray-200 dark:border-gray-300">
+                    <input type="password" name="password" placeholder="Password" required class="w-full p-2 mt-2 border rounded dark:bg-gray-200 dark:border-gray-300">
                     
                     <!-- Forgot Password Link -->
                     <div class="text-left">
-                        <a href="{{ url_for('auth.reset_password') }}" class="text-xs text-indigo-600 mt-2 inline-block">Forgot Your Password?</a>
+                        <a href="{{ url_for('auth.reset_password') }}" class="text-xs text-indigo-600 mt-2 inline-block dark:text-black">Forgot Your Password?</a>
                     </div>
                     
-                    <button type="submit" class="w-full mt-4 py-2 bg-indigo-600 text-white rounded">Sign In</button>
+                    <button type="submit" class="w-full mt-4 py-2 bg-indigo-600 text-white rounded dark:bg-gray-600">Sign In</button>
                 </form>
             </div>
         </div>
 
         <!-- Toggle Section (On Left Side) -->
-        <div class="absolute left-0 w-1/2 h-full bg-indigo-600 text-white flex flex-col items-center justify-center p-8">
+        <div class="absolute left-0 w-1/2 h-full bg-indigo-600 text-white dark:bg-black ck flex flex-col items-center justify-center p-8">
             <h1 class="text-2xl font-semibold">Hello, Friend!</h1>
             <p class="text-sm mt-2">Register with your details to use all site features</p>
             <a href="{{ url_for('auth.signup') }}">
-                <button class="mt-4 py-2 px-6 border rounded bg-white text-indigo-600">Sign Up</button>
-            </a>
+                <button class="mt-4 py-2 px-6 border rounded bg-white text-indigo-600 dark:bg-gray-600 dark:text-white dark:border-gray-600">Sign Up</button>
+            </a> 
         </div>
     </div>
+    <script src="/static/js/darkMode.js"></script>
 </body>
 </html>
