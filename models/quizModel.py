@@ -17,9 +17,12 @@ class Quiz(db.Model):
     always_available = db.Column(db.Boolean, default=True)
     start_time = db.Column(db.Time, nullable=True)
     end_time = db.Column(db.Time, nullable=True)
+
+    
     
     user = db.relationship("User", backref=db.backref("quizzes", cascade="all, delete-orphan"))
     questions = db.relationship("Question", backref="quiz", cascade="all, delete-orphan")
+
 
 class Question(db.Model):
     __tablename__ = "questions"
@@ -73,7 +76,8 @@ class UserAnswer(db.Model):
 
     __table_args__ = (db.UniqueConstraint("attempt_id", "question_id", "option_id", name="uq_attempt_question_option"),)
 
-# Indexes for faster lookups
+
+
 db.Index("idx_quiz_user", Quiz.user_id)
 db.Index("idx_question_quiz", Question.quiz_id)
 db.Index("idx_option_question", Option.question_id)
