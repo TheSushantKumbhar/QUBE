@@ -103,7 +103,7 @@ def upload_image():
 @quiz_bp.route('/quizCategories',methods=['GET','POST'])
 @login_required
 def quiz_categories():
-    return render_template('CreateQuiz/quizCategories.html')
+    return render_template('CreateQuiz/quizCategories.html',username=session.get('username'),profile_pic=session.get('profile_pic'))
 
 @quiz_bp.route('/create', methods=['GET', 'POST'])
 @login_required
@@ -274,7 +274,7 @@ def my_quizzes():
     """View user's quizzes"""
     user = get_current_user()
     quizzes = Quiz.query.filter_by(user_id=user.id).all()
-    return render_template('createQuiz/myQuizzes.html', quizzes=quizzes)
+    return render_template('createQuiz/myQuizzes.html', quizzes=quizzes,username=session.get('username'),profile_pic=session.get('profile_pic'))
 
 
 @quiz_bp.route('/preview')
@@ -366,7 +366,7 @@ def view_quiz(quiz_id):
         flash("You don't have permission to view this quiz.", "danger")
         return redirect(url_for('quiz.my_quizzes'))
     
-    return render_template('CreateQuiz/viewQuiz.html', quiz=quiz, current_user=user)
+    return render_template('CreateQuiz/viewQuiz.html', quiz=quiz, current_user=user,username=session.get('username'),profile_pic=session.get('profile_pic'))
 
 
 @quiz_bp.route('/update_settings/<int:quiz_id>', methods=['POST'])
@@ -509,7 +509,7 @@ def explore_quizzes():
     return render_template('explore/explore.html', 
                           quizzes=public_quizzes,
                           current_user=current_user,
-                          current_time=current_time)
+                          current_time=current_time,username=session.get('username'),profile_pic=session.get('profile_pic'))
 
 @quiz_bp.route('/explore/details/<int:quiz_id>')
 def explore_quiz_details(quiz_id):
