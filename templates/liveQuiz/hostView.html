@@ -1,486 +1,259 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+{% block title %}Host Room{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto mt-12">
+    <h2 class="text-2xl font-bold mb-4">Host Live Quiz</h2>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ quiz.title }} - Quiz Host View</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    <div id="setupSection">
+        <label for="quiz" class="block text-gray-700 mb-2">Select Quiz</label>
+        <select id="quiz" class="w-full p-2 border rounded mb-4">
+            {% for quiz in quizzes %}
+            <option value="{{ quiz.id }}">{{ quiz.title }}</option>
+            {% endfor %}
+        </select>
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: white;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
+        <label for="room_code" class="block text-gray-700 mb-2">Enter Room Code</label>
+        <input type="text" id="room_code" class="w-full p-2 border rounded mb-4">
 
-        .main-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-
-        .header {
-            background: #f8f9fa;
-            border-radius: 16px;
-            border: 1px solid #e9ecef;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-        }
-
-        .content-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            height: 100%;
-        }
-
-        .room-code {
-            background: linear-gradient(45deg, #3B82F6, #8B5CF6);
-            color: white;
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        /* Participants area */
-        .participants-area {
-            position: relative;
-            min-height: 500px;
-            background: #f8f9fa;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid #e9ecef;
-        }
-
-        .mini-controls {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .participant-item {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            align-items: center;
-        }
-
-        .participant-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            margin-right: 1rem;
-        }
-
-        .modal {
-            transition: opacity 0.3s ease;
-        }
-
-        .modal-content {
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-
-        .new-participant {
-            background-color: #f0f9ff;
-            animation: highlight-new 3s forwards;
-        }
-
-        @keyframes highlight-new {
-            0% {
-                background-color: #f0f9ff;
-            }
-
-            100% {
-                background-color: transparent;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="main-container">
-        <!-- Header -->
-        <div class="header flex flex-col md:flex-row items-center justify-between">
-            <div class="flex items-center mb-4 md:mb-0">
-                <div class="text-indigo-600 mr-4">
-                    <i class="fas fa-broadcast-tower text-4xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-gray-800 text-2xl md:text-3xl font-bold">{{ quiz.title }}</h1>
-                    <p class="text-gray-600 text-sm">{{ quiz.subject }}</p>
-                </div>
-            </div>
-
-            <div class="flex items-center space-x-4">
-                <div class="flex items-center bg-indigo-100 rounded-lg px-4 py-2">
-                    <i class="fas fa-users text-indigo-600 mr-2"></i>
-                    <span class="text-indigo-800 font-bold" id="liveParticipantCount">{{ participants|length }}</span>
-                </div>
-
-                <div class="flex items-center space-x-2">
-                    <div class="room-code flex items-center">
-                        <span id="roomCodeDisplay">{{ room.room_code }}</span>
-                        <button id="copyCodeBtn" class="ml-2 text-white text-opacity-80 hover:text-opacity-100">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main content -->
-        <div class="grid grid-cols-1 gap-6">
-            <!-- Quiz Controls - Compact Version -->
-            <div class="mini-controls p-4 flex flex-wrap items-center justify-between">
-                <div class="flex items-center">
-                    <div class="mr-4">
-                        <span class="text-sm text-gray-500">Quiz</span>
-                        <p class="font-bold text-lg text-gray-800">{{ quiz.title }}</p>
-                    </div>
-                    <div class="bg-gray-100 h-8 w-px mx-2"></div>
-                    <div class="mr-4">
-                        <span class="text-sm text-gray-500">Questions</span>
-                        <p class="font-bold text-lg text-gray-800">{{ quiz.questions|length }}</p>
-                    </div>
-                    <div class="bg-gray-100 h-8 w-px mx-2"></div>
-                    <div>
-                        <span class="text-sm text-gray-500">Time per Question</span>
-                        <p class="font-bold text-lg text-gray-800">{{ room.question_time }}s</p>
-                    </div>
-                </div>
-
-                <div class="flex space-x-3 mt-4 md:mt-0">
-                    <button id="startQuizBtn"
-                        class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg shadow-lg transition flex items-center justify-center text-base">
-                        <i class="fas fa-play mr-2"></i> Start Quiz
-                    </button>
-
-                    <button id="endRoomBtn"
-                        class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition flex items-center justify-center">
-                        <i class="fas fa-times-circle mr-2"></i> End Quiz
-                    </button>
-                </div>
-            </div>
-
-            <!-- Participants Area - Simple List -->
-            <div class="participants-area p-4">
-                <div class="bg-white rounded-lg shadow">
-                    <div class="p-4 border-b border-gray-200">
-                        <h3 class="font-bold text-lg text-gray-800">Participants</h3>
-                    </div>
-                    <div id="participantsList">
-                        {% if participants %}
-                        {% for participant in participants %}
-                        <div class="participant-item" data-name="{{ participant.display_name }}">
-                            <div class="participant-avatar bg-blue-500">
-                                {{ participant.display_name[0].upper() }}
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-800">{{ participant.display_name }}</p>
-                                <p class="text-sm text-gray-500">Joined at {{ participant.joined_at.strftime('%H:%M:%S')
-                                    }}</p>
-                            </div>
-                        </div>
-                        {% endfor %}
-                        {% else %}
-                        <div id="noParticipantsMessage" class="text-center p-8">
-                            <div class="text-gray-400 text-5xl mb-3">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <h4 class="font-medium text-gray-700 mb-1">No participants yet</h4>
-                            <p class="text-sm text-gray-500">Share the room code with your audience</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
+        <button id="createRoom" class="bg-indigo-600 text-white px-4 py-2 rounded">Create Room</button>
     </div>
 
-    <!-- New Participant Notification -->
-    <div id="newParticipantNotification"
-        class="fixed bottom-5 right-5 bg-green-500 text-white p-4 rounded-lg shadow-lg hidden  items-center z-50">
-        <i class="fas fa-user-plus mr-2"></i>
-        <span id="newParticipantName"></span> has joined!
+    <div id="roomSection" class="hidden mt-6">
+        <p class="text-lg font-semibold">Room Code: <span id="displayRoomCode"></span></p>
+        <button id="startQuiz" class="mt-4 bg-green-600 text-white px-4 py-2 rounded">Start Quiz</button>
+        <button id="endQuiz" class="mt-2 bg-red-600 text-white px-4 py-2 rounded">End Quiz</button>
+        <button id="endRoom" class="mt-2 bg-red-800 text-white px-4 py-2 rounded">Close Room</button>
     </div>
 
-    <!-- End Room Modal -->
-    <div id="endRoomModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
-        <div class="modal-content bg-white rounded-lg p-6 w-full max-w-md">
-            <div class="text-center mb-4">
-                <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
-                <h3 class="text-xl font-bold text-gray-800">End Live Quiz?</h3>
-                <p class="text-gray-600 mt-2">Are you sure you want to end this live quiz session? All participants will
-                    be disconnected and all progress will be lost.</p>
-            </div>
+    <div id="participantsSection" class="mt-4">
+        <h3 class="font-semibold mb-2">Participants:</h3>
+        <ul id="participantList" class="list-disc list-inside"></ul>
+    </div>
 
-            <div class="flex justify-center space-x-4 mt-6">
-                <button id="cancelEndRoomBtn"
-                    class="bg-gray-300 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-400 transition">
-                    Cancel
-                </button>
-                <form id="endRoomForm" action="{{ url_for('live.end_live_room') }}" method="POST">
-                    <input type="hidden" name="room_code" value="{{ room.room_code }}">
-                    <button type="submit"
-                        class="bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-600 transition">
-                        End Session
-                    </button>
-                </form>
-            </div>
+    <!-- New question display section -->
+    <div id="questionSection" class="hidden mt-6 p-4 border rounded bg-gray-50">
+        <h3 class="text-xl font-bold mb-2">Current Question</h3>
+        <div id="questionDisplay" class="mb-4">
+            <p id="questionText" class="text-lg mb-2"></p>
+            <div id="optionsDisplay" class="ml-4"></div>
         </div>
+        <div id="timerDisplay" class="text-right font-semibold">Time left: <span id="timeLeft">15</span>s</div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialize socket connection
-            const socket = io();
-            const roomCode = '{{ room.room_code }}';
+    <!-- Leaderboard section -->
+    <div id="leaderboardSection" class="mt-6">
+        <h3 class="font-semibold mb-2">Leaderboard:</h3>
+        <ul id="leaderboardList" class="list-disc list-inside"></ul>
+    </div>
+</div>
 
-            // Join host room
-            socket.emit('join_host_room', { room_code: roomCode });
-            socket.on("host_joined_room", (data) => {
-                if (data.success) {
-                    console.log("Host joined room successfully");
-                    // Set up listener for new participants here
-                    socket.on("new_participant", (data) => {
-                        console.log("New participant:", data);
-                    });
-                }
-            });
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 
-            // Colors for participant avatars
-            const avatarColors = [
-                'bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-yellow-500',
-                'bg-red-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500'
-            ];
+<script>
+    // For hostView.html - Improve host view:
+    const socket = io();
+    const createRoomBtn = document.getElementById('createRoom');
+    const startQuizBtn = document.getElementById('startQuiz');
+    const endQuizBtn = document.getElementById('endQuiz');
+    const roomSection = document.getElementById('roomSection');
+    const displayRoomCode = document.getElementById('displayRoomCode');
+    const questionSection = document.getElementById('questionSection');
+    const questionText = document.getElementById('questionText');
+    const optionsDisplay = document.getElementById('optionsDisplay');
+    const timeLeft = document.getElementById('timeLeft');
+    const setupSection = document.getElementById('setupSection');
+    let quizInProgress = false;
 
-            // Copy room code functionality
-            const copyCodeBtn = document.getElementById('copyCodeBtn');
-            copyCodeBtn.addEventListener('click', function () {
-                const roomCode = document.getElementById('roomCodeDisplay').textContent;
-                navigator.clipboard.writeText(roomCode).then(function () {
-                    copyCodeBtn.innerHTML = '<i class="fas fa-check"></i>';
-                    setTimeout(() => {
-                        copyCodeBtn.innerHTML = '<i class="fas fa-copy"></i>';
-                    }, 2000);
-                });
-            });
+    createRoomBtn.onclick = () => {
+        const roomCode = document.getElementById('room_code').value.trim();
+        if (!roomCode) {
+            alert('Please enter a room code');
+            return;
+        }
 
-            // End room modal functionality
-            const endRoomBtn = document.getElementById('endRoomBtn');
-            const endRoomModal = document.getElementById('endRoomModal');
-            const cancelEndRoomBtn = document.getElementById('cancelEndRoomBtn');
-
-            endRoomBtn.addEventListener('click', function () {
-                endRoomModal.style.display = 'flex';
-            });
-
-            cancelEndRoomBtn.addEventListener('click', function () {
-                endRoomModal.style.display = 'none';
-            });
-
-            // Show new participant notification
-            function showParticipantNotification(name) {
-                const notification = document.getElementById('newParticipantNotification');
-                const nameSpan = document.getElementById('newParticipantName');
-                nameSpan.textContent = name;
-
-                notification.classList.remove('hidden');
-                notification.style.display = 'flex';
-
-                setTimeout(() => {
-                    notification.classList.add('hidden');
-                }, 3000);
-            }
-
-            // Add new participant to list view
-            function addParticipantToList(data) {
-                console.log("New participant received:", data);
-                const participantsList = document.getElementById('participantsList');
-                const noParticipantsMsg = document.getElementById('noParticipantsMessage');
-
-                if (noParticipantsMsg) {
-                    noParticipantsMsg.remove();
-                }
-
-                const colorClass = avatarColors[Math.floor(Math.random() * avatarColors.length)];
-                const now = new Date();
-                const timeString = now.toTimeString().split(' ')[0];
-
-                const newParticipantItem = document.createElement('div');
-                newParticipantItem.className = 'participant-item new-participant';
-                newParticipantItem.setAttribute('data-name', data.display_name);
-
-                newParticipantItem.innerHTML = `
-                    <div class="participant-avatar ${colorClass}">
-                        ${data.display_name[0].toUpperCase()}
-                    </div>
-                    <div>
-                        <p class="font-medium text-gray-800">${data.display_name}</p>
-                        <p class="text-sm text-gray-500">Joined at ${timeString}</p>
-                    </div>
-                `;
-
-                participantsList.insertBefore(newParticipantItem, participantsList.firstChild);
-
-                // Update participant counter
-                const liveParticipantCount = document.getElementById('liveParticipantCount');
-                const currentCount = document.querySelectorAll('.participant-item').length;
-                liveParticipantCount.textContent = currentCount;
-
-                // Show notification
-                showParticipantNotification(data.display_name);
-            }
-
-            // Listen for new participants
-            socket.on('new_participant', function (data) {
-                console.log("Socket event received: new_participant", data);
-
-                // Make sure the data is valid before proceeding
-                if (!data || !data.display_name) {
-                    console.error("Invalid participant data received:", data);
-                    return;
-                }
-
-                // Check if this participant already exists (to prevent duplicates)
-                const existingItems = document.querySelectorAll('.participant-item');
-                let exists = false;
-
-                existingItems.forEach(item => {
-                    if (item.getAttribute('data-name') === data.display_name) {
-                        exists = true;
-                    }
-                });
-
-                if (!exists) {
-                    addParticipantToList(data);
-                } else {
-                    console.log("Participant already exists:", data.display_name);
-                }
-            });
-
-            // Debug connection status and ensure socket is properly connected
-            socket.on('connect', function () {
-                console.log('Connected to server with socket ID:', socket.id);
-
-                // Re-join the host room on connection/reconnection
-                socket.emit('join_host_room', { room_code: roomCode });
-
-                // Request current participant list
-                socket.emit('request_participants', { room_code: roomCode });
-            });
-
-            // Event handler to receive the current list of participants
-            socket.on('current_participants', function (data) {
-                console.log("Received current participants list:", data);
-
-                // Add each participant to the view
-                if (data && data.participants && Array.isArray(data.participants)) {
-                    data.participants.forEach(participant => {
-                        // Check if this participant already has an item
-                        let exists = false;
-                        const existingItems = document.querySelectorAll('.participant-item');
-
-                        existingItems.forEach(item => {
-                            if (item.getAttribute('data-name') === participant.display_name) {
-                                exists = true;
-                            }
-                        });
-
-                        if (!exists) {
-                            addParticipantToList(participant);
-                        }
-                    });
-                }
-
-                // Update the count
-                const liveParticipantCount = document.getElementById('liveParticipantCount');
-                const currentCount = document.querySelectorAll('.participant-item').length;
-                liveParticipantCount.textContent = currentCount;
-            });
-
-            // Listen for participant disconnection
-            socket.on('participant_disconnected', function (data) {
-                console.log("Socket event received: participant_disconnected", data);
-                const participantsList = document.getElementById('participantsList');
-                const items = participantsList.querySelectorAll('.participant-item');
-
-                // Find and remove the disconnected participant's item
-                items.forEach(item => {
-                    const name = item.getAttribute('data-name');
-                    if (name === data.display_name) {
-                        item.remove();
-
-                        // Update counter
-                        const liveParticipantCount = document.getElementById('liveParticipantCount');
-                        const currentCount = parseInt(liveParticipantCount.textContent) - 1;
-                        liveParticipantCount.textContent = currentCount;
-
-                        // Show empty state if no participants left
-                        if (currentCount === 0) {
-                            const noParticipantsMessage = document.createElement('div');
-                            noParticipantsMessage.id = 'noParticipantsMessage';
-                            noParticipantsMessage.className = 'text-center p-8';
-                            noParticipantsMessage.innerHTML = `
-                                <div class="text-gray-400 text-5xl mb-3">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <h4 class="font-medium text-gray-700 mb-1">No participants yet</h4>
-                                <p class="text-sm text-gray-500">Share the room code with your audience</p>
-                            `;
-                            participantsList.appendChild(noParticipantsMessage);
-                        }
-                    }
-                });
-            });
-
-            // Start Quiz functionality
-            document.getElementById('startQuizBtn').addEventListener('click', function () {
-                // Disable the button to prevent multiple clicks
-                this.disabled = true;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Starting...';
-
-                // Start the quiz via socket
-                socket.emit('start_quiz', { room_code: roomCode });
-
-                // Redirect to the active quiz page
-                setTimeout(() => {
-                    window.location.href = `/live/${roomCode}/active`;
-                }, 1000);
-            });
-
-            // Handle socket reconnection
-            socket.on('reconnect', function () {
-                console.log('Reconnected to server');
-                // Rejoin the host room
-                socket.emit('join_host_room', { room_code: roomCode });
-                // Request current participants
-                socket.emit('request_participants', { room_code: roomCode });
-            });
-
-            // Add disconnect handler
-            socket.on('disconnect', function () {
-                console.log('Disconnected from server, will try to reconnect automatically');
-            });
-
+        const quizId = document.getElementById('quiz').value;
+        socket.emit('create_room', {
+            room_code: roomCode,
+            quiz_id: quizId,
+            host_id: '{{ current_user.id }}'
         });
-    </script>
-</body>
+    };
 
-</html>
+    socket.on('new_question', data => {
+        // Show question section and hide setup if needed
+        questionSection.classList.remove('hidden');
+        quizInProgress = true;
+
+        // Display question
+        questionText.innerText = data.question;
+
+        // Display options
+        optionsDisplay.innerHTML = '';
+        data.options.forEach((option, index) => {
+            const div = document.createElement('div');
+            div.className = 'mb-2 p-2 border-l-4 border-indigo-500 bg-indigo-50';
+            div.innerHTML = `<span class="font-medium">${index + 1}.</span> ${option}`;
+            optionsDisplay.appendChild(div);
+        });
+
+        // Set timer with smoother countdown
+        if (window.hostTimer) clearInterval(window.hostTimer);
+
+        let seconds = data.time;
+        timeLeft.innerText = seconds;
+
+        const startTime = Date.now();
+        const endTime = startTime + (seconds * 1000);
+
+        window.hostTimer = setInterval(() => {
+            const now = Date.now();
+            const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+
+            timeLeft.innerText = remaining;
+
+            if (remaining <= 0) {
+                clearInterval(window.hostTimer);
+            }
+        }, 100); // Update more frequently for smoother countdown
+    });
+
+    socket.on('room_created', data => {
+        roomSection.classList.remove('hidden');
+        displayRoomCode.innerText = data.room_code;
+        setupSection.classList.add('hidden');
+
+        // Add copy button functionality
+        const roomCodeSpan = document.getElementById('displayRoomCode');
+        roomCodeSpan.addEventListener('click', () => {
+            navigator.clipboard.writeText(roomCodeSpan.innerText)
+                .then(() => {
+                    alert('Room code copied to clipboard!');
+                });
+        });
+        roomCodeSpan.title = 'Click to copy';
+        roomCodeSpan.style.cursor = 'pointer';
+    });
+
+    startQuizBtn.onclick = () => {
+        if (quizInProgress) {
+            if (!confirm('A quiz is already in progress. Start a new one?')) {
+                return;
+            }
+        }
+
+        socket.emit('start_quiz', { room_code: displayRoomCode.innerText });
+        startQuizBtn.disabled = true;
+        setTimeout(() => { startQuizBtn.disabled = false; }, 2000); // Prevent double-clicks
+    };
+
+    endQuizBtn.onclick = () => {
+        if (!quizInProgress) {
+            alert('No quiz is currently running.');
+            return;
+        }
+
+        if (confirm('Are you sure you want to end the quiz?')) {
+            socket.emit('end_quiz', { room_code: displayRoomCode.innerText });
+            questionSection.classList.add('hidden');
+            quizInProgress = false;
+        }
+    };
+
+    socket.on('update_participants', data => {
+        const list = document.getElementById('participantList');
+        list.innerHTML = '';
+        data.participants.forEach(username => {
+            const li = document.createElement('li');
+            li.textContent = username;
+            list.appendChild(li);
+        });
+
+        // Update start button based on participant count
+        if (data.participants.length > 0) {
+            startQuizBtn.disabled = false;
+        } else {
+            startQuizBtn.disabled = true;
+        }
+    });
+
+    socket.on('leaderboard_update', data => {
+        const list = document.getElementById('leaderboardList');
+        list.innerHTML = '';
+
+        // Convert object to array for sorting
+        const scores = Object.entries(data).map(([name, score]) => ({ name, score }));
+        scores.sort((a, b) => b.score - a.score);
+
+        scores.forEach((entry, index) => {
+            const li = document.createElement('li');
+            li.className = index === 0 ? 'text-green-600 font-semibold' : '';
+            li.textContent = `${entry.name}: ${entry.score} points`;
+            list.appendChild(li);
+        });
+    });
+
+    socket.on('quiz_ended', data => {
+        alert("Quiz has ended!");
+        questionSection.classList.add('hidden');
+        quizInProgress = false;
+
+        if (window.hostTimer) {
+            clearInterval(window.hostTimer);
+        }
+
+        // Display final leaderboard
+        const list = document.getElementById('leaderboardList');
+        list.innerHTML = '<h3 class="font-bold text-lg my-2">Final Results:</h3>';
+
+        const scores = Object.entries(data.leaderboard).map(([name, score]) => ({ name, score }));
+        scores.sort((a, b) => b.score - a.score);
+
+        scores.forEach((entry, index) => {
+            const li = document.createElement('li');
+            li.className = index === 0 ? 'font-bold text-green-600' : '';
+            li.textContent = `${index + 1}. ${entry.name}: ${entry.score} points`;
+            list.appendChild(li);
+        });
+    });
+
+    socket.on('error', data => {
+        alert(data.message);
+    });
+
+    // Add these elements to your existing host view JavaScript
+
+    // Get the endRoom button reference
+    const endRoomBtn = document.getElementById('endRoom');
+
+    // Add click handler for ending the room
+    endRoomBtn.onclick = () => {
+        if (confirm('Are you sure you want to close this room? This will kick out all participants and delete the room.')) {
+            const roomCode = displayRoomCode.innerText;
+            socket.emit('end_room', { room_code: roomCode });
+        }
+    };
+
+    // Add event handler for room ended confirmation
+    socket.on('room_ended', (data) => {
+        if (data.success) {
+            // Reset UI to setup state
+            roomSection.classList.add('hidden');
+            setupSection.classList.remove('hidden');
+            questionSection.classList.add('hidden');
+
+            // Clear participant and leaderboard lists
+            document.getElementById('participantList').innerHTML = '';
+            document.getElementById('leaderboardList').innerHTML = '';
+
+            // Reset room code input
+            document.getElementById('room_code').value = '';
+
+            // Reset quiz in progress flag
+            quizInProgress = false;
+
+            // Show confirmation
+            alert('Room has been closed successfully.');
+        }
+    });
+</script>
+{% endblock %}
