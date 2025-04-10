@@ -40,24 +40,31 @@
         </div>
     </div>
 
-    <div id="page3" class="p-6 hidden overflow-auto pb-24">
-        <h2 class="text-xl font-semibold mb-4">Create Questions</h2>
-        <div id="questionsContainer"></div>
-        <div class="fixed bottom-0 left-56 w-[calc(100%-14rem)] bg-indigo-300 p-4 flex justify-between">
-            <button id="backToPage2"
-                class="bg-gray-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-500 transition">
-                Back
-            </button>
-            <button id="addQuestion"
-                class="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-700 transition">
-                <i class="fas fa-plus mr-2"></i>Add Question
-            </button>
-            <button id="previewQuiz"
-                class="bg-green-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-green-700 transition">
-                Preview Quiz
-            </button>
+    <div id="page3" class="p-6 hidden overflow-hidden h-full">
+        <div class="bg-white rounded-xl shadow-md flex flex-col justify-between h-full p-6">
+            <div class="overflow-auto">
+                <h2 class="text-xl font-semibold mb-4">Create Questions</h2>
+                <div id="questionsContainer"></div>
+            </div>
+    
+            <!-- Button Bar inside white container -->
+            <div class="bg-indigo-300 mt-6 p-4 flex justify-between rounded-b-xl">
+                <button id="backToPage2"
+                    class="bg-gray-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-500 transition">
+                    Back
+                </button>
+                <button id="addQuestion"
+                    class="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-700 transition">
+                    <i class="fas fa-plus mr-2"></i>Add Question
+                </button>
+                <button id="previewQuiz"
+                    class="bg-green-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-green-700 transition">
+                    Preview Quiz
+                </button>
+            </div>
         </div>
     </div>
+    
 
     <!-- Page 4 for Preview -->
     <div id="page4" class="hidden">
