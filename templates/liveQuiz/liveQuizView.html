@@ -64,7 +64,8 @@
                         <i class="fas fa-broadcast-tower text-indigo-600 mr-2"></i> Live Quiz Settings
                     </h3>
                     
-                    <form id="liveQuizSettingsForm" action="{{ url_for('live.create_live_room', quiz_id=quiz.id) }}" method="POST">
+                    <form id="liveQuizSettingsForm" action="" method="POST">
+
                         <div>
                             <!-- Time per Question Setting -->
                             <div class="mb-6">
@@ -78,9 +79,12 @@
                                 <p class="text-xs text-gray-500 mt-2">Set how much time participants will have to answer each question</p>
                             </div>
 
+                            <!-- Hidden input for quiz_id -->
+                            <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+
                             <!-- Create Room Button -->
                             <button type="submit" id="createRoomBtn" class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 transition flex items-center justify-center">
-                                <i class="fas fa-play-circle mr-2"></i> Create Room & Go to Host View
+                                <i class="fas fa-play-circle mr-2"></i>  Go to Host View
                             </button>
                             
                             <!-- Quiz Details Summary -->
