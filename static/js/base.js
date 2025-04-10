@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
     profileElement.addEventListener('click', function(e) {
         if (document.body.classList.contains('sidebar-collapsed')) {
             // If sidebar is collapsed, navigate directly to profile page
-            window.location.href = '/auth/profile';
+            window.location.href = '/auth/update_profile';
             // Prevent any default behavior or bubble
             e.preventDefault();
             e.stopPropagation();
