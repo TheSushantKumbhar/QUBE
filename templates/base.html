@@ -7,6 +7,38 @@
     <script src="https://kit.fontawesome.com/YOUR_KIT_CODE.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/static/css/output.css">
     <title>{% block title %}QUBE{% endblock %}</title>
+    <!-- Critical CSS to apply immediately -->
+    <style>
+        /* Initial state setup - applied before DOM renders */
+        :root {
+            --sidebar-width: 13rem;
+            --content-margin: 13rem;
+        }
+        
+        #sidebar {
+            width: var(--sidebar-width);
+            transition: width 0.15s ease-out;
+            will-change: width;
+        }
+        
+        #main-content {
+            margin-left: var(--content-margin);
+            transition: margin-left 0.15s ease-out;
+            will-change: margin-left;
+        }
+    </style>
+    <!-- Apply initial state -->
+    <script>
+        (function() {
+            // Apply remembered state before page renders
+            const sidebarState = localStorage.getItem('sidebarOpen');
+            if (sidebarState === 'false') {
+                document.documentElement.style.setProperty('--sidebar-width', '4rem');
+                document.documentElement.style.setProperty('--content-margin', '4rem');
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+        })();
+    </script>
     <style>
         /* For WebKit browsers (Chrome, Safari) */
         ::-webkit-scrollbar {
@@ -34,59 +66,350 @@
             scrollbar-color: #6366f1 #e5e7eb;
         }
 
-        /* Hide scrollbar but allow scrolling */
-        /* ::-webkit-scrollbar {
-            overflow: auto;
-            scrollbar-width: none;
-           
+        /* Prevent FOUC but with faster reveal */
+        body {
+            opacity: 0;
+        }
+        
+        body.loaded {
+            opacity: 1;
+            transition: opacity 0.1s ease;
         }
 
-        ::-webkit-scrollbar {
+        /* Styles for the nav items */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.15s ease;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 2rem;
+            flex-shrink: 0;
+        }
+
+        .fa-icon {
+            font-size: 1.25rem;
+        }
+
+        .png-icon {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            transition: width 0.15s ease, height 0.15s ease;
+        }
+
+        /* For collapsed sidebar, center the icons */
+        .sidebar-collapsed .nav-item {
+            justify-content: center;
+            padding: 0.75rem 0;
+        }
+        
+        .sidebar-collapsed .nav-icon {
+            margin: 0 auto;
+            padding: 0;
+        }
+        
+        .sidebar-collapsed .png-icon {
+            margin-right: 0;
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Hide PNG icons by default, can be toggled */
+        .png-icon {
             display: none;
-        } */
+        }
+
+        /* Use this class to show PNG icons and hide Font Awesome icons */
+        .use-png-icons .fa-icon {
+            display: none;
+        }
+        
+        .use-png-icons .png-icon {
+            display: block;
+        }
+
+        /* Logo container */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background-color 0.15s ease;
+        }
+
+        .logo-container:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-image {
+            width: 28px;
+            height: 28px;
+            margin-right: 8px;
+            object-fit: contain;
+            transition: width 0.15s ease, height 0.15s ease;
+        }
+
+        /* For collapsed sidebar - only show logo, not text */
+        .sidebar-collapsed .logo-text {
+            display: none;
+        }
+
+        .sidebar-collapsed .logo-image {
+            margin-right: 0;
+            width: 32px;
+            height: 32px;
+        }
+
+        /* Profile capsule styles */
+        .profile-container {
+            position: absolute;
+            bottom: 1rem;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 30;
+        }
+        
+        .profile-capsule {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 2rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 80%;
+        }
+        
+        .profile-capsule:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .profile-image {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ffffff;
+        }
+        
+        .profile-info {
+            margin-left: 0.75rem;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Drop-up menu styles - now appears on hover */
+        .drop-up {
+            position: absolute;
+            bottom: calc(100% + 8px); /* Position above the profile capsule with gap */
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1), 0 -2px 4px rgba(0, 0, 0, 0.06);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s ease;
+            z-index: 40;
+            overflow: hidden;
+            color: #1f2937;
+        }
+        
+        .profile-capsule:hover .drop-up {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .drop-up-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            transition: background-color 0.15s ease;
+        }
+        
+        .drop-up-item:hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Dark mode styles for drop-up */
+        .dark .drop-up {
+            background-color: #1f2937;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.3), 0 -2px 4px rgba(0, 0, 0, 0.2);
+            color: #f3f4f6;
+        }
+        
+        .dark .drop-up-item:hover {
+            background-color: #374151;
+        }
+        
+        /* For collapsed sidebar */
+        .sidebar-collapsed .profile-info {
+            display: none;
+        }
+        
+        .sidebar-collapsed .profile-capsule {
+            width: auto;
+            padding: 0.25rem;
+        }
+        
+        .sidebar-collapsed .drop-up {
+            width: 12rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+        }
+        
+        .sidebar-collapsed .profile-capsule:hover .drop-up {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Dark mode toggle in dropdown */
+        .dark-toggle-container {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+        }
+        
+        .dark-toggle-container:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .dark .dark-toggle-container:hover {
+            background-color: #374151;
+        }
     </style>
 </head>
 
-<body class="flex bg-indigo-700">
-
+<body class="flex bg-indigo-700 dark:bg-black">
     <!-- Sidebar -->
     <nav id="sidebar"
-        class="bg-indigo-700 h-screen shadow-md fixed left-0 top-0 flex flex-col transition-all duration-300 z-10 overflow-hidden"
-        style="width: 13rem;">
+        class="bg-indigo-700 dark:bg-black h-screen shadow-md fixed left-0 top-0 flex flex-col z-10 overflow-hidden use-png-icons">
         <div class="p-6 flex flex-col w-full">
             <!-- Logo and Toggle Button Row -->
-            <div class="flex items-center justify-between">
-                <a href="/" class="mt-5 text-2xl font-bold text-white" id="logo">Q U B E</a>
-                <!-- button -->
-                <button id="sidebar-toggle" class="text-white bg-indigo-600 p-2 rounded-md hover:bg-indigo-800">
-                    <i class="fas fa-bars"></i>
-                </button>
+            <div class="flex items-center justify-center">
+                <!-- Logo as button -->
+                <div id="logo-button" class="logo-container">
+                    <img src="/static/images/cube.png" class="logo-image" alt="QUBE Logo">
+                    <span class="logo-text text-2xl font-bold text-white">Q U B E</span>
+                </div>
             </div>
 
             <!-- Navigation Links -->
-            <div class="mt-12 flex flex-col space-y-6 w-full">
-                <a href="/" class="flex items-center text-white hover:text-blue-500"><i class="fas fa-home mr-3"></i>
-                    <span class="nav-text">Home</span></a>
-                <a href="{{ url_for('quiz.explore_quizzes')}}"
-                    class="flex items-center text-white hover:text-blue-600"><i class="fas fa-search mr-3"></i> <span
-                        class="nav-text">Explore</span></a>
-                <a href="{{url_for('live.live_home')}}" class="flex items-center text-white hover:text-blue-600"><i
-                        class="fas fa-bolt mr-3"></i> <span class="nav-text">Live</span></a>
-                <a href="{{ url_for('quiz.quiz_categories')}}"
-                    class="flex items-center text-white hover:text-blue-600"><i class="fas fa-plus-circle mr-3"></i>
-                    <span class="nav-text">Create Quiz</span></a>
-                <a href="/analytics" class="flex items-center text-white hover:text-blue-600"><i
-                        class="fas fa-chart-bar mr-3"></i> <span class="nav-text">Analytics</span></a>
+            <div class="mt-12 flex flex-col space-y-3 w-full">
+                <a href="/" class="nav-item text-white hover:text-blue-500">
+                    <span class="nav-icon">
+                        <i class="fa-icon fas fa-home"></i>
+                        <img src="/static/images/home2.png" class="png-icon" alt="Home">
+                    </span>
+                    <span class="nav-text ml-3">Home</span>
+                </a>
+                <a href="{{ url_for('quiz.explore_quizzes')}}" class="nav-item text-white hover:text-blue-600">
+                    <span class="nav-icon">
+                        <i class="fa-icon fas fa-search"></i>
+                        <img src="/static/images/explore.png" class="png-icon" alt="Explore">
+                    </span>
+                    <span class="nav-text ml-3">Explore</span>
+                </a>
+                <a href="{{url_for('live.live_home')}}" class="nav-item text-white hover:text-blue-600">
+                    <span class="nav-icon">
+                        <i class="fa-icon fas fa-bolt"></i>
+                        <img src="/static/images/live.png" class="png-icon" alt="Live">
+                    </span>
+                    <span class="nav-text ml-3">Live</span>
+                </a>
+                <a href="{{ url_for('quiz.quiz_categories')}}" class="nav-item text-white hover:text-blue-600">
+                    <span class="nav-icon">
+                        <i class="fa-icon fas fa-plus-circle"></i>
+                        <img src="/static/images/icons/create.png" class="png-icon" alt="Create Quiz">
+                    </span>
+                    <span class="nav-text ml-3">Create Quiz</span>
+                </a>
+                <a href="/analytics" class="nav-item text-white hover:text-blue-600">
+                    <span class="nav-icon">
+                        <i class="fa-icon fas fa-chart-bar"></i>
+                        <img src="/static/images/icons/analytics.png" class="png-icon" alt="Analytics">
+                    </span>
+                    <span class="nav-text ml-3">Analytics</span>
+                </a>
+            </div>
+            
+            <!-- Profile Capsule Container -->
+            <div class="profile-container">
+                <div class="profile-capsule">
+                    <img src="/static/images/default-profile.jpg" alt="Profile" class="profile-image">
+                    <div class="profile-info">
+                        <div class="font-medium">John Doe</div>
+                        <div class="text-xs text-gray-300">Premium User</div>
+                    </div>
+                
+                    <!-- Drop-up Menu - Now a direct child of profile-capsule -->
+                    <div class="drop-up">
+                        <a href="/profile" class="drop-up-item">
+                            <i class="fas fa-user-circle mr-3"></i>
+                            <span>My Profile</span>
+                        </a>
+                        <a href="/settings" class="drop-up-item">
+                            <i class="fas fa-cog mr-3"></i>
+                            <span>Settings</span>
+                        </a>
+                        <div class="dark-toggle-container">
+                            <i class="fas fa-moon mr-3"></i>
+                            <span>Dark Mode</span>
+                            <div class="ml-auto">
+                                <button id="dark-toggle"
+                                    class="flex items-center justify-center w-10 h-10 rounded-full focus:outline-none bg-gray-200 dark:bg-gray-700 transition-colors">
+                                    <!-- Sun icon (shows in dark mode) -->
+                                    <svg id="sun-icon" class="hidden dark:block w-6 h-6 text-yellow-400" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                                        </path>
+                                    </svg>
+                                    <!-- Moon icon (shows in light mode) -->
+                                    <svg id="moon-icon" class="block dark:hidden w-6 h-6 text-gray-800" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <a href="/logout" class="drop-up-item text-red-500">
+                            <i class="fas fa-sign-out-alt mr-3"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content Wrapper -->
-    <div id="main-content" class="transition-all duration-300 w-full" style="margin-left: 13rem;">
-
+    <div id="main-content" class="w-full">
         <!-- White Content Container -->
         <div id="content-container"
-            class="bg-gray-100 rounded-2xl mt-3 mr-3 mb-3  h-95vh overflow-auto shadow-lg transition-all duration-300">
+            class="bg-gray-100 rounded-2xl mt-3 mr-3 mb-3 h-95vh overflow-auto shadow-lg">
             <!-- Page Content (Dynamic Section) -->
             <div class="p-6">
                 {% block content %}
@@ -95,45 +418,103 @@
             </div>
         </div>
     </div>
-
-    <!-- <script src="/static/js/loading.js"></script> -->
+    <script src="/static/js/darkMode.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        // Set state immediately before any rendering
+        (function() {
+            const sidebarState = localStorage.getItem('sidebarOpen');
+            if (sidebarState === 'false') {
+                // Don't use DOM methods here, use classList on documentElement
+                const navTexts = document.getElementsByClassName('nav-text');
+                for (let i = 0; i < navTexts.length; i++) {
+                    navTexts[i].style.display = 'none';
+                }
+                
+                // Make sure the logo image is visible but text is hidden in collapsed state
+                const logoText = document.querySelector('.logo-text');
+                if (logoText) {
+                    logoText.style.display = 'none';
+                }
+            }
+        })();
+
+        // Main initialization - keep this minimal for fast loading
+        document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('main-content');
             const contentContainer = document.getElementById('content-container');
-            const toggleBtn = document.getElementById('sidebar-toggle');
-            const logo = document.getElementById('logo');
+            const logoBtn = document.getElementById('logo-button');
             const navTexts = document.querySelectorAll('.nav-text');
-            let sidebarOpen = true;
-
-            // Use CSS-based sizing instead of JavaScript calculations
-            // This single line will replace the adjustContainerSize function
+            const logoImage = document.querySelector('.logo-image');
+            const logoText = document.querySelector('.logo-text');
+            
+            // Use localStorage to remember sidebar state
+            let sidebarOpen = localStorage.getItem('sidebarOpen') !== 'false';
+            
+            // Set content container height
             contentContainer.style.height = 'calc(100vh - 24px)';
 
-            toggleBtn.addEventListener('click', function () {
+            // Function to toggle sidebar with optimized performance
+            function toggleSidebar() {
+                sidebarOpen = !sidebarOpen;
+                localStorage.setItem('sidebarOpen', sidebarOpen);
+                
                 if (sidebarOpen) {
-                    // Collapse sidebar
-                    sidebar.style.width = '4rem';
-                    mainContent.style.marginLeft = '4rem';
-
-                    // Hide text elements
-                    logo.style.display = 'none';
+                    // Expand sidebar
+                    document.documentElement.style.setProperty('--sidebar-width', '13rem');
+                    document.documentElement.style.setProperty('--content-margin', '13rem');
+                    document.documentElement.classList.remove('sidebar-collapsed');
+                    sidebar.classList.remove('sidebar-collapsed');
+                    
+                    // Show logo image and text
+                    logoImage.style.display = 'block';
+                    logoText.style.display = 'block';
+                    
+                    // Slight delay to show text after width change starts
+                    setTimeout(() => {
+                        navTexts.forEach(text => {
+                            text.style.display = 'inline';
+                        });
+                    }, 50);
+                } else {
+                    // Hide text first for smoother transition
                     navTexts.forEach(text => {
                         text.style.display = 'none';
                     });
-                } else {
-                    // Expand sidebar
-                    sidebar.style.width = '13rem';
-                    mainContent.style.marginLeft = '13rem';
-
-                    // Show text elements
-                    logo.style.display = 'block';
-                    navTexts.forEach(text => {
-                        text.style.display = 'inline';
-                    });
+                    
+                    // Ensure logo image stays visible but hide text
+                    logoImage.style.display = 'block';
+                    logoText.style.display = 'none';
+                    
+                    // Immediately start width transition
+                    document.documentElement.style.setProperty('--sidebar-width', '4rem');
+                    document.documentElement.style.setProperty('--content-margin', '4rem');
+                    document.documentElement.classList.add('sidebar-collapsed');
+                    sidebar.classList.add('sidebar-collapsed');
                 }
-                sidebarOpen = !sidebarOpen;
+            }
+
+            // Add event listener to logo button
+            logoBtn.addEventListener('click', toggleSidebar);
+            
+            // Preload images for faster rendering
+            function preloadImages() {
+                const images = document.querySelectorAll('img');
+                for (let img of images) {
+                    const src = img.getAttribute('src');
+                    if (src) {
+                        const newImg = new Image();
+                        newImg.src = src;
+                    }
+                }
+            }
+            
+            // Preload images
+            preloadImages();
+            
+            // Show page once everything is initialized (faster fade-in)
+            requestAnimationFrame(() => {
+                document.body.classList.add('loaded');
             });
         });
     </script>
