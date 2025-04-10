@@ -10,12 +10,7 @@
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 min-h-full transition-colors duration-300">
     <div class="container mx-auto px-4 py-4">
-        <div class="flex justify-end mb-4">
-            <button id="theme-toggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700">
-                <i class="fas fa-sun text-yellow-500 dark:hidden"></i>
-                <i class="fas fa-moon text-blue-300 hidden dark:block"></i>
-            </button>
-        </div>
+       
         
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
             <div class="bg-blue-600 dark:bg-blue-800 text-white p-4">
@@ -166,6 +161,7 @@
         </div>
     </div>
     
+    <script src="{{ url_for('static', filename='js/darkmode.js') }}"></script>
     <script src="/static/js/QuizResults.js"></script>
 </body>
 </html>
