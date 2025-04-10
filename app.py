@@ -24,7 +24,6 @@ app.config["SECRET_KEY"] = "your_secret_key_here"
 db.init_app(app)
 migrate.init_app(app, db) 
 
-
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(quiz_bp, url_prefix='/quiz')
 from liveQuiz.routes import live
@@ -36,24 +35,34 @@ create_database(app)
 def home():
     return render_template('Homepage/index.html',username=session.get('user'))
 
-def keep_db_alive():
-    with app.app_context():
-        try:
-            db.session.execute('SELECT 1')  # Lightweight dummy query
-            db.session.commit()
-            print("DB keep-alive successful.")
-        except Exception as e:
-            db.session.rollback()
-            print("DB keep-alive error:", str(e))
+@app.context_processor
+def inject_current_user():
+    from utils.auth_helpers import get_current_user
+    return dict(current_user=get_current_user())
 
-# ---- SCHEDULER SETUP ----
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=keep_db_alive, trigger="interval", minutes=4)
-scheduler.start()
 
-# Shut down the scheduler when exiting the app
-import atexit
-atexit.register(lambda: scheduler.shutdown())
+# def keep_db_alive():
+#     with app.app_context():
+#         try:
+#             db.session.execute('SELECT 1')  # Lightweight dummy query
+#             db.session.commit()
+#             print("DB keep-alive successful.")
+#         except Exception as e:
+#             db.session.rollback()
+#             print("DB keep-alive error:", str(e))
+
+# # ---- SCHEDULER SETUP ----
+# def start_scheduler():
+#     scheduler = BackgroundScheduler(daemon=True)
+#     scheduler.add_job(func=keep_db_alive, trigger="interval", minutes=4)
+#     scheduler.start()
+#     return scheduler
+
+# scheduler = start_scheduler()
+
+# # Shut down the scheduler when exiting the app
+# import atexit
+# atexit.register(lambda: scheduler.shutdown())
 
 
 if __name__ == '__main__':
