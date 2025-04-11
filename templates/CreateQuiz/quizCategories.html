@@ -2,100 +2,100 @@
 content %}
 
 <div class="w-full">
-        <!-- Flash messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %} {% if
-        messages %}
-        <div class="p-4">
-            {% for category, message in messages %}
-            <div
-                class="p-4 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-800{% elif category == 'danger' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
-                {{ message }}
-            </div>
-            {% endfor %}
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div class="p-4">
+        {% for category, message in messages %}
+        <div
+            class="p-4 mb-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-800{% elif category == 'danger' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+            {{ message }}
         </div>
-        {% endif %} {% endwith %}
+        {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
 
-        <div id="page1">
-            <div
-                class="border bg-indigo-700 rounded-xl mx-3 flex flex-row justify-between items-center gap-44 py-2 shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:shadow-xl opacity-0 translate-y-5 animate-fade-in">
+    <div id="page1">
+        <div
+            class="border bg-indigo-700 dark:bg-gray-900 dark:border-gray-900 rounded-xl mx-3 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-44 py-4 md:py-2 shadow-md transform transition duration-300 ease-in-out hover:scale-105 hover:shadow-xl opacity-0 translate-y-5 animate-fade-in">
 
-                <div class="flex flex-col items-start ml-12">
-                    <h2 class="text-3xl text-white font-bold text-center">
-                        Welcome to Create Quiz
-                    </h2>
-                    <p class="text-center text-xl text-white mt-3">
-                        Create interactive quizzes with images and different question types
-                    </p>
-                </div>
-                <div class="ml-10 flex flex-col items-end">
-                    <img src="{{ url_for('static', filename='images/qube1.gif') }}" alt="Quiz Icon"
-                        class="h-40 w-40 mr-8">
-                </div>
+            <div class="flex flex-col items-start md:ml-12 px-4 md:px-0">
+                <h2 class="text-2xl md:text-3xl text-white font-bold text-center">
+                    Welcome to Create Quiz
+                </h2>
+                <p class="text-center text-lg md:text-xl text-white mt-3">
+                    Create interactive quizzes with images and different question types
+                </p>
             </div>
-
-            <!-- Four horizontal boxes with animations -->
-            <div class="flex flex-wrap justify-center gap-10 mt-6 ">
-                <!-- Box 1 -->
-                <div
-                    class="w-64 p-6 h-[50vh] bg-indigo-200 rounded-lg shadow-md text-center flex flex-col items-center transform transition duration-300 ease-in-out hover:scale-105 hover:shadow-xl opacity-0 translate-y-5 animate-fade-in">
-                    <img src="{{ url_for('static', filename='images/ManualQuiz.jpg') }}" alt="Manual Quiz"
-                        class="w-56 h-32 mb-4 object-cover rounded-md" />
-                    <h3 class="text-lg font-semibold">Manual Quiz</h3>
-                    <p class="text-gray-600 mt-2">
-                        Create Quiz manually by typing questions and options.
-                    </p>
-                    <a href="{{ url_for('quiz.create_quiz_page') }}"
-                        class="mt-6 bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700 transition">
-                        Open
-                    </a>
-                </div>
-
-                <!-- Box 2 -->
-                <div
-                    class="w-64 p-6 bg-indigo-200 rounded-lg shadow-md text-center flex flex-col items-center transform transition duration-300 ease-in-out hover:scale-105 hover:shadow-xl opacity-0 translate-y-5 animate-fade-in">
-                    <img src="{{ url_for('static', filename='images/ManualQuiz.jpg') }}" alt="Manual Quiz"
-                        class="w-56 h-32 mb-4 object-cover rounded-md" />
-                    <h3 class="text-lg font-semibold">Generate with AI</h3>
-                    <p class="text-gray-600 mt-2">
-                        Generate Quiz with AI prompts with clear instructions.
-                    </p>
-                    <a href="{{ url_for('quiz.create_quiz_page') }}"
-                        class="mt-6 bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700 transition">
-                        Open
-                    </a>
-                </div>
-
-                <!-- Box 3 -->
-                <div
-                    class="w-64 p-6 bg-indigo-200 rounded-lg shadow-md text-center flex flex-col items-center transform transition duration-300 ease-in-out hover:scale-105 hover:shadow-xl opacity-0 translate-y-5 animate-fade-in">
-                    <img src="{{ url_for('static', filename='images/ManualQuiz.jpg') }}" alt="Manual Quiz"
-                        class="w-56 h-32 mb-4 object-cover rounded-md" />
-                    <h3 class="text-lg font-semibold">Generate with Notes</h3>
-                    <p class="text-gray-600 mt-2">
-                        Upload your notes pdf and generate questions with help of AI with clear prompts.
-                    </p>
-                    <a href="{{ url_for('quiz.create_quiz_page') }}"
-                        class="mt-6 bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700 transition">
-                        Open
-                    </a>
-                </div>
-
-                <!-- Box 4 -->
-                <div
-                    class="w-64 p-6 bg-indigo-200 rounded-lg shadow-md text-center flex flex-col items-center transform transition duration-300 ease-in-out hover:scale-105 hover:shadow-xl opacity-0 translate-y-5 animate-fade-in">
-                    <img src="{{ url_for('static', filename='images/MyQuiz.jpg') }}" alt="My Quizzes"
-                        class="w-56 h-32 mb-4 object-cover rounded-md" />
-                    <h3 class="text-lg font-semibold">My quizzes</h3>
-                    <p class="text-gray-600 mt-2">
-                        See your created quizzes here with one click this is just preview of your quizzes .
-                    </p>
-                    <a href="{{url_for('quiz.my_quizzes')}}"
-                        class="mt-6 bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700 transition">
-                        Open
-                    </a>
-                </div>
+            <div class="mt-4 md:mt-0 md:ml-10 flex flex-col items-end">
+                <img src="{{ url_for('static', filename='images/qube1.gif') }}" alt="Quiz Icon"
+                    class="h-32 w-32 md:h-40 md:w-40 md:mr-8">
             </div>
         </div>
+
+        <!-- Four horizontal boxes with animations -->
+        <div class="flex flex-wrap justify-center gap-6 md:gap-10 mt-6 px-4 md:px-0">
+            <!-- Box 1 -->
+            <div
+                class="w-full sm:w-72 md:w-64 p-4 md:p-6 h-auto md:h-[50vh] bg-indigo-200 dark:bg-zinc-700 rounded-lg shadow-md text-center flex flex-col items-center transform transition duration-300 ease-in-out hover:scale-105 hover:shadow-xl opacity-0 translate-y-5 animate-fade-in">
+                <img src="{{ url_for('static', filename='images/ManualQuiz.jpg') }}" alt="Manual Quiz"
+                    class="w-56 h-32 mb-4 object-cover rounded-md" />
+                <h3 class="text-lg font-semibold dark:text-indigo-100">Manual Quiz</h3>
+                <p class="text-gray-600 mt-2 dark:text-zinc-400">
+                    Create Quiz manually by typing questions and options.
+                </p>
+                <a href="{{ url_for('quiz.create_quiz_page') }}"
+                    class="mt-6 bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700 dark:bg-zinc-900 dark:hover:bg-zinc-600 transition">
+                    Open
+                </a>
+            </div>
+
+            <!-- Box 2 -->
+            <div
+                class="w-full sm:w-72 md:w-64 p-4 md:p-6 bg-indigo-200 dark:bg-zinc-700 rounded-lg shadow-md text-center flex flex-col items-center transform transition duration-300 ease-in-out hover:scale-105 hover:shadow-xl opacity-0 translate-y-5 animate-fade-in">
+                <img src="{{ url_for('static', filename='images/ManualQuiz.jpg') }}" alt="Manual Quiz"
+                    class="w-56 h-32 mb-4 object-cover rounded-md" />
+                <h3 class="text-lg font-semibold  dark:text-indigo-100">Generate with AI</h3>
+                <p class="text-gray-600 mt-2 dark:text-zinc-400">
+                    Generate Quiz with AI prompts with clear instructions.
+                </p>
+                <a href="{{ url_for('quiz.create_quiz_page') }}"
+                    class="mt-6 bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700  dark:bg-zinc-900 dark:hover:bg-zinc-600 transition">
+                    Open
+                </a>
+            </div>
+
+            <!-- Box 3 -->
+            <div
+                class="w-full sm:w-72 md:w-64 p-4 md:p-6 bg-indigo-200  dark:bg-zinc-700 rounded-lg shadow-md text-center flex flex-col items-center transform transition duration-300 ease-in-out hover:scale-105 hover:shadow-xl opacity-0 translate-y-5 animate-fade-in">
+                <img src="{{ url_for('static', filename='images/ManualQuiz.jpg') }}" alt="Manual Quiz"
+                    class="w-56 h-32 mb-4 object-cover rounded-md" />
+                <h3 class="text-lg font-semibol dark:text-indigo-100">Generate with Notes</h3>
+                <p class="text-gray-600 mt-2  dark:text-zinc-400">
+                    Upload your notes pdf and generate questions with help of AI with clear prompts.
+                </p>
+                <a href="{{ url_for('quiz.create_quiz_page') }}"
+                    class="mt-6 bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700  dark:bg-zinc-900 dark:hover:bg-zinc-600 transition">
+                    Open
+                </a>
+            </div>
+
+            <!-- Box 4 -->
+            <div
+                class="w-full sm:w-72 md:w-64 p-4 md:p-6 bg-indigo-200 dark:bg-zinc-700 rounded-lg shadow-md text-center flex flex-col items-center transform transition duration-300 ease-in-out hover:scale-105 hover:shadow-xl opacity-0 translate-y-5 animate-fade-in">
+                <img src="{{ url_for('static', filename='images/MyQuiz.jpg') }}" alt="My Quizzes"
+                    class="w-56 h-32 mb-4 object-cover rounded-md" />
+                <h3 class="text-lg font-semibold dark:text-indigo-100">My quizzes</h3>
+                <p class="text-gray-600 mt-2 dark:text-zinc-400">
+                    See your created quizzes here with one click this is just preview of your quizzes .
+                </p>
+                <a href="{{url_for('quiz.my_quizzes')}}"
+                    class="mt-6 bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-700 dark:bg-zinc-900 dark:hover:bg-zinc-600 transition">
+                    Open
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Tailwind CSS Animations -->
