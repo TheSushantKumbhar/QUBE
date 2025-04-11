@@ -1,56 +1,130 @@
 {% extends 'base.html' %}
 {% block title %}Host Room{% endblock %}
 {% block content %}
-<div class="max-w-3xl mx-auto mt-12">
-    <h2 class="text-2xl font-bold mb-4">Host Live Quiz</h2>
-
-    <div id="setupSection">
-        <label for="quiz" class="block text-gray-700 mb-2">Select Quiz</label>
-        <select id="quiz" class="w-full p-2 border rounded mb-4">
-            {% for quiz in quizzes %}
-            <option value="{{ quiz.id }}">{{ quiz.title }}</option>
-            {% endfor %}
-        </select>
-
-        <label for="room_code" class="block text-gray-700 mb-2">Enter Room Code</label>
-        <input type="text" id="room_code" class="w-full p-2 border rounded mb-4">
-
-        <button id="createRoom" class="bg-indigo-600 text-white px-4 py-2 rounded">Create Room</button>
+<div class="max-w-4xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-indigo-800 dark:text-indigo-300">Host Live Quiz</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Create a room and invite participants to join your quiz</p>
     </div>
-
-    <div id="roomSection" class="hidden mt-6">
-        <p class="text-lg font-semibold">Room Code: <span id="displayRoomCode"></span></p>
-        <button id="startQuiz" class="mt-4 bg-green-600 text-white px-4 py-2 rounded">Start Quiz</button>
-        <button id="endQuiz" class="mt-2 bg-red-600 text-white px-4 py-2 rounded">End Quiz</button>
-        <button id="endRoom" class="mt-2 bg-red-800 text-white px-4 py-2 rounded">Close Room</button>
-    </div>
-
-    <div id="participantsSection" class="mt-4">
-        <h3 class="font-semibold mb-2">Participants:</h3>
-        <ul id="participantList" class="list-disc list-inside"></ul>
-    </div>
-
-    <!-- New question display section -->
-    <div id="questionSection" class="hidden mt-6 p-4 border rounded bg-gray-50">
-        <h3 class="text-xl font-bold mb-2">Current Question</h3>
-        <div id="questionDisplay" class="mb-4">
-            <p id="questionText" class="text-lg mb-2"></p>
-            <div id="optionsDisplay" class="ml-4"></div>
+    
+    <!-- Setup Section -->
+    <div id="setupSection" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4 text-indigo-700 dark:text-indigo-300">Room Setup</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="quiz" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">Select Quiz</label>
+                <select id="quiz" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white">
+                    {% for quiz in quizzes %}
+                    <option value="{{ quiz.id }}">{{ quiz.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="room_code" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">Room Code</label>
+                <input type="text" id="room_code" placeholder="Enter a unique room code" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white">
+            </div>
+            
+            <div>
+                <label for="question_timer" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">Question Timer (seconds)</label>
+                <input type="number" id="question_timer" value="30" min="5" max="300" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white">
+            </div>
+            
+            <div class="flex items-end">
+                <button id="createRoom" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg flex items-center justify-center w-full md:w-auto transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Create Room
+                </button>
+            </div>
         </div>
-        <div id="timerDisplay" class="text-right font-semibold">Time left: <span id="timeLeft">30</span>s</div>
     </div>
 
-    <!-- Leaderboard section -->
-    <div id="leaderboardSection" class="mt-6">
-        <h3 class="font-semibold mb-2">Leaderboard:</h3>
-        <ul id="leaderboardList" class="list-disc list-inside"></ul>
+    <!-- Room Control Section -->
+    <div id="roomSection" class="hidden bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-indigo-700 dark:text-indigo-300">Room Controls</h2>
+            <div class="flex items-center">
+                <span class="text-gray-700 dark:text-gray-300 mr-2">Room Code:</span>
+                <span id="displayRoomCode" class="bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-3 py-1 rounded-md font-mono font-bold cursor-pointer hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors" title="Click to copy"></span>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="col-span-1">
+                <label for="current_question_timer" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">Question Timer (seconds)</label>
+                <input type="number" id="current_question_timer" value="30" min="5" max="300" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white">
+            </div>
+            
+            <div class="col-span-2 flex items-end space-x-3">
+                <button id="startQuiz" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-3 rounded-lg flex items-center justify-center flex-1 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Start Quiz
+                </button>
+                <button id="endQuiz" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-3 rounded-lg flex items-center justify-center flex-1 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="9" y1="9" x2="15" y2="15"/>
+                        <line x1="15" y1="9" x2="9" y2="15"/>
+                    </svg>
+                    End Quiz
+                </button>
+                <button id="endRoom" class="bg-red-800 hover:bg-red-900 text-white font-semibold px-4 py-3 rounded-lg flex items-center justify-center flex-1 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                    Close Room
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Section with Grid Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Current Question Section -->
+        <div id="questionSection" class="hidden bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-indigo-600 dark:bg-indigo-800 p-3 text-white flex justify-between items-center">
+                <h3 class="font-bold">Current Question</h3>
+                <div id="timerDisplay" class="bg-white text-indigo-800 dark:bg-gray-900 dark:text-indigo-200 px-3 py-1 rounded-full font-mono">
+                    Time left: <span id="timeLeft" class="font-bold">30</span>s
+                </div>
+            </div>
+            <div class="p-4">
+                <p id="questionText" class="text-lg font-medium text-gray-900 dark:text-white mb-4"></p>
+                <div id="optionsDisplay" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- Participants Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-indigo-600 dark:bg-indigo-800 p-3 text-white">
+                <h3 class="font-bold">Participants</h3>
+            </div>
+            <div class="p-4 max-h-64 overflow-y-auto">
+                <ul id="participantList" class="divide-y divide-gray-200 dark:divide-gray-700"></ul>
+            </div>
+        </div>
+
+        <!-- Leaderboard Section - Full Width -->
+        <div class="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-indigo-600 dark:bg-indigo-800 p-3 text-white">
+                <h3 class="font-bold">Leaderboard</h3>
+            </div>
+            <div class="p-4 max-h-80 overflow-y-auto">
+                <ul id="leaderboardList" class="divide-y divide-gray-200 dark:divide-gray-700"></ul>
+            </div>
+        </div>
     </div>
 </div>
 
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 
 <script>
-    // For hostView.html - Improve host view:
     const socket = io();
     const createRoomBtn = document.getElementById('createRoom');
     const startQuizBtn = document.getElementById('startQuiz');
@@ -72,10 +146,16 @@
         }
 
         const quizId = document.getElementById('quiz').value;
+        const questionTimer = document.getElementById('question_timer').value;
+        
+        // Copy the initial timer value to the room section
+        document.getElementById('current_question_timer').value = questionTimer;
+        
         socket.emit('create_room', {
             room_code: roomCode,
             quiz_id: quizId,
-            host_id: '{{ current_user.id }}'
+            host_id: '{{ current_user.id }}',
+            question_timer: parseInt(questionTimer)
         });
     };
 
@@ -91,8 +171,8 @@
         optionsDisplay.innerHTML = '';
         data.options.forEach((option, index) => {
             const div = document.createElement('div');
-            div.className = 'mb-2 p-2 border-l-4 border-indigo-500 bg-indigo-50';
-            div.innerHTML = `<span class="font-medium">${index + 1}.</span> ${option}`;
+            div.className = 'mb-3 p-3 border-l-4 border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-400 rounded-r-lg';
+            div.innerHTML = `<span class="inline-flex items-center justify-center w-6 h-6 mr-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-full font-medium">${index + 1}</span> ${option}`;
             optionsDisplay.appendChild(div);
         });
 
@@ -110,6 +190,17 @@
             const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
 
             timeLeft.innerText = remaining;
+            
+            // Add color changes for timer
+            if (remaining <= 5) {
+                timeLeft.parentElement.classList.add('bg-red-600');
+                timeLeft.parentElement.classList.remove('bg-white', 'bg-yellow-400', 'text-indigo-800');
+                timeLeft.parentElement.classList.add('text-white');
+            } else if (remaining <= 10) {
+                timeLeft.parentElement.classList.add('bg-yellow-400');
+                timeLeft.parentElement.classList.remove('bg-white', 'bg-red-600', 'text-indigo-800');
+                timeLeft.parentElement.classList.add('text-black');
+            }
 
             if (remaining <= 0) {
                 clearInterval(window.hostTimer);
@@ -123,15 +214,33 @@
         setupSection.classList.add('hidden');
 
         // Add copy button functionality
-        const roomCodeSpan = document.getElementById('displayRoomCode');
-        roomCodeSpan.addEventListener('click', () => {
-            navigator.clipboard.writeText(roomCodeSpan.innerText)
+        displayRoomCode.addEventListener('click', () => {
+            navigator.clipboard.writeText(displayRoomCode.innerText)
                 .then(() => {
-                    alert('Room code copied to clipboard!');
+                    // Visual feedback for copy
+                    const originalBg = displayRoomCode.classList.contains('bg-indigo-100') ? 'bg-indigo-100' : 'bg-indigo-900';
+                    displayRoomCode.classList.remove(originalBg);
+                    displayRoomCode.classList.add('bg-green-100', 'dark:bg-green-900', 'text-green-800', 'dark:text-green-200');
+                    
+                    setTimeout(() => {
+                        displayRoomCode.classList.remove('bg-green-100', 'dark:bg-green-900', 'text-green-800', 'dark:text-green-200');
+                        displayRoomCode.classList.add(originalBg);
+                    }, 1000);
+                    
+                    // Toast notification instead of alert
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-300';
+                    toast.textContent = 'Room code copied to clipboard!';
+                    document.body.appendChild(toast);
+                    
+                    setTimeout(() => {
+                        toast.classList.add('opacity-0');
+                        setTimeout(() => document.body.removeChild(toast), 300);
+                    }, 2000);
                 });
         });
-        roomCodeSpan.title = 'Click to copy';
-        roomCodeSpan.style.cursor = 'pointer';
+        displayRoomCode.title = 'Click to copy';
+        displayRoomCode.classList.add('cursor-pointer');
     });
 
     startQuizBtn.onclick = () => {
@@ -141,7 +250,13 @@
             }
         }
 
-        socket.emit('start_quiz', { room_code: displayRoomCode.innerText });
+        // Get the current timer value
+        const questionTimer = document.getElementById('current_question_timer').value;
+        
+        socket.emit('start_quiz', { 
+            room_code: displayRoomCode.innerText,
+            question_timer: parseInt(questionTimer)
+        });
         startQuizBtn.disabled = true;
         setTimeout(() => { startQuizBtn.disabled = false; }, 2000); // Prevent double-clicks
     };
@@ -162,17 +277,34 @@
     socket.on('update_participants', data => {
         const list = document.getElementById('participantList');
         list.innerHTML = '';
-        data.participants.forEach(username => {
-            const li = document.createElement('li');
-            li.textContent = username;
-            list.appendChild(li);
-        });
+        
+        if (data.participants.length === 0) {
+            const emptyState = document.createElement('li');
+            emptyState.className = 'py-3 px-2 text-gray-500 dark:text-gray-400 text-center italic';
+            emptyState.textContent = 'No participants have joined yet';
+            list.appendChild(emptyState);
+        } else {
+            data.participants.forEach((username, index) => {
+                const li = document.createElement('li');
+                li.className = 'py-3 px-2 flex items-center';
+                li.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mr-3">
+                            <span class="text-indigo-600 dark:text-indigo-300 font-medium">${index + 1}</span>
+                        </div>
+                        <span class="text-gray-900 dark:text-white">${username}</span>
+                    </div>`;
+                list.appendChild(li);
+            });
+        }
 
         // Update start button based on participant count
         if (data.participants.length > 0) {
             startQuizBtn.disabled = false;
+            startQuizBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         } else {
             startQuizBtn.disabled = true;
+            startQuizBtn.classList.add('opacity-50', 'cursor-not-allowed');
         }
     });
 
@@ -184,16 +316,48 @@
         const scores = Object.entries(data).map(([name, score]) => ({ name, score }));
         scores.sort((a, b) => b.score - a.score);
 
-        scores.forEach((entry, index) => {
-            const li = document.createElement('li');
-            li.className = index === 0 ? 'text-green-600 font-semibold' : '';
-            li.textContent = `${entry.name}: ${entry.score} points`;
-            list.appendChild(li);
-        });
+        if (scores.length === 0) {
+            const emptyState = document.createElement('li');
+            emptyState.className = 'py-3 px-2 text-gray-500 dark:text-gray-400 text-center italic';
+            emptyState.textContent = 'No scores to display yet';
+            list.appendChild(emptyState);
+        } else {
+            scores.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.className = 'py-3 px-2 flex items-center justify-between';
+                
+                // Create medal icons for top 3
+                let medalIcon = '';
+                if (index === 0) {
+                    medalIcon = '<svg class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-3a5 5 0 100-10 5 5 0 000 10z" clip-rule="evenodd"></path></svg>';
+                } else if (index === 1) {
+                    medalIcon = '<svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-3a5 5 0 100-10 5 5 0 000 10z" clip-rule="evenodd"></path></svg>';
+                } else if (index === 2) {
+                    medalIcon = '<svg class="w-6 h-6 text-yellow-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-3a5 5 0 100-10 5 5 0 000 10z" clip-rule="evenodd"></path></svg>';
+                }
+                
+                li.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-8 text-center mr-3 font-semibold ${index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-400' : index === 2 ? 'text-yellow-700' : 'text-gray-700 dark:text-gray-300'}">${index + 1}</div>
+                        <div class="mr-2">${medalIcon}</div>
+                        <span class="text-gray-900 dark:text-white font-medium">${entry.name}</span>
+                    </div>
+                    <div class="bg-indigo-100 dark:bg-indigo-900 px-3 py-1 rounded-full text-indigo-800 dark:text-indigo-200 font-semibold">${entry.score} pts</div>
+                `;
+                list.appendChild(li);
+            });
+        }
     });
 
     socket.on('quiz_ended', data => {
-        alert("Quiz has ended!");
+        // Replace alert with toast notification
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-indigo-600 text-white px-4 py-2 rounded shadow-lg';
+        toast.innerHTML = '<strong>Quiz Ended!</strong> Final results are now displayed.';
+        document.body.appendChild(toast);
+        
+        setTimeout(() => document.body.removeChild(toast), 3000);
+        
         questionSection.classList.add('hidden');
         quizInProgress = false;
 
@@ -203,15 +367,42 @@
 
         // Display final leaderboard
         const list = document.getElementById('leaderboardList');
-        list.innerHTML = '<h3 class="font-bold text-lg my-2">Final Results:</h3>';
+        list.innerHTML = `<div class="py-2 px-4 bg-indigo-50 dark:bg-indigo-900/30 text-center text-lg font-bold text-indigo-800 dark:text-indigo-200 rounded-md mb-2">Final Results</div>`;
 
         const scores = Object.entries(data.leaderboard).map(([name, score]) => ({ name, score }));
         scores.sort((a, b) => b.score - a.score);
 
         scores.forEach((entry, index) => {
             const li = document.createElement('li');
-            li.className = index === 0 ? 'font-bold text-green-600' : '';
-            li.textContent = `${index + 1}. ${entry.name}: ${entry.score} points`;
+            li.className = 'py-4 px-2 flex items-center justify-between';
+            
+            // Trophy for winner, medal for 2nd and 3rd
+            let icon = '';
+            let colorClass = '';
+            
+            if (index === 0) {
+                icon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clip-rule="evenodd" /><path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z" /></svg>';
+                colorClass = 'bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500';
+            } else if (index === 1) {
+                icon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z" clip-rule="evenodd" /></svg>';
+                colorClass = 'bg-gray-50 dark:bg-gray-700/30';
+            } else if (index === 2) {
+                icon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-yellow-700" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z" clip-rule="evenodd" /></svg>';
+                colorClass = 'bg-yellow-50/50 dark:bg-yellow-900/10';
+            }
+            
+            li.className = `py-3 px-4 flex items-center justify-between ${colorClass} rounded-lg mb-2`;
+            
+            li.innerHTML = `
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center mr-3 shadow-sm">
+                        <span class="text-gray-800 dark:text-gray-200 font-bold">${index + 1}</span>
+                    </div>
+                    <div class="mr-3">${icon}</div>
+                    <span class="text-gray-900 dark:text-white font-semibold text-lg">${entry.name}</span>
+                </div>
+                <div class="bg-indigo-100 dark:bg-indigo-900 px-4 py-2 rounded-full text-indigo-800 dark:text-indigo-200 font-bold">${entry.score} points</div>
+            `;
             list.appendChild(li);
         });
     });
@@ -220,12 +411,9 @@
         alert(data.message);
     });
 
-    // Add these elements to your existing host view JavaScript
-
-    // Get the endRoom button reference
+    // Handler for ending the room
     const endRoomBtn = document.getElementById('endRoom');
 
-    // Add click handler for ending the room
     endRoomBtn.onclick = () => {
         if (confirm('Are you sure you want to close this room? This will kick out all participants and delete the room.')) {
             const roomCode = displayRoomCode.innerText;
@@ -233,7 +421,6 @@
         }
     };
 
-    // Add event handler for room ended confirmation
     socket.on('room_ended', (data) => {
         if (data.success) {
             // Reset UI to setup state
@@ -251,8 +438,16 @@
             // Reset quiz in progress flag
             quizInProgress = false;
 
-            // Show confirmation
-            alert('Room has been closed successfully.');
+            // Show confirmation with toast instead of alert
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-300';
+            toast.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg> Room closed successfully';
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 2000);
         }
     });
 </script>

@@ -1,261 +1,384 @@
-{% extends 'base.html' %}
-{% block title %}Join Quiz Room{% endblock %}
-{% block content %}
-<div class="max-w-3xl mx-auto mt-12">
-    <h2 class="text-2xl font-bold mb-4">Join Live Quiz</h2>
+<!DOCTYPE html>
+<html lang="en">
 
-    <div id="joinForm" class="mb-6">
-        <div class="mb-4">
-            <label for="username" class="block text-gray-700 mb-2">Your Name</label>
-            <input type="text" id="username" class="w-full p-2 border rounded">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Quiz Room</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50">
+    <button id="exitPageBtn"
+        class="fixed top-4 right-4 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-full shadow-md">
+        Exit Page
+    </button>
+    <div class="max-w-3xl mx-auto mt-12 px-4">
+        <h2 class="text-2xl font-bold mb-4">Join Live Quiz</h2>
+
+        <div id="joinForm" class="mb-6 bg-white p-6 rounded-lg shadow-md">
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700 mb-2 font-medium">Your Name</label>
+                <input type="text" id="username"
+                    class="w-full p-2 border rounded focus:ring focus:ring-indigo-200 focus:outline-none">
+            </div>
+            <div class="mb-4">
+                <label for="room_code" class="block text-gray-700 mb-2 font-medium">Room Code</label>
+                <input type="text" id="room_code"
+                    class="w-full p-2 border rounded focus:ring focus:ring-indigo-200 focus:outline-none">
+            </div>
+            <button id="joinButton"
+                class="bg-green-600 hover:bg-green-700 transition text-white px-6 py-3 rounded font-medium w-full">Join
+                Quiz</button>
         </div>
-        <div class="mb-4">
-            <label for="room_code" class="block text-gray-700 mb-2">Room Code</label>
-            <input type="text" id="room_code" class="w-full p-2 border rounded">
+
+        <div id="waitingRoom" class="hidden text-center py-8 bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold mb-2">Waiting for quiz to start...</h3>
+            <p class="text-gray-600">The host will start the quiz soon.</p>
+            <button id="exitQuizBtn"
+                class="mt-6 bg-red-600 hover:bg-red-700 transition text-white px-4 py-2 rounded">Exit Quiz</button>
         </div>
-        <button id="joinButton" class="bg-green-600 text-white px-4 py-2 rounded">Join Quiz</button>
+
+        <div id="questionSection" class="hidden bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-bold mb-4">Question</h3>
+            <div id="questionDisplay" class="mb-8 p-4 bg-gray-50 rounded border">
+                <p id="questionText" class="text-lg mb-4"></p>
+                <div id="optionsDisplay" class="space-y-3"></div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <button id="submitAnswer"
+                    class="bg-indigo-600 hover:bg-indigo-700 transition text-white px-6 py-2 rounded font-medium disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    Submit Answer
+                </button>
+
+                <button id="exitDuringQuizBtn"
+                    class="bg-red-600 hover:bg-red-700 transition text-white px-4 py-2 rounded">
+                    Exit Quiz
+                </button>
+            </div>
+
+            <div id="timerDisplay" class="mt-4 text-right font-semibold text-indigo-600">
+                Time left: <span id="timeLeft" class="text-xl">15</span>s
+            </div>
+        </div>
+
+        <div id="leaderboardSection" class="mt-6 bg-white p-6 rounded-lg shadow-md">
+            <h3 class="font-semibold mb-2 text-lg">Leaderboard:</h3>
+            <ul id="leaderboardList" class="space-y-2"></ul>
+        </div>
     </div>
 
-    <div id="waitingRoom" class="hidden text-center py-8">
-        <h3 class="text-xl font-semibold mb-2">Waiting for quiz to start...</h3>
-        <p class="text-gray-600">The host will start the quiz soon.</p>
-    </div>
-
-    <div id="questionSection" class="hidden">
-        <h3 class="text-xl font-bold mb-4">Question</h3>
-        <div id="questionDisplay" class="mb-8 p-4 bg-gray-50 rounded border">
-            <p id="questionText" class="text-lg mb-4"></p>
-            <div id="optionsDisplay" class="space-y-3"></div>
-        </div>
-
-        <button id="submitAnswer" class="bg-indigo-600 text-white px-6 py-2 rounded disabled:bg-gray-400">
-            Submit Answer
-        </button>
-
-        <div id="timerDisplay" class="mt-4 text-right font-semibold">
-            Time left: <span id="timeLeft">15</span>s
-        </div>
-    </div>
-
-    <div id="leaderboardSection" class="mt-6">
-        <h3 class="font-semibold mb-2">Leaderboard:</h3>
-        <ul id="leaderboardList" class="list-disc list-inside"></ul>
-    </div>
-</div>
-
-<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-<script>
-
-    const socket = io();
-    // Common socket connection error handling
-    socket.on('connect_error', () => {
-        console.error('Connection error');
-        alert('Connection to server lost. Please refresh the page.');
-    });
-
-    socket.on('disconnect', () => {
-        console.error('Disconnected from server');
-        // Optionally show a reconnection message
-    });
-
-    // For joinQuiz.html - Improve participant view:
-
-    let currentQuestionId = null;
-    let selectedAnswer = null;
-    let answerSubmitted = false;
-
-    // DOM Elements
-    const joinForm = document.getElementById('joinForm');
-    const waitingRoom = document.getElementById('waitingRoom');
-    const questionSection = document.getElementById('questionSection');
-    const questionText = document.getElementById('questionText');
-    const optionsDisplay = document.getElementById('optionsDisplay');
-    const submitAnswerBtn = document.getElementById('submitAnswer');
-    const timeLeft = document.getElementById('timeLeft');
-
-    // Join Room
-    document.getElementById('joinButton').onclick = () => {
-        const username = document.getElementById('username').value.trim();
-        const roomCode = document.getElementById('room_code').value.trim();
-
-        if (!username || !roomCode) {
-            alert('Please enter your name and a room code');
-            return;
-        }
-
-        socket.emit('join_room', {
-            room_code: roomCode,
-            username: username
-        });
-    };
-
-    // Event Handlers
-    socket.on('joined_room', data => {
-        joinForm.classList.add('hidden');
-        waitingRoom.classList.remove('hidden');
-    });
-
-    socket.on('new_question', data => {
-        waitingRoom.classList.add('hidden');
-        questionSection.classList.remove('hidden');
-
-        currentQuestionId = data.qid;
-        questionText.innerText = data.question;
-        answerSubmitted = false;
-        selectedAnswer = null;
-
-        // Clear previous options
-        optionsDisplay.innerHTML = '';
-
-        // Add options as radio buttons
-        data.options.forEach((option, index) => {
-            const div = document.createElement('div');
-            div.className = 'flex items-start space-x-2 p-2 hover:bg-gray-100 rounded';
-            div.innerHTML = `
-            <input type="radio" id="option${index}" name="answer" value="${index}" class="mt-1">
-            <label for="option${index}" class="cursor-pointer w-full">${option}</label>
-        `;
-            // Add click handler to the entire div
-            div.addEventListener('click', () => {
-                const radio = div.querySelector('input[type="radio"]');
-                radio.checked = true;
-                selectedAnswer = parseInt(radio.value);
-
-                // Highlight selected option
-                document.querySelectorAll('#optionsDisplay > div').forEach(el => {
-                    el.classList.remove('bg-blue-100');
-                });
-                div.classList.add('bg-blue-100');
-            });
-            optionsDisplay.appendChild(div);
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        // Common socket connection error handling
+        socket.on('connect_error', () => {
+            console.error('Connection error');
+            alert('Connection to server lost. Please refresh the page.');
         });
 
-        // Reset submit button
-        submitAnswerBtn.disabled = false;
+        socket.on('disconnect', () => {
+            console.error('Disconnected from server');
+            // Optionally show a reconnection message
+        });
 
-        // Set timer with smoother countdown
-        if (window.questionTimer) clearInterval(window.questionTimer);
+        // For joinQuiz.html - Improve participant view:
 
-        let seconds = data.time;
-        timeLeft.innerText = seconds;
+        let currentQuestionId = null;
+        let selectedAnswer = null;
+        let answerSubmitted = false;
+        let currentRoomCode = null;
 
-        const startTime = Date.now();
-        const endTime = startTime + (seconds * 1000);
+        // DOM Elements
+        const joinForm = document.getElementById('joinForm');
+        const waitingRoom = document.getElementById('waitingRoom');
+        const questionSection = document.getElementById('questionSection');
+        const questionText = document.getElementById('questionText');
+        const optionsDisplay = document.getElementById('optionsDisplay');
+        const submitAnswerBtn = document.getElementById('submitAnswer');
+        const timeLeft = document.getElementById('timeLeft');
+        const exitQuizBtn = document.getElementById('exitQuizBtn');
+        const exitDuringQuizBtn = document.getElementById('exitDuringQuizBtn');
 
-        window.questionTimer = setInterval(() => {
-            const now = Date.now();
-            const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+        // Join Room
+        document.getElementById('joinButton').onclick = () => {
+            const username = document.getElementById('username').value.trim();
+            const roomCode = document.getElementById('room_code').value.trim();
 
-            timeLeft.innerText = remaining;
-
-            if (remaining <= 0) {
-                clearInterval(window.questionTimer);
-                submitAnswerBtn.disabled = true;
-
-                // If answer selected but not submitted, auto-submit
-                if (selectedAnswer !== null && !answerSubmitted) {
-                    submitAnswer();
-                }
+            if (!username || !roomCode) {
+                alert('Please enter your name and a room code');
+                return;
             }
-        }, 100); // Update more frequently for smoother countdown
-    });
 
-    // Submit Answer
-    submitAnswerBtn.onclick = submitAnswer;
+            currentRoomCode = roomCode;
 
-    function submitAnswer() {
-        if (answerSubmitted) return;
+            socket.emit('join_room', {
+                room_code: roomCode,
+                username: username
+            });
+        };
 
-        if (selectedAnswer === null) {
-            alert('Please select an answer');
-            return;
+        // Exit quiz functionality
+        function exitQuiz() {
+            if (!currentRoomCode) return;
+
+            if (confirm('Are you sure you want to exit this quiz?')) {
+                socket.emit('leave_room', { room_code: currentRoomCode });
+                resetUI();
+            }
         }
 
-        const roomCode = document.getElementById('room_code').value;
+        // Reset UI to initial state
+        function resetUI() {
+            // Reset variables
+            currentQuestionId = null;
+            selectedAnswer = null;
+            answerSubmitted = false;
+            currentRoomCode = null;
 
-        socket.emit('submit_answer', {
-            room_code: roomCode,
-            qid: currentQuestionId,
-            answer: selectedAnswer
-        });
+            // Reset UI
+            waitingRoom.classList.add('hidden');
+            questionSection.classList.add('hidden');
+            joinForm.classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('room_code').value = '';
 
-        answerSubmitted = true;
-        submitAnswerBtn.disabled = true;
-        submitAnswerBtn.innerText = 'Answer Submitted';
-        submitAnswerBtn.classList.add('bg-gray-400');
-    }
+            // Clear leaderboard
+            document.getElementById('leaderboardList').innerHTML = '';
 
-    // Update Leaderboard
-    socket.on('leaderboard_update', data => {
-        const list = document.getElementById('leaderboardList');
-        list.innerHTML = '';
-
-        // Convert to array for sorting
-        const scores = Object.entries(data).map(([name, score]) => ({ name, score }));
-        scores.sort((a, b) => b.score - a.score);
-
-        scores.forEach((entry, index) => {
-            const li = document.createElement('li');
-            li.className = index === 0 ? 'text-green-600 font-semibold' : '';
-            li.textContent = `${entry.name}: ${entry.score} points`;
-            list.appendChild(li);
-        });
-    });
-
-    // Quiz Ended
-    socket.on('quiz_ended', data => {
-        questionSection.classList.add('hidden');
-        waitingRoom.classList.remove('hidden');
-        waitingRoom.innerHTML = '<h3 class="text-xl font-bold mb-4">Quiz has ended!</h3>';
-
-        if (window.questionTimer) {
-            clearInterval(window.questionTimer);
+            // Clear timers
+            if (window.questionTimer) {
+                clearInterval(window.questionTimer);
+            }
         }
 
-        // Display final results
-        const list = document.getElementById('leaderboardList');
-        list.innerHTML = '<h3 class="font-bold text-lg mb-4">Final Results:</h3>';
+        // Add event listeners for exit buttons
+        exitQuizBtn.addEventListener('click', exitQuiz);
+        exitDuringQuizBtn.addEventListener('click', exitQuiz);
 
-        const scores = Object.entries(data.leaderboard).map(([name, score]) => ({ name, score }));
-        scores.sort((a, b) => b.score - a.score);
-
-        scores.forEach((entry, index) => {
-            const li = document.createElement('li');
-            li.className = index === 0 ? 'font-bold text-green-600' : '';
-            li.textContent = `${index + 1}. ${entry.name}: ${entry.score} points`;
-            list.appendChild(li);
+        // Event Handlers
+        socket.on('joined_room', data => {
+            joinForm.classList.add('hidden');
+            waitingRoom.classList.remove('hidden');
         });
-    });
 
-    socket.on('error', data => {
-        alert(data.message);
-    });
+        socket.on('new_question', data => {
+            waitingRoom.classList.add('hidden');
+            questionSection.classList.remove('hidden');
 
-    // Add this to your participant view JavaScript (joinQuiz.html)
+            currentQuestionId = data.qid;
+            questionText.innerText = data.question;
 
-    // Handle room closed event
-    socket.on('room_closed', (data) => {
-        // Clear any active timers
-        if (window.questionTimer) {
-            clearInterval(window.questionTimer);
+            // Reset answer state for new question
+            answerSubmitted = false;
+            selectedAnswer = null;
+
+            // Reset submit button
+            submitAnswerBtn.disabled = false;
+            submitAnswerBtn.innerText = 'Submit Answer';
+            submitAnswerBtn.classList.remove('bg-gray-400');
+            submitAnswerBtn.classList.add('bg-indigo-600');
+
+            // Clear previous options
+            optionsDisplay.innerHTML = '';
+
+            // Add options as radio buttons
+            data.options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-start space-x-2 p-2 hover:bg-gray-100 rounded';
+                div.innerHTML = `
+                <input type="radio" id="option${index}" name="answer" value="${index}" class="mt-1">
+                <label for="option${index}" class="cursor-pointer w-full">${option}</label>
+            `;
+                // Add click handler to the entire div
+                div.addEventListener('click', () => {
+                    const radio = div.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                    selectedAnswer = parseInt(radio.value);
+
+                    // Highlight selected option
+                    document.querySelectorAll('#optionsDisplay > div').forEach(el => {
+                        el.classList.remove('bg-blue-100');
+                    });
+                    div.classList.add('bg-blue-100');
+                });
+                optionsDisplay.appendChild(div);
+            });
+
+            // Set timer with smoother countdown
+            if (window.questionTimer) clearInterval(window.questionTimer);
+
+            let seconds = data.time;
+            timeLeft.innerText = seconds;
+
+            const startTime = Date.now();
+            const endTime = startTime + (seconds * 1000);
+
+            window.questionTimer = setInterval(() => {
+                const now = Date.now();
+                const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+
+                timeLeft.innerText = remaining;
+
+                if (remaining <= 0) {
+                    clearInterval(window.questionTimer);
+
+                    // If answer selected but not submitted, auto-submit
+                    if (selectedAnswer !== null && !answerSubmitted) {
+                        submitAnswer();
+                    } else if (!answerSubmitted) {
+                        // If no answer selected, disable the submit button
+                        submitAnswerBtn.disabled = true;
+                        submitAnswerBtn.innerText = 'Time Up';
+                    }
+                }
+            }, 100); // Update more frequently for smoother countdown
+        });
+
+        // Submit Answer
+        submitAnswerBtn.onclick = submitAnswer;
+
+        // Enhance the submitAnswer function
+        function submitAnswer() {
+            if (answerSubmitted) return;
+
+            if (selectedAnswer === null) {
+                alert('Please select an answer');
+                return;
+            }
+
+            // Disable the submit button immediately to prevent double submission
+            submitAnswerBtn.disabled = true;
+            submitAnswerBtn.innerText = 'Submitting...';
+
+            socket.emit('submit_answer', {
+                room_code: currentRoomCode,
+                qid: currentQuestionId,
+                answer: selectedAnswer
+            });
+
+            answerSubmitted = true;
         }
 
-        // Hide all sections except join form
-        waitingRoom.classList.add('hidden');
-        questionSection.classList.add('hidden');
-        joinForm.classList.remove('hidden');
+        socket.on('error', data => {
+            console.error('Socket error:', data.message);
 
-        // Reset state
-        currentQuestionId = null;
-        selectedAnswer = null;
-        answerSubmitted = false;
+            // If the error relates to answer submission, provide feedback
+            if (data.message === 'Answer already submitted' ||
+                data.message === 'Question time expired') {
+                submitAnswerBtn.disabled = true;
+                submitAnswerBtn.innerText = data.message;
+                submitAnswerBtn.classList.remove('bg-indigo-600');
+                submitAnswerBtn.classList.add('bg-gray-400');
+            } else {
+                // For other errors, show alert
+                alert(data.message);
+            }
+        });
 
-        // Show message to user
-        alert(data.message || 'The quiz room has been closed by the host.');
+        // Update Leaderboard
+        socket.on('leaderboard_update', data => {
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = '';
 
-        // Clear inputs
-        document.getElementById('username').value = '';
-        document.getElementById('room_code').value = '';
-    });
-</script>
-{% endblock %}
+            // Convert to array for sorting
+            const scores = Object.entries(data).map(([name, score]) => ({ name, score }));
+            scores.sort((a, b) => b.score - a.score);
+
+            scores.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.className = index === 0 ? 'text-green-600 font-semibold border-b pb-1' : 'border-b pb-1';
+                li.textContent = `${entry.name}: ${entry.score} points`;
+                list.appendChild(li);
+            });
+        });
+
+        socket.on('answer_result', data => {
+            // Visual feedback for correct/incorrect answers
+            if (data.correct) {
+                submitAnswerBtn.innerText = `Correct! +${data.points} points`;
+                submitAnswerBtn.classList.remove('bg-gray-400', 'bg-indigo-600');
+                submitAnswerBtn.classList.add('bg-green-600');
+            } else {
+                submitAnswerBtn.innerText = 'Incorrect';
+                submitAnswerBtn.classList.remove('bg-gray-400', 'bg-indigo-600');
+                submitAnswerBtn.classList.add('bg-red-600');
+            }
+        });
+
+        // Add handler for initial answer receipt
+        socket.on('answer_received', data => {
+            submitAnswerBtn.disabled = true;
+            submitAnswerBtn.innerText = 'Answer Submitted';
+            submitAnswerBtn.classList.remove('bg-indigo-600');
+            submitAnswerBtn.classList.add('bg-gray-400');
+        });
+
+        // Quiz Ended
+        socket.on('quiz_ended', data => {
+            questionSection.classList.add('hidden');
+            waitingRoom.classList.remove('hidden');
+            waitingRoom.innerHTML = `
+                <h3 class="text-xl font-bold mb-4">Quiz has ended!</h3>
+                <button id="exitAfterQuizBtn" class="mt-4 bg-red-600 hover:bg-red-700 transition text-white px-4 py-2 rounded">Exit Quiz</button>
+            `;
+
+            // Add event listener to the new exit button
+            document.getElementById('exitAfterQuizBtn').addEventListener('click', exitQuiz);
+
+            if (window.questionTimer) {
+                clearInterval(window.questionTimer);
+            }
+
+            // Reset answer state
+            answerSubmitted = false;
+            selectedAnswer = null;
+
+            // Display final results
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = '<h3 class="font-bold text-lg mb-4">Final Results:</h3>';
+
+            const scores = Object.entries(data.leaderboard).map(([name, score]) => ({ name, score }));
+            scores.sort((a, b) => b.score - a.score);
+
+            scores.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.className = index === 0 ? 'font-bold text-green-600 p-2 bg-green-50 rounded' : 'p-2';
+                li.textContent = `${index + 1}. ${entry.name}: ${entry.score} points`;
+                list.appendChild(li);
+            });
+        });
+
+        // Handle room closed event
+        socket.on('room_closed', (data) => {
+            // Clear any active timers
+            if (window.questionTimer) {
+                clearInterval(window.questionTimer);
+            }
+
+            // Reset UI
+            resetUI();
+
+            // Show message to user
+            alert(data.message || 'The quiz room has been closed by the host.');
+        });
+
+        // Handle successful leave room event
+        socket.on('left_room', (data) => {
+            resetUI();
+
+            if (data.success) {
+                alert('You have successfully left the quiz.');
+            }
+        });
+        // Exit page functionality
+        document.getElementById('exitPageBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to exit this page?')) {
+                window.location.href = '/live'; // Replace with your desired destination
+            }
+        });
+    </script>
+</body>
+
+</html>
