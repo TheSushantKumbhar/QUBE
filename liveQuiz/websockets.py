@@ -8,13 +8,16 @@ from sqlalchemy.orm import joinedload
 
 socketio = SocketIO()
 
-rooms = {}  # room_code: {host_id, participants: {sid: username}, quiz, current_q, leaderboard, timer, question_end_time}
+rooms = {}  # room_code: {host_id, participants: {sid: username}, quiz, current_q, leaderboard, timer, question_end_time, question_timer, submitted_answers, pending_answers}
 
 @socketio.on('create_room')
 def create_room(data):
     room_code = data['room_code']
     quiz_id = data['quiz_id']
     host_id = data['host_id']
+    # Get the default question timer (or use 30 seconds if not provided)
+    question_timer = data.get('question_timer', 30)
+    
     quiz = Quiz.query.options(joinedload(Quiz.questions)).get(quiz_id)
 
     if room_code in rooms:
@@ -49,7 +52,10 @@ def create_room(data):
         'current_q': 0,
         'leaderboard': {},
         'timer': None,
-        'question_end_time': None
+        'question_end_time': None,
+        'question_timer': question_timer,  # Store the default question timer
+        'submitted_answers': {},  # Track who has submitted answers for the current question
+        'pending_answers': {}  # Store answers to process after the timer ends
     }
 
     join_room(room_code)
@@ -94,18 +100,27 @@ def join_room_handler(data):
 @socketio.on('start_quiz')
 def start_quiz(data):
     room_code = data['room_code']
-
+    # Update question timer if provided
+    question_timer = data.get('question_timer')
+    
     room = rooms.get(room_code)
     if not room:
         emit('error', {'message': 'Room not found'})
         return
+    
+    # Update the question timer if provided
+    if question_timer is not None:
+        room['question_timer'] = question_timer
 
     room['current_q'] = 0  # Reset to first question
     room['leaderboard'] = {name: 0 for name in room['participants'].values()}  # Reset scores
     send_question(room_code)
 
 def send_question(room_code):
-    room = rooms[room_code]
+    room = rooms.get(room_code)
+    if not room:
+        return  # Room might have been deleted
+    
     questions = room['quiz']['questions']
     current_q = room['current_q']
 
@@ -114,10 +129,16 @@ def send_question(room_code):
         return
 
     q = questions[current_q]
-    question_time = 15  # Default time per question
+    # Use the custom question timer
+    question_time = room['question_timer']
     
     # Set end time for synchronization
     room['question_end_time'] = time.time() + question_time
+    
+    # Reset submitted answers for new question
+    room['submitted_answers'] = {}
+    # Reset pending answers for new question
+    room['pending_answers'] = {}
     
     socketio.emit('new_question', {
         'question': q['text'],
@@ -134,9 +155,48 @@ def send_question(room_code):
 def question_timer(room_code, seconds):
     socketio.sleep(seconds)
     room = rooms.get(room_code)
-    if room:
-        room['current_q'] += 1
-        send_question(room_code)
+    if not room:
+        return  # Room might have been deleted
+    
+    # Process all pending answers now that time is up
+    current_question = room['quiz']['questions'][room['current_q']]
+    current_question_id = current_question['id']
+    pending = room['pending_answers'].get(current_question_id, {})
+    
+    # Process each pending answer
+    for sid, answer_data in pending.items():
+        username = answer_data['username']
+        answer_index = answer_data['answer_index']
+        submit_time = answer_data['submit_time']
+        
+        # Check if answer is correct
+        if answer_index in current_question['correct_indices']:
+            # Calculate points - one point per second remaining, maximum points equals question time
+            points = max(1, int(room['question_end_time'] - submit_time))
+            room['leaderboard'][username] = room['leaderboard'].get(username, 0) + points
+            
+            # Notify user their answer was correct
+            socketio.emit('answer_result', {
+                'correct': True,
+                'points': points
+            }, room=sid)
+        else:
+            # Notify user their answer was incorrect
+            socketio.emit('answer_result', {
+                'correct': False,
+                'points': 0
+            }, room=sid)
+    
+    # Update leaderboard for everyone
+    socketio.emit('leaderboard_update', room['leaderboard'], room=room_code)
+    
+    # Wait a moment for participants to see results before moving to next question
+    socketio.sleep(3)
+    
+    # Move to next question
+    room['current_q'] += 1
+    room['question_end_time'] = None  # Clear end time when question expires
+    send_question(room_code)
 
 @socketio.on('submit_answer')
 def handle_answer(data):
@@ -150,22 +210,48 @@ def handle_answer(data):
         emit('error', {'message': 'Room not found'})
         return
     
-    # Find the current question
-    question = next((q for q in room['quiz']['questions'] if q['id'] == qid), None)
     username = room['participants'].get(sid)
+    if not username:
+        emit('error', {'message': 'User not found in room'})
+        return
     
-    if not question or not username:
+    # Check if the question is still active
+    if room['question_end_time'] is None or time.time() > room['question_end_time']:
+        emit('error', {'message': 'Question time expired'})
         return
         
-    # Check if answer is correct using the index
-    if answer_index in question['correct_indices']:
-        # Calculate points based on remaining time
-        remaining_time = max(0, room['question_end_time'] - time.time())
-        points = max(1, int(remaining_time))  # Minimum 1 point, more for faster answers
-        room['leaderboard'][username] = room['leaderboard'].get(username, 0) + points
-
-    # Update leaderboard for everyone
-    socketio.emit('leaderboard_update', room['leaderboard'], room=room_code)
+    # Check if user already submitted an answer for this question
+    current_question_id = room['quiz']['questions'][room['current_q']]['id']
+    if sid in room['submitted_answers'].get(current_question_id, []):
+        emit('error', {'message': 'Answer already submitted'})
+        return
+    
+    # Find the current question
+    question = room['quiz']['questions'][room['current_q']]
+    if question['id'] != qid:
+        emit('error', {'message': 'Question ID mismatch'})
+        return
+    
+    # Mark this user as having submitted an answer for this question
+    if current_question_id not in room['submitted_answers']:
+        room['submitted_answers'][current_question_id] = []
+    room['submitted_answers'][current_question_id].append(sid)
+    
+    # Store the answer for processing at the end of the timer
+    if current_question_id not in room['pending_answers']:
+        room['pending_answers'][current_question_id] = {}
+    
+    # Store answer data with submission time
+    room['pending_answers'][current_question_id][sid] = {
+        'username': username,
+        'answer_index': answer_index,
+        'submit_time': time.time()
+    }
+    
+    # Acknowledge receipt of the answer without revealing if it's correct
+    emit('answer_received', {
+        'message': 'Answer received'
+    })
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -199,10 +285,10 @@ def end_quiz(data):
             socketio.sleep(0)  # Cancel timer
             room['timer'] = None
         
+        # Clear question end time to prevent late submissions
+        room['question_end_time'] = None
+        
         socketio.emit('quiz_ended', {'leaderboard': room['leaderboard']}, room=room_code)
-
-
-# Add this function to your websocket.py file
 
 @socketio.on('end_room')
 def end_room(data):
@@ -224,3 +310,29 @@ def end_room(data):
     
     # Confirm to host
     emit('room_ended', {'success': True})
+
+@socketio.on('leave_room')
+def handle_leave_room(data):
+    room_code = data.get('room_code')
+    sid = request.sid
+    
+    # Verify the room exists
+    if room_code not in rooms:
+        emit('error', {'message': 'Room not found'})
+        return
+    
+    room = rooms[room_code]
+    
+    # Check if user is in this room
+    if sid in room['participants']:
+        username = room['participants'].pop(sid)
+        leave_room(room_code)
+        
+        # Notify the user they've left
+        emit('left_room', {'success': True})
+        
+        # Update other participants
+        usernames = list(room['participants'].values())
+        emit('update_participants', {'participants': usernames}, room=room_code)
+    else:
+        emit('error', {'message': 'You are not in this room'})
