@@ -78,7 +78,7 @@
 
                     {% if quiz.questions %}
                     <div class="space-y-4">
-                        {% for question in quiz.questions[:2] %}
+                        {% for question in quiz.questions %}
                         <div class="bg-indigo-50 p-4 rounded-lg">
                             <p class="font-medium text-indigo-800 mb-2">Q{{ loop.index }}: {{ question.text }}</p>
 
@@ -101,11 +101,11 @@
                         </div>
                         {% endfor %}
 
-                        {% if quiz.questions|length > 2 %}
+                        <!-- {% if quiz.questions|length > 2 %}
                         <div class="text-center">
                             <p class="text-gray-500">{{ quiz.questions|length - 2 }} more questions...</p>
                         </div>
-                        {% endif %}
+                        {% endif %} -->
                     </div>
                     {% else %}
                     <p class="text-gray-500 italic">No questions in this quiz.</p>
@@ -197,7 +197,7 @@
                     </h3>
 
                     <div class="space-y-3">
-                        <a href="{{ url_for('quiz.create_quiz_page', quiz_id=quiz.id) }}"
+                        <a href="{{ url_for('quiz.edit_quiz', quiz_id=quiz.id) }}"
                             class="w-full bg-blue-600 text-white py-2.5 rounded-lg flex items-center justify-center hover:bg-blue-700 transition">
                             <i class="fas fa-edit mr-2"></i> Edit Quiz
                         </a>
