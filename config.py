@@ -4,7 +4,7 @@ import os
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
-
+import google.generativeai as genai
 
 load_dotenv()
 
@@ -38,3 +38,13 @@ cloudinary.config(
     api_secret=os.getenv("CLOUDINARY_API_SECRET"),
     secure=True
 )
+
+# genai.configure(
+#     api_key=os.getenv("GEMINI_API_KEY")
+# )
+
+
+
+def configure_genai():
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+    return genai
