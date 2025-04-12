@@ -17,9 +17,9 @@
     {% endif %}
     {% endwith %}
 
-    <div id="page2" class="p-6">
+    <!-- <div id="page2" class="p-6"> -->
         <!-- <img src="{{ url_for('static', filename='images/question.gif') }}" alt="Quiz Icon" class="h-40 w-40 mr-4 ml-80 flex items-center"> -->
-        <h2 class="text-xl font-semibold text-center">Quiz Details</h2>
+        <!-- <h2 class="text-xl font-semibold text-center">Quiz Details</h2>
         <div class="mt-4">
             <label class="block font-medium">Quiz Title</label>
             <input type="text" id="quizTitle" class="w-full border p-2 rounded-md" placeholder="Enter quiz title" />
@@ -38,7 +38,123 @@
                 Next
             </button>
         </div>
+    </div> -->
+    <div id="page2" class="p-6 max-w-2xl mx-auto bg-white rounded-lg shadow-sm">
+        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Quiz Details</h2>
+        
+        <!-- Quiz details form -->
+        <div class="space-y-6">
+            <div>
+                <label for="quizTitle" class="block font-medium text-gray-700 mb-1">Quiz Title</label>
+                <input type="text" id="quizTitle" class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="Enter quiz title" />
+                <p class="mt-1 text-xs text-gray-500">Choose a clear and engaging title for your quiz</p>
+            </div>
+            
+            <div>
+                <label for="quizSubject" class="block font-medium text-gray-700 mb-1">Subject</label>
+                
+                <!-- Custom select dropdown with integrated input field -->
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="quizSubject" 
+                        class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" 
+                        placeholder="Enter subject" 
+                        autocomplete="off"
+                    />
+                    
+                    <!-- Custom dropdown button -->
+                    <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                        <svg class="h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    
+                    <!-- Custom dropdown menu -->
+                    <div id="subjectDropdown" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 max-h-60 overflow-y-auto">
+                        <!-- Category: Academic -->
+                        <div class="px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-50">Academic</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Mathematics</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Physics</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Chemistry</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Biology</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Computer Science</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">History</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Geography</div>
+                        
+                        <!-- Category: Arts & Culture -->
+                        <div class="px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-50">Arts & Culture</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Literature</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Music</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Fine Arts</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Film & Cinema</div>
+                        
+                        <!-- Category: Languages -->
+                        <div class="px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-50">Languages</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">English</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Spanish</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">French</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">German</div>
+                        
+                        <!-- Category: Technology -->
+                        <div class="px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-50">Technology</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Programming</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Web Development</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Artificial Intelligence</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Cybersecurity</div>
+                        
+                        <!-- Category: General -->
+                        <div class="px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-50">General</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">General Knowledge</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Trivia</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Current Events</div>
+                        <div class="subject-option px-4 py-2 hover:bg-gray-100 cursor-pointer">Sports</div>
+                    </div>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Select from the list or enter your own subject</p>
+            </div>
+        </div>
+        
+        <div class="flex justify-between mt-8">
+            <a href="{{ url_for('quiz.quiz_categories') }}" class="bg-gray-400 text-white px-6 py-2.5 rounded-lg shadow-md hover:bg-gray-500 transition focus:outline-none focus:ring-2 focus:ring-gray-400">
+                Back
+            </a>
+            <button id="nextToPage3" class="bg-indigo-500 text-white px-6 py-2.5 rounded-lg shadow-md hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                Next
+            </button>
+        </div>
     </div>
+    
+    <!-- Note: You'll need to include this script to make the custom dropdown work -->
+    <script>
+    // Only include this if you need the visual dropdown effect
+    // This doesn't replace your existing form submission logic
+    document.addEventListener('DOMContentLoaded', function() {
+        const subjectInput = document.getElementById('quizSubject');
+        const subjectDropdown = document.getElementById('subjectDropdown');
+        
+        // Toggle dropdown on input field click
+        subjectInput.addEventListener('click', function() {
+            subjectDropdown.classList.toggle('hidden');
+        });
+        
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!subjectInput.contains(event.target) && !subjectDropdown.contains(event.target)) {
+                subjectDropdown.classList.add('hidden');
+            }
+        });
+        
+        // Handle option selection
+        const options = document.querySelectorAll('.subject-option');
+        options.forEach(option => {
+            option.addEventListener('click', function() {
+                subjectInput.value = this.textContent;
+                subjectDropdown.classList.add('hidden');
+            });
+        });
+    });
+    </script>
 
     <div id="page3" class=" hidden overflow-hidden h-full">
         <div class="bg-white rounded-xl shadow-md flex flex-col justify-between h-full p-6">
