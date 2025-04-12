@@ -227,7 +227,6 @@
             /* Position above the profile capsule with gap */
             left: 0;
             width: 100%;
-            background-color: #fff;
             border-radius: 0.5rem;
             box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1), 0 -2px 4px rgba(0, 0, 0, 0.06);
             opacity: 0;
@@ -236,7 +235,7 @@
             transition: all 0.2s ease;
             z-index: 40;
             overflow: hidden;
-            
+
         }
 
         /* Only show drop-up when not in collapsed mode */
@@ -259,7 +258,7 @@
 
         /* Dark mode styles for drop-up */
         .dark .drop-up {
-            
+
             box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.3), 0 -2px 4px rgba(0, 0, 0, 0.2);
             color: #f3f4f6;
         }
@@ -418,61 +417,60 @@
                     </div>
 
                     <!-- Drop-up Menu with PNG icon slots - only visible in expanded state -->
-                    <div class="drop-up dark:bg-zinc-800">
-                        <a href="{{url_for('auth.update_profile')}}" class="drop-up-item">
-                            <!-- <i class="fa-icon fas fa-user-circle mr-3"></i> -->
-                            <!-- <img src="/static/images/user.png" class="drop-up-icon" alt="My Profile"> -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-pen-icon lucide-user-round-pen"><path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/></svg>
+                    <div class="drop-up bg-indigo-200 dark:bg-zinc-800 space-y-2 p-2 rounded-lg">
+                        <!-- My Profile -->
+                        <a href="{{url_for('auth.update_profile')}}" class="drop-up-item flex items-center gap-3 p-2 hover:bg-indigo-300 dark:hover:bg-zinc-700 rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 21a8 8 0 0 1 10.821-7.487" />
+                                <path
+                                    d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
+                                <circle cx="10" cy="8" r="5" />
+                            </svg>
                             <span>My Profile</span>
                         </a>
-                        <a href="{{url_for('quiz.my_quizzes')}}" class="drop-up-item">
-                            <i class="fa-icon fas fa-cog mr-3"></i>
-                            <!-- <img src="/static/images/game.png" class="drop-up-icon" alt="my quizzes"> -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-puzzle-icon lucide-puzzle"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"/></svg>
-                            <span>My quizzes</span>
+                    
+                        <!-- My Quizzes -->
+                        <a href="{{url_for('quiz.my_quizzes')}}" class="drop-up-item flex items-center gap-3 p-2 hover:bg-indigo-300 dark:hover:bg-zinc-700 rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z" />
+                            </svg>
+                            <span>My Quizzes</span>
                         </a>
-                        <div class="dark-toggle-container flex flex-row">
-                            <i class="fa-icon fas fa-moon mr-3"></i>
-                            <!-- <img src="/static/images/icons/dark-mode.png" class="drop-up-icon" alt="Dark Mode"> -->
-
-
-                            <div class="flex flex-row justify-start items-center">
-                                <div class="mr-3">
-                                    <button id="dark-toggle"
-                                        class="flex items-center justify-center w-10 h-10 rounded-full focus:outline-none bg-gray-200 dark:bg-gray-700 transition-colors">
-                                        <!-- Sun icon (shows in dark mode) -->
-                                        <svg id="sun-icon" class="hidden dark:block w-6 h-6 text-yellow-400" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
-                                            </path>
-                                        </svg>
-                                        <!-- Moon icon (shows in light mode) -->
-                                        <svg id="moon-icon" class="block dark:hidden w-6 h-6 text-gray-800" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path str3oke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
-                                            </path>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <!-- <div>
-                                    <span>Dark Mode</span>
-                                </div> -->
-                                <div>
-                                    <p>Dark Mode</p>
-                                </div>
-                            </div>
+                    
+                        <!-- Dark Mode Toggle -->
+                        <div class="flex items-center gap-3 p-2 hover:bg-indigo-300 dark:hover:bg-zinc-700 rounded">
+                            <button id="dark-toggle" class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 transition-colors">
+                                <!-- Sun (dark mode) -->
+                                <svg id="sun-icon" class="hidden dark:block w-6 h-6 text-yellow-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                                    </path>
+                                </svg>
+                                <!-- Moon (light mode) -->
+                                <svg id="moon-icon" class="block dark:hidden w-6 h-6 text-gray-800" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg>
+                            </button>
+                            <span>Dark Mode</span>
                         </div>
-                        <a href="{{url_for('auth.logout')}}" class="drop-up-item text-red-500">
-                            <!-- <i class="fa-icon fas fa-sign-out-alt mr-3"></i>
-                            <img src="/static/images/icons/logout.png" class="drop-up-icon" alt="Logout"> -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    
+                        <!-- Logout -->
+                        <a href="{{url_for('auth.logout')}}" class="drop-up-item flex items-center gap-3 text-red-500 p-2 hover:bg-red-100 dark:hover:bg-zinc-700 rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                <polyline points="16 17 21 12 16 7" />
+                                <line x1="21" x2="9" y1="12" y2="12" />
+                            </svg>
                             <span>Logout</span>
                         </a>
-                    </div>
+                    </div>                    
                 </div>
             </div>
         </div>
@@ -481,7 +479,8 @@
     <!-- Main Content Wrapper -->
     <div id="main-content" class="w-full">
         <!-- White Content Container -->
-        <div id="content-container" class="bg-gray-100 dark:bg-zinc-800 rounded-2xl mt-3 mr-3 mb-3 h-95vh overflow-auto shadow-lg">
+        <div id="content-container"
+            class="bg-gray-100 dark:bg-zinc-800 rounded-2xl mt-3 mr-3 mb-3 h-95vh overflow-auto shadow-lg">
             <!-- Page Content (Dynamic Section) -->
             <div class="p-6">
                 {% block content %}
