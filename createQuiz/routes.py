@@ -142,7 +142,6 @@ def create_quiz_page():
                 db.session.flush()
                 
                 for o_index, option_data in enumerate(question_data['options']):
-                    # Check if option image is already a URL or needs to be uploaded
                     option_image_url = option_data.get('image')
                     if option_image_url and option_image_url.startswith('data:image'):
                         option_image_url = upload_to_cloudinary(option_image_url)
@@ -179,7 +178,7 @@ def create_quiz_api():
         new_quiz = Quiz(
             title=data['title'],
             subject=data.get('subject', ''),
-            user_id=user.id,  # Use the SQLAlchemy user id
+            user_id=user.id,  
             is_public=False,
             is_live=False
         )
@@ -228,7 +227,6 @@ def create_quiz_api():
 @quiz_bp.route('/api/quizzes/<int:quiz_id>', methods=['GET'])
 @login_required
 def get_quiz(quiz_id):
-    """Get quiz data by ID"""
     try:
         quiz = Quiz.query.get(quiz_id)
         if not quiz:
@@ -459,7 +457,7 @@ def edit_quiz(quiz_id):
         'questions': questions
     }
     
-    return render_template('CreateQuiz/editQuiz.html', quiz=quiz, quiz_data=json.dumps(quiz_data))
+    return render_template('CreateQuiz/createQuiz.html', quiz=quiz, quiz_data=json.dumps(quiz_data))
 
 
 @quiz_bp.route('/delete/<int:quiz_id>', methods=['POST'])
