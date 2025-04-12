@@ -9,6 +9,7 @@ from config import SQLALCHEMY_DATABASE_URI
 from models.db_init import create_database
 from models.models import User   
 from liveQuiz.websockets import socketio  
+from config import configure_genai
 
 
 from apscheduler.schedulers.background import BackgroundScheduler 
@@ -20,6 +21,8 @@ socketio.init_app(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
 app.config["SECRET_KEY"] = "your_secret_key_here"       
+# app.config["GEMINI_API_KEY"] = GEMINI_API_KEY
+ 
 
 db.init_app(app)
 migrate.init_app(app, db) 
@@ -28,7 +31,11 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(quiz_bp, url_prefix='/quiz')
 from liveQuiz.routes import live
 app.register_blueprint(live, url_prefix="/live")
+from AIQuiz.routes import AI
+app.register_blueprint(AI,url_prefix="/AI")
 
+
+# configure_genai()
 create_database(app)
 
 @app.route('/')
