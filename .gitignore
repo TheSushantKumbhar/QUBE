@@ -7,3 +7,5 @@ static/css/output.css
 .env
 static/profile_pics
 static/uploads
+
+templates/dummy
