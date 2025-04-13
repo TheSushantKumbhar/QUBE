@@ -5,7 +5,8 @@
 <div class="w-full bg-gradient-to-b from-indigo-50 to-white min-h-screen pb-10">
     <!-- Header Banner -->
     <div>
-        <div class="max-w-6xl bg-indigo-600 px-6 py-5 mt-6 rounded-lg shadow-lg mx-auto flex flex-col md:flex-row items-center justify-between">
+        <div
+            class="max-w-6xl bg-indigo-600 px-6 py-5 mt-6 rounded-lg shadow-lg mx-auto flex flex-col md:flex-row items-center justify-between">
             <div class="mb-4 md:mb-0 flex items-center">
                 <i class="fas fa-clipboard-check text-white text-4xl mr-4"></i>
                 <div>
@@ -53,10 +54,12 @@
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <p class="text-sm text-gray-500">Status</p>
                             <div class="flex gap-2 mt-1">
-                                <span class="px-2 py-1 {{ 'bg-green-100 text-green-800' if quiz.is_public else 'bg-gray-100 text-gray-800' }} text-xs rounded-full">
+                                <span
+                                    class="px-2 py-1 {{ 'bg-green-100 text-green-800' if quiz.is_public else 'bg-gray-100 text-gray-800' }} text-xs rounded-full">
                                     {{ 'Public' if quiz.is_public else 'Private' }}
                                 </span>
-                                <span class="px-2 py-1 {{ 'bg-purple-100 text-purple-800' if quiz.is_live else 'bg-gray-100 text-gray-800' }} text-xs rounded-full">
+                                <span
+                                    class="px-2 py-1 {{ 'bg-purple-100 text-purple-800' if quiz.is_live else 'bg-gray-100 text-gray-800' }} text-xs rounded-full">
                                     {{ 'Live' if quiz.is_live else 'Not Live' }}
                                 </span>
                             </div>
@@ -73,6 +76,23 @@
                                 Not scheduled
                                 {% endif %}
                             </p>
+                            
+                            <div class="mt-4">
+                                <h4 class="font-medium text-gray-700 mb-2">Time Limit</h4>
+                                <div class="flex items-center">
+                                    <input type="number" name="time_limit" id="time_limit" min="1" max="180"
+                                        value="{{ quiz.time_limit|default(0) }}"
+                                        class="w-24 border border-gray-300 rounded p-2 focus:outline-none focus:border-indigo-500">
+                                    <select name="time_unit" id="time_unit"
+                                        class="ml-2 border border-gray-300 rounded p-2 focus:outline-none focus:border-indigo-500">
+                                        <option value="minutes" {{ 'selected' if quiz.time_unit=='minutes' or not
+                                            quiz.time_unit else '' }}>Minutes</option>
+                                        <option value="hours" {{ 'selected' if quiz.time_unit=='hours' else '' }}>Hours
+                                        </option>
+                                    </select>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1">Set to 0 for no time limit</p>
+                            </div>
                         </div>
                     </div>
 
@@ -84,14 +104,16 @@
 
                             {% if question.image_url %}
                             <div class="mb-3">
-                                <img src="{{ question.image_url }}" alt="Question image" class="rounded-md max-h-40 object-contain">
+                                <img src="{{ question.image_url }}" alt="Question image"
+                                    class="rounded-md max-h-40 object-contain">
                             </div>
                             {% endif %}
 
                             <div class="ml-4 space-y-1">
                                 {% for option in question.options %}
                                 <div class="flex items-start">
-                                    <span class="inline-flex items-center justify-center h-5 w-5 rounded-full text-xs {{ 'bg-green-500 text-white' if option.is_correct else 'bg-gray-200 text-gray-700' }} mr-2 mt-0.5">
+                                    <span
+                                        class="inline-flex items-center justify-center h-5 w-5 rounded-full text-xs {{ 'bg-green-500 text-white' if option.is_correct else 'bg-gray-200 text-gray-700' }} mr-2 mt-0.5">
                                         {{ loop.index }}
                                     </span>
                                     <p>{{ option.text }}</p>
@@ -121,15 +143,18 @@
                         <i class="fas fa-cog text-indigo-600 mr-2"></i> Quiz Settings
                     </h3>
 
-                    <form id="quizSettingsForm" action="{{ url_for('quiz.update_quiz_settings', quiz_id=quiz.id) }}" method="POST">
+                    <form id="quizSettingsForm" action="{{ url_for('quiz.update_quiz_settings', quiz_id=quiz.id) }}"
+                        method="POST">
                         <div class="space-y-4">
                             <!-- Public/Private Toggle -->
                             <div>
                                 <label class="flex items-center cursor-pointer">
                                     <div class="relative">
-                                        <input type="checkbox" id="is_public" name="is_public" class="sr-only" {{ 'checked' if quiz.is_public else '' }}>
+                                        <input type="checkbox" id="is_public" name="is_public" class="sr-only"
+                                            {{ 'checked' if quiz.is_public else '' }}>
                                         <div class="block bg-gray-300 w-14 h-8 rounded-full"></div>
-                                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition">
+                                        </div>
                                     </div>
                                     <span class="ml-3 text-gray-700 font-medium">Make Quiz Public</span>
                                 </label>
@@ -153,12 +178,14 @@
 
                                 <div>
                                     <label class="flex items-center cursor-pointer mb-3">
-                                        <input type="radio" name="availability_type" value="always" {{ 'checked' if quiz.always_available else '' }} class="mr-2">
+                                        <input type="radio" name="availability_type" value="always" {{ 'checked' if
+                                            quiz.always_available else '' }} class="mr-2">
                                         <span class="text-gray-700">Always available</span>
                                     </label>
 
                                     <label class="flex items-center cursor-pointer">
-                                        <input type="radio" name="availability_type" value="scheduled" {{ 'checked' if not quiz.always_available else '' }} class="mr-2">
+                                        <input type="radio" name="availability_type" value="scheduled" {{ 'checked' if
+                                            not quiz.always_available else '' }} class="mr-2">
                                         <span class="text-gray-700">Set specific time</span>
                                     </label>
                                 </div>
@@ -212,7 +239,7 @@
                             <i class="fas fa-eye mr-2"></i> Preview Quiz
                         </a> -->
                     </div>
-                </div> 
+                </div>
             </div>
         </div>
     </div>
@@ -264,11 +291,13 @@
         <div class="text-center mb-4">
             <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
             <h3 class="text-xl font-bold text-gray-800">Delete Quiz?</h3>
-            <p class="text-gray-600 mt-2">Are you sure you want to delete "{{ quiz.title }}"? This action cannot be undone.</p>
+            <p class="text-gray-600 mt-2">Are you sure you want to delete "{{ quiz.title }}"? This action cannot be
+                undone.</p>
         </div>
 
         <div class="flex justify-center space-x-4 mt-6">
-            <button id="cancelDeleteBtn" class="bg-gray-300 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-400 transition">
+            <button id="cancelDeleteBtn"
+                class="bg-gray-300 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-400 transition">
                 Cancel
             </button>
             <form action="{{ url_for('quiz.delete_quiz', quiz_id=quiz.id) }}" method="POST">
