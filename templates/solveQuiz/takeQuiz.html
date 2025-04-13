@@ -23,14 +23,19 @@
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
                     <div class="bg-blue-600 dark:bg-blue-800 text-white p-4 flex justify-between items-center">
                         <h2 class="text-xl font-bold m-0">{{ quiz.title }}</h2>
-                        <div id="quiz-timer"
+                        <!-- <div id="quiz-timer"
                             class="text-lg font-bold py-2 px-4 bg-white bg-opacity-20 dark:bg-opacity-20 rounded">
                             <i class="fas fa-clock mr-2"></i><span id="timer-display">00:00:00</span>
+                        </div> -->
+                        <div id="quiz-timer"
+                            class="text-lg font-bold py-2 px-4 bg-white bg-opacity-20 dark:bg-opacity-20 rounded">
+                            <i class="fas fa-clock mr-2"></i>Time Remaining: <span id="timer-display">Loading...</span>
                         </div>
                     </div>
                     <div class="p-4">
                         <div id="quiz-container" data-attempt-id="{{ attempt.id }}"
-                            data-submit-url="{{ url_for('quiz.submit_quiz', attempt_id=attempt.id) }}">
+                            data-submit-url="{{ url_for('quiz.submit_quiz', attempt_id=attempt.id) }}"
+                            data-time-limit="{{ quiz.time_limit }}" data-time-unit="{{ quiz.time_unit }}">
                             <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-5">
                                 <p class="mb-2"><i class="fas fa-info-circle mr-2"></i>Answer all questions to the best
                                     of your ability. Use the navigation buttons or question numbers to move between
@@ -248,7 +253,7 @@
             </div>
         </div>
     </div>
-    
+
     <script src="{{ url_for('static', filename='js/darkmode.js') }}"></script>
     <script src="/static/js/takeQuiz.js"></script>
 </body>
