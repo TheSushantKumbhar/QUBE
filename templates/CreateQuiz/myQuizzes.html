@@ -2,10 +2,10 @@
 {% block title %}My Quizzes - QUBE{% endblock %}
 {% block content %}
 
-<div class="w-full  min-h-screen pb-10">
+<div class="w-full min-h-screen pb-10 dark:bg-zinc-900">
     <!-- Header Banner -->
     <div>
-        <div class="max-w-6xl bg-indigo-600 px-6 py-5 rounded-lg shadow-lg mx-auto flex flex-col md:flex-row items-center justify-between">
+        <div class="max-w-6xl bg-indigo-600  dark:bg-gray-900 px-6 py-5 rounded-lg shadow-lg mx-auto flex flex-col md:flex-row items-center justify-between">
             <div class="mb-4 md:mb-0 flex items-center">
                 <i class="fas fa-list-alt text-white text-4xl mr-4"></i>
                 <div>
@@ -14,9 +14,15 @@
                 </div>
             </div>
             
-            <div class="flex gap-3">
+            <div class="flex gap-3 items-center">
+                <!-- Dark Mode Toggle -->
+                <button id="darkModeToggle" class="p-2 rounded-lg text-white hover:bg-indigo-500 transition">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:block"></i>
+                </button>
+                
                 <a href="{{ url_for('quiz.quiz_categories') }}" 
-                   class="bg-white text-indigo-700 px-5 py-2.5 rounded-lg shadow-md hover:bg-gray-100 transition font-medium flex items-center">
+                   class="bg-white text-indigo-700 dark:bg-indigo-200 px-5 py-2.5 rounded-lg shadow-md hover:bg-gray-100 dark:hover:bg-indigo-300 transition font-medium flex items-center">
                     <i class="fas fa-plus mr-2"></i> Create New Quiz
                 </a>
             </div>
@@ -25,35 +31,35 @@
 
     <!-- Stats Summary -->
     <div class="max-w-6xl mx-auto mt-6 px-4">
-        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-md p-6 mb-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-indigo-50 rounded-lg p-4 flex items-center">
-                    <div class="bg-indigo-100 rounded-full p-3 mr-4">
-                        <i class="fas fa-clipboard-list text-indigo-600 text-xl"></i>
+                <div class="bg-indigo-50 dark:bg-zinc-700 rounded-lg p-4 flex items-center">
+                    <div class="bg-indigo-100 dark:bg-indigo-800 rounded-full p-3 mr-4">
+                        <i class="fas fa-clipboard-list text-indigo-600 dark:text-indigo-300 text-xl"></i>
                     </div>
                     <div>
-                        <p class="text-gray-500 text-sm">Total Quizzes</p>
-                        <p class="text-xl font-bold text-gray-800">{{ quizzes|length }}</p>
+                        <p class="text-gray-500 dark:text-gray-300 text-sm">Total Quizzes</p>
+                        <p class="text-xl font-bold text-gray-800 dark:text-white">{{ quizzes|length }}</p>
                     </div>
                 </div>
                 
-                <div class="bg-purple-50 rounded-lg p-4 flex items-center">
-                    <div class="bg-purple-100 rounded-full p-3 mr-4">
-                        <i class="fas fa-eye text-purple-600 text-xl"></i>
+                <div class="bg-purple-50 dark:bg-zinc-700 rounded-lg p-4 flex items-center">
+                    <div class="bg-purple-100 dark:bg-purple-800 rounded-full p-3 mr-4">
+                        <i class="fas fa-eye text-purple-600 dark:text-purple-300 text-xl"></i>
                     </div>
                     <div>
-                        <p class="text-gray-500 text-sm">Public Quizzes</p>
-                        <p class="text-xl font-bold text-gray-800">{{ quizzes|selectattr('is_public', 'eq', true)|list|length }}</p>
+                        <p class="text-gray-500 dark:text-gray-300 text-sm">Public Quizzes</p>
+                        <p class="text-xl font-bold text-gray-800 dark:text-white">{{ quizzes|selectattr('is_public', 'eq', true)|list|length }}</p>
                     </div>
                 </div>
                 
-                <div class="bg-green-50 rounded-lg p-4 flex items-center">
-                    <div class="bg-green-100 rounded-full p-3 mr-4">
-                        <i class="fas fa-bolt text-green-600 text-xl"></i>
+                <div class="bg-green-50 dark:bg-zinc-700 rounded-lg p-4 flex items-center">
+                    <div class="bg-green-100 dark:bg-green-800 rounded-full p-3 mr-4">
+                        <i class="fas fa-bolt text-green-600 dark:text-green-300 text-xl"></i>
                     </div>
                     <div>
-                        <p class="text-gray-500 text-sm">Live Quizzes</p>
-                        <p class="text-xl font-bold text-gray-800">{{ quizzes|selectattr('is_live', 'eq', true)|list|length }}</p>
+                        <p class="text-gray-500 dark:text-gray-300 text-sm">Live Quizzes</p>
+                        <p class="text-xl font-bold text-gray-800 dark:text-white">{{ quizzes|selectattr('is_live', 'eq', true)|list|length }}</p>
                     </div>
                 </div>
             </div>
@@ -65,50 +71,50 @@
         {% if quizzes %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for quiz in quizzes %}
-                <div class="bg-white rounded-xl shadow-md overflow-hidden transform transition-transform hover:scale-105 hover:shadow-lg">
+                <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-md overflow-hidden transform transition-transform hover:scale-105 hover:shadow-lg">
                     <div class="bg-indigo-600 h-2"></div>
                     <div class="p-6">
                         <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-xl font-bold text-gray-800 truncate mr-2">{{ quiz.title }}</h3>
+                            <h3 class="text-xl font-bold text-gray-800 dark:text-white truncate mr-2">{{ quiz.title }}</h3>
                             <div class="flex gap-2">
                                 {% if quiz.is_public %}
-                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Public</span>
+                                <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full">Public</span>
                                 {% else %}
-                                <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">Private</span>
+                                <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs rounded-full">Private</span>
                                 {% endif %}
                                 
                                 {% if quiz.is_live %}
-                                <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">Live</span>
+                                <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">Live</span>
                                 {% endif %}
                                 
                                 {% if not quiz.always_available and quiz.start_time and quiz.end_time %}
-                                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Time Limited</span>
+                                <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">Time Limited</span>
                                 {% endif %}
                             </div>
                         </div>
                         
-                        <p class="text-gray-600 mb-4 text-sm">{{ quiz.subject }}</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">{{ quiz.subject }}</p>
                         
-                        <div class="flex items-center text-sm text-gray-500 mb-6">
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-6">
                             <i class="far fa-calendar-alt mr-2"></i>
                             Created: {{ quiz.created_at.strftime('%b %d, %Y') }}
                         </div>
                         
                         <div class="flex items-center justify-between mt-2">
-                            <div class="flex items-center bg-indigo-50 px-3 py-1 rounded-full text-sm text-indigo-600">
+                            <div class="flex items-center bg-indigo-50 dark:bg-indigo-900 px-3 py-1 rounded-full text-sm text-indigo-600 dark:text-indigo-300">
                                 <i class="fas fa-question-circle mr-2"></i>
                                 {{ quiz.questions|length }} questions
                             </div>
                             
                             <div class="flex gap-2">
                                 <a href="{{ url_for('quiz.view_quiz', quiz_id=quiz.id) }}" 
-                                   class="text-indigo-600 hover:text-indigo-800" title="View Quiz">
+                                   class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300" title="View Quiz">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="#" class="text-indigo-600 hover:text-indigo-800" title="Edit Quiz">
+                                <a href="#" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300" title="Edit Quiz">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="#" class="text-red-600 hover:text-red-800" title="Delete Quiz">
+                                <a href="#" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" title="Delete Quiz">
                                     <i class="fas fa-trash-alt"></i>
                                 </a>
                             </div>
@@ -118,11 +124,11 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div class="bg-white rounded-xl shadow-md p-10 text-center">
+            <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-md p-10 text-center">
                 <div class="flex flex-col items-center">
-                    <i class="fas fa-clipboard-list text-indigo-300 text-6xl mb-4"></i>
-                    <h3 class="text-xl font-semibold text-gray-700 mb-2">No Quizzes Yet</h3>
-                    <p class="text-gray-500 mb-6">You haven't created any quizzes yet. Start creating your first quiz now!</p>
+                    <i class="fas fa-clipboard-list text-indigo-300 dark:text-indigo-500 text-6xl mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">No Quizzes Yet</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">You haven't created any quizzes yet. Start creating your first quiz now!</p>
                     <a href="{{ url_for('quiz.quiz_categories') }}" 
                        class="bg-indigo-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-indigo-700 transition font-medium">
                         <i class="fas fa-plus mr-2"></i> Create Your First Quiz
@@ -134,7 +140,6 @@
 </div>
 
 <script>
-   
     document.addEventListener('DOMContentLoaded', function() {
         // Animation for quiz cards as they come into view
         const quizCards = document.querySelectorAll('.grid > div');
@@ -162,6 +167,30 @@
             // Add cursor pointer to indicate clickable
             card.classList.add('cursor-pointer');
         });
+        
+        // Dark mode toggle functionality
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        // Check for saved theme preference or prefer-color-scheme
+        if (localStorage.getItem('color-theme') === 'dark' || 
+            (!localStorage.getItem('color-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        // Toggle dark mode
+        darkModeToggle.addEventListener('click', function() {
+            // Toggle class on document element
+            document.documentElement.classList.toggle('dark');
+            
+            // Update localStorage
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                localStorage.setItem('color-theme', 'light');
+            }
+        });
     });
 </script>
 
@@ -169,6 +198,17 @@
     .grid > div {
         opacity: 0;
         transition: opacity 0.3s ease-in-out;
+    }
+    
+    /* Add this to your <head> or include in your base template if not already present */
+    /* For tailwind dark mode to work properly */
+    @media (prefers-color-scheme: dark) {
+        .dark\:block {
+            display: block;
+        }
+        .dark\:hidden {
+            display: none;
+        }
     }
 </style>
 
