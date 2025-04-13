@@ -2,8 +2,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from flask import Flask, render_template, session
-from auth.routes import auth_bp
-from createQuiz.routes import quiz_bp
+
+
 from extensions import db, migrate
 from config import SQLALCHEMY_DATABASE_URI
 from models.db_init import create_database
@@ -27,12 +27,20 @@ app.config["SECRET_KEY"] = "your_secret_key_here"
 db.init_app(app)
 migrate.init_app(app, db) 
 
+from auth.routes import auth_bp
 app.register_blueprint(auth_bp, url_prefix='/auth')
+
+from createQuiz.routes import quiz_bp
 app.register_blueprint(quiz_bp, url_prefix='/quiz')
+
 from liveQuiz.routes import live
 app.register_blueprint(live, url_prefix="/live")
+
 from AIQuiz.routes import AI
 app.register_blueprint(AI,url_prefix="/AI")
+
+from Analytics.routes import analytics
+app.register_blueprint(analytics,url_prefix="/analytics")
 
 
 # configure_genai()
