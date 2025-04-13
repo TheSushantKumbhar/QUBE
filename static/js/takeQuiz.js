@@ -28,19 +28,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const answeredQuestions = new Set();
     const flaggedQuestions = new Set();
     
-    // Timer variables
+    // // Timer variables
+    // let timerSeconds = 0;
+    // let timerInterval;
+    // const startTime = new Date();
+    // const timerDisplay = document.getElementById('timer-display');
+    // const quizTimer = document.getElementById('quiz-timer');
+    
+    // Modal setup
+    const submitModal = document.getElementById('submitConfirmModal');
+    const cancelSubmit = document.getElementById('cancel-submit');
+    
+    // // Start the timer
+    // startTimer();
+
     let timerSeconds = 0;
     let timerInterval;
     const startTime = new Date();
     const timerDisplay = document.getElementById('timer-display');
     const quizTimer = document.getElementById('quiz-timer');
     
-    // Modal setup
-    const submitModal = document.getElementById('submitConfirmModal');
-    const cancelSubmit = document.getElementById('cancel-submit');
+    // Get time limit from data attributes
+    const quizContainer = document.getElementById('quiz-container');
+    const timeLimit = parseInt(quizContainer.dataset.timeLimit) || 0;
+    const timeUnit = quizContainer.dataset.timeUnit || 'minutes';
+    
+    // Calculate total seconds for time limit
+    let totalSeconds = 0;
+    if (timeLimit > 0) {
+        if (timeUnit === 'minutes') {
+            totalSeconds = timeLimit * 60;
+        } else if (timeUnit === 'hours') {
+            totalSeconds = timeLimit * 3600;
+        }
+        timerSeconds = totalSeconds; // Start from the time limit and count down
+    }
     
     // Start the timer
-    startTimer();
+    if (timeLimit > 0) {
+        startCountdownTimer(); // Use countdown timer if there's a time limit
+    } else {
+        startTimer(); // Use elapsed timer if no time limit
+    }
     
     // Initialize question navigation
     initializeQuestionNavigation();
@@ -110,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.querySelectorAll('.prev-question').forEach((button) => {
         button.addEventListener('click', () => {
-            if (currentQuestionIndex > 0) {
+            if (currentQuestionIndex > 0) { 
                 goToQuestion(currentQuestionIndex - 1);
             }
         });
@@ -237,11 +266,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Timer function
+    // function startTimer() {
+    //     timerInterval = setInterval(updateTimer, 1000);
+    // }
+    
+    // function updateTimer() {
+    //     timerSeconds++;
+        
+    //     const hours = Math.floor(timerSeconds / 3600);
+    //     const minutes = Math.floor((timerSeconds % 3600) / 60);
+    //     const seconds = timerSeconds % 60;
+        
+    //     timerDisplay.textContent = 
+    //         (hours < 10 ? '0' + hours : hours) + ':' +
+    //         (minutes < 10 ? '0' + minutes : minutes) + ':' +
+    //         (seconds < 10 ? '0' + seconds : seconds);
+        
+    //     // Add warning colors based on time
+    //     if (timerSeconds > 2700) { // 45 minutes - warning
+    //         quizTimer.classList.remove('bg-white', 'bg-opacity-20');
+    //         quizTimer.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-800', 'dark:text-yellow-100');
+    //     }
+    //     if (timerSeconds > 3300) { // 55 minutes - danger
+    //         quizTimer.classList.remove('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-800', 'dark:text-yellow-100');
+    //         quizTimer.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-800', 'dark:text-red-100', 'animate-pulse');
+    //     }
+    // }
+
     function startTimer() {
-        timerInterval = setInterval(updateTimer, 1000);
+        timerInterval = setInterval(updateElapsedTimer, 1000);
     }
     
-    function updateTimer() {
+    function updateElapsedTimer() {
         timerSeconds++;
         
         const hours = Math.floor(timerSeconds / 3600);
@@ -253,12 +309,70 @@ document.addEventListener('DOMContentLoaded', function() {
             (minutes < 10 ? '0' + minutes : minutes) + ':' +
             (seconds < 10 ? '0' + seconds : seconds);
         
-        // Add warning colors based on time
+        // Add warning colors based on time (keep your existing code)
         if (timerSeconds > 2700) { // 45 minutes - warning
             quizTimer.classList.remove('bg-white', 'bg-opacity-20');
             quizTimer.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-800', 'dark:text-yellow-100');
         }
         if (timerSeconds > 3300) { // 55 minutes - danger
+            quizTimer.classList.remove('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-800', 'dark:text-yellow-100');
+            quizTimer.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-800', 'dark:text-red-100', 'animate-pulse');
+        }
+    }
+    
+    // Timer function for counting down time limit
+    function startCountdownTimer() {
+        timerInterval = setInterval(updateCountdownTimer, 1000);
+        updateCountdownTimer(); // Update immediately to show initial time
+    }
+    
+    function updateCountdownTimer() {
+        if (timerSeconds <= 0) {
+            // Time's up - submit the quiz automatically
+            clearInterval(timerInterval);
+            
+            // Show a time's up message
+            const timeUpAlert = document.createElement('div');
+            timeUpAlert.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+            timeUpAlert.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+                    <i class="fas fa-clock text-4xl text-red-500 mb-4"></i>
+                    <h2 class="text-xl font-bold mb-2 dark:text-white">Time's Up!</h2>
+                    <p class="mb-4 dark:text-gray-300">Your quiz is being submitted automatically.</p>
+                    <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                </div>
+            `;
+            document.body.appendChild(timeUpAlert);
+            
+            // Submit the quiz after a short delay
+            setTimeout(() => {
+                submitQuiz();
+            }, 1500);
+            
+            return;
+        }
+        
+        timerSeconds--;
+        
+        const hours = Math.floor(timerSeconds / 3600);
+        const minutes = Math.floor((timerSeconds % 3600) / 60);
+        const seconds = timerSeconds % 60;
+        
+        timerDisplay.textContent = 
+            (hours < 10 ? '0' + hours : hours) + ':' +
+            (minutes < 10 ? '0' + minutes : minutes) + ':' +
+            (seconds < 10 ? '0' + seconds : seconds);
+        
+        // Add warning colors based on remaining time
+        const totalTimeSeconds = timeUnit === 'minutes' ? timeLimit * 60 : timeLimit * 3600;
+        const timePercentRemaining = (timerSeconds / totalTimeSeconds) * 100;
+        
+        if (timePercentRemaining <= 25) { // Warning at 25% time remaining
+            quizTimer.classList.remove('bg-white', 'bg-opacity-20');
+            quizTimer.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-800', 'dark:text-yellow-100');
+        }
+        
+        if (timePercentRemaining <= 10) { // Danger at 10% time remaining
             quizTimer.classList.remove('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-800', 'dark:text-yellow-100');
             quizTimer.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-800', 'dark:text-red-100', 'animate-pulse');
         }
