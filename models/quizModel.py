@@ -18,7 +18,8 @@ class Quiz(db.Model):
     start_time = db.Column(db.Time, nullable=True)
     end_time = db.Column(db.Time, nullable=True)
 
-    
+    time_limit = db.Column(db.Integer, default=0)  # 0 means no time limit
+    time_unit = db.Column(db.String(10), default='minutes')  # 'minutes' or 'hours'
     
     user = db.relationship("User", backref=db.backref("quizzes", cascade="all, delete-orphan"))
     questions = db.relationship("Question", backref="quiz", cascade="all, delete-orphan")
