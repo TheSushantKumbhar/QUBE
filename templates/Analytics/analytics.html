@@ -89,20 +89,37 @@
         </div>
     </div>
 
-    <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-        <!-- Quiz Completion Chart -->
+    <!-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
         <div class="bg-white dark:bg-zinc-700 rounded-xl shadow-md p-6">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Quiz Completion Rates</h2>
-            <div class="h-64" id="completion-chart"></div>
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Your Performance History</h2>
+            <div class="h-64" id="performance-chart">
+                <canvas id="performanceCanvas"></canvas>
+            </div>
+            
         </div>
 
-        <!-- Score Distribution Chart -->
         <div class="bg-white dark:bg-zinc-700 rounded-xl shadow-md p-6">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Score Distribution</h2>
-            <div class="h-64" id="score-distribution-chart"></div>
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Performance by Subject</h2>
+            <div class="h-64" id="subject-chart"></div>
+        </div>
+    </div> -->
+
+    <!-- Charts Row -->
+<!-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+    <div class="bg-white dark:bg-zinc-700 rounded-xl shadow-md p-6">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Your Performance History</h2>
+        <div class="h-64" id="performance-chart">
+            <canvas id="performanceCanvas"></canvas>
         </div>
     </div>
+
+    <div class="bg-white dark:bg-zinc-700 rounded-xl shadow-md p-6">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Performance by Subject</h2>
+        <div class="h-64" id="subject-chart">
+            <canvas id="subjectCanvas"></canvas>
+        </div>
+    </div>
+</div> -->
 
     <!-- Top Performing Quizzes Table -->
     <div class="bg-white dark:bg-zinc-700 rounded-xl shadow-md p-6 mb-10">
@@ -147,7 +164,7 @@
                             <div class="flex items-center">
                                 <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
                                     <div class="bg-indigo-600 h-2.5 rounded-full"
-                                        style="width: {{ quiz.completion_rate }} %"></div>
+                                        style="width: {{ quiz.completion_rate }}%"></div>
                                 </div>
                                 <span class="ml-2 text-sm text-gray-900 dark:text-white">{{ quiz.completion_rate
                                     }}%</span>
@@ -239,34 +256,66 @@
 </div>
 
 <!-- Include Charts.js -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
 <script>
+ // Initialize charts when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', function () {
+    try {
+        // Parse the data properly
+        const userPerformanceData = JSON.parse('{{ user_performance_data | tojson }}');
+        const subjectPerformanceData = JSON.parse('{{ subject_performance_data | tojson }}');
 
-    // Initialize charts when the DOM is fully loaded
-    document.addEventListener('DOMContentLoaded', function () {
-        // // Chart data from server
-        // const completionData = {{ completion_data|tojson }};
-        // const scoreDistribution = {{ score_distribution|tojson }};
-        const completionData = JSON.parse('{{ completion_data | tojson | safe }}');
-        const scoreDistribution = JSON.parse('{{ score_distribution | tojson | safe }}');
+        // Verify elements exist before accessing them - target the canvas element directly
+        const performanceCanvas = document.getElementById('performanceCanvas');
+        const subjectCtx = document.getElementById('subject-chart');
 
-        // Quiz Completion Chart
-        const completionCtx = document.getElementById('completion-chart').getContext('2d');
-        const completionChart = new Chart(completionCtx, {
+        if (!performanceCanvas || !subjectCtx) {
+            console.error('One or more chart containers not found');
+            return;
+        }
+
+        // Function to get the current theme colors
+        const getThemeColors = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            return {
+                gridColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                tickColor: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
+                backgroundColor: isDark ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.2)',
+                borderColor: isDark ? 'rgba(99, 102, 241, 1)' : 'rgba(99, 102, 241, 1)',
+                avgLineColor: isDark ? 'rgba(156, 163, 175, 1)' : 'rgba(156, 163, 175, 1)'
+            };
+        };
+
+        // Get initial theme colors
+        const colors = getThemeColors();
+
+        // User Performance Chart - use the canvas element
+        const performanceChart = new Chart(performanceCanvas, {
             type: 'line',
             data: {
-                labels: completionData.labels,
-                datasets: [{
-                    label: 'Completion Rate (%)',
-                    data: completionData.values,
-                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                    borderColor: 'rgba(99, 102, 241, 1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: true
-                }]
+                labels: userPerformanceData.labels,
+                datasets: [
+                    {
+                        label: 'Your Score',
+                        data: userPerformanceData.user_scores,
+                        backgroundColor: colors.backgroundColor,
+                        borderColor: colors.borderColor,
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Average Score',
+                        data: userPerformanceData.avg_scores,
+                        backgroundColor: 'rgba(156, 163, 175, 0.2)',
+                        borderColor: colors.avgLineColor,
+                        borderWidth: 2,
+                        tension: 0.3,
+                        borderDash: [5, 5],
+                        fill: false
+                    }
+                ]
             },
             options: {
                 responsive: true,
@@ -276,114 +325,138 @@
                         beginAtZero: true,
                         max: 100,
                         grid: {
-                            color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            color: colors.gridColor
                         },
                         ticks: {
-                            color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
+                            color: colors.tickColor
                         }
                     },
                     x: {
                         grid: {
-                            color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            color: colors.gridColor
                         },
                         ticks: {
-                            color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
+                            color: colors.tickColor
                         }
                     }
                 },
                 plugins: {
                     legend: {
                         labels: {
-                            color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
+                            color: colors.tickColor
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.y + '%';
+                                return label;
+                            }
                         }
                     }
                 }
             }
         });
 
-        // Score Distribution Chart
-        const scoreCtx = document.getElementById('score-distribution-chart').getContext('2d');
-        const scoreChart = new Chart(scoreCtx, {
-            type: 'bar',
+        // Subject Performance Chart - Also make sure this has a canvas element
+        const subjectCanvas = document.createElement('canvas');
+        subjectCtx.appendChild(subjectCanvas);
+        
+        const subjectChart = new Chart(subjectCanvas, {
+            type: 'radar',
             data: {
-                labels: scoreDistribution.labels,
+                labels: subjectPerformanceData.labels,
                 datasets: [{
-                    label: 'Number of Attempts',
-                    data: scoreDistribution.values,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.8)',
-                        'rgba(255, 159, 64, 0.8)',
-                        'rgba(255, 205, 86, 0.8)',
-                        'rgba(75, 192, 192, 0.8)',
-                        'rgba(54, 162, 235, 0.8)',
-                        'rgba(153, 102, 255, 0.8)',
-                        'rgba(201, 203, 207, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgb(255, 99, 132)',
-                        'rgb(255, 159, 64)',
-                        'rgb(255, 205, 86)',
-                        'rgb(75, 192, 192)',
-                        'rgb(54, 162, 235)',
-                        'rgb(153, 102, 255)',
-                        'rgb(201, 203, 207)'
-                    ],
-                    borderWidth: 1
+                    label: 'Score (%)',
+                    data: subjectPerformanceData.scores,
+                    backgroundColor: colors.backgroundColor,
+                    borderColor: colors.borderColor,
+                    borderWidth: 2,
+                    pointBackgroundColor: colors.borderColor,
+                    pointRadius: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: {
+                    r: {
                         beginAtZero: true,
-                        grid: {
-                            color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
-                        },
+                        max: 100,
                         ticks: {
-                            color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            stepSize: 20,
+                            color: colors.tickColor,
+                            backdropColor: 'transparent',
+                            z: 100
                         },
-                        ticks: {
-                            color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
+                        pointLabels: {
+                            color: colors.tickColor
+                        },
+                        grid: {
+                            color: colors.gridColor
                         }
                     }
                 },
                 plugins: {
                     legend: {
                         labels: {
-                            color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
+                            color: colors.tickColor
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.raw + '%';
+                                return label;
+                            }
                         }
                     }
                 }
             }
         });
 
-        // Update charts when dark mode changes
-        const darkToggle = document.getElementById('dark-toggle');
-        if (darkToggle) {
-            darkToggle.addEventListener('click', function () {
-                setTimeout(() => {
-                    completionChart.options.scales.y.grid.color = document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-                    completionChart.options.scales.x.grid.color = document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-                    completionChart.options.scales.y.ticks.color = document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
-                    completionChart.options.scales.x.ticks.color = document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
-                    completionChart.options.plugins.legend.labels.color = document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
-                    completionChart.update();
+        // Function to update charts when theme changes
+        const updateChartsForTheme = () => {
+            const colors = getThemeColors();
 
-                    scoreChart.options.scales.y.grid.color = document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-                    scoreChart.options.scales.x.grid.color = document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-                    scoreChart.options.scales.y.ticks.color = document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
-                    scoreChart.options.scales.x.ticks.color = document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
-                    scoreChart.options.plugins.legend.labels.color = document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
-                    scoreChart.update();
-                }, 100);
+            // Update Performance Chart
+            performanceChart.options.scales.y.grid.color = colors.gridColor;
+            performanceChart.options.scales.y.ticks.color = colors.tickColor;
+            performanceChart.options.scales.x.grid.color = colors.gridColor;
+            performanceChart.options.scales.x.ticks.color = colors.tickColor;
+            performanceChart.options.plugins.legend.labels.color = colors.tickColor;
+            performanceChart.update();
+
+            // Update Subject Chart
+            subjectChart.options.scales.r.grid.color = colors.gridColor;
+            subjectChart.options.scales.r.ticks.color = colors.tickColor;
+            subjectChart.options.scales.r.pointLabels.color = colors.tickColor;
+            subjectChart.options.plugins.legend.labels.color = colors.tickColor;
+            subjectChart.update();
+        };
+
+        // Listen for theme change events
+        window.addEventListener('themeChanged', updateChartsForTheme);
+        
+        // Also check for a theme toggle button if it exists
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                // Give time for the DOM to update before adjusting charts
+                setTimeout(updateChartsForTheme, 100);
             });
         }
-    });
+    } catch (error) {
+        console.error('Error initializing charts:', error);
+    }
+});
 </script>
 {% endblock %}
