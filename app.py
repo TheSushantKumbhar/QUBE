@@ -22,7 +22,15 @@ socketio.init_app(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
 app.config["SECRET_KEY"] = "your_secret_key_here"       
 # app.config["GEMINI_API_KEY"] = GEMINI_API_KEY
+
+from sqlalchemy.pool import NullPool
+
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    "pool_pre_ping": True,
+    "poolclass": NullPool
+}
  
+
 
 db.init_app(app)
 migrate.init_app(app, db) 
@@ -42,13 +50,15 @@ app.register_blueprint(AI,url_prefix="/AI")
 from Analytics.routes import analytics
 app.register_blueprint(analytics,url_prefix="/analytics")
 
+from homepage.routes import main_bp
+app.register_blueprint(main_bp)
 
 # configure_genai()
 create_database(app)
 
-@app.route('/')
-def home():
-    return render_template('Homepage/index.html',username=session.get('username'),profile_pic=session.get('profile_pic'))
+# @app.route('/')
+# def home():
+#     return render_template('Homepage/index.html',username=session.get('username'),profile_pic=session.get('profile_pic'))
 
 @app.context_processor
 def inject_current_user():
