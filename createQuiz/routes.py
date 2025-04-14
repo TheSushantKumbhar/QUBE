@@ -350,8 +350,6 @@ def save_quiz():
         flash(f"Error saving quiz: {str(e)}", "danger")
         return redirect(url_for('quiz.create_quiz_page'))
 
-# Add these routes to your existing createquiz/routes.py file
-
 @quiz_bp.route('/view/<int:quiz_id>')
 @login_required
 def view_quiz(quiz_id):
@@ -366,56 +364,6 @@ def view_quiz(quiz_id):
     
     return render_template('CreateQuiz/viewQuiz.html', quiz=quiz, current_user=user,username=session.get('username'),profile_pic=session.get('profile_pic'))
 
-
-# @quiz_bp.route('/update_settings/<int:quiz_id>', methods=['POST'])
-# @login_required
-# def update_quiz_settings(quiz_id):
-#     """Update quiz settings (public/private, scheduled times)"""
-#     quiz = Quiz.query.get_or_404(quiz_id)
-#     user = get_current_user()
-    
-#     # Check if user owns this quiz
-#     if quiz.user_id != user.id:
-#         return jsonify({'success': False, 'message': 'You do not have permission to modify this quiz'}), 403
-    
-#     try:
-#         # Update quiz settings
-#         quiz.is_public = 'is_public' in request.form
-#         # quiz.is_live = 'is_live' in request.form
-#         quiz.always_available = request.form.get('always_available') == 'true'
-        
-#         # If not always available, update the time restrictions
-#         if not quiz.always_available:
-#             start_time_str = request.form.get('start_time')
-#             end_time_str = request.form.get('end_time')
-            
-#             if start_time_str and end_time_str:
-#                 # Convert time strings to datetime objects
-#                 from datetime import datetime, time
-                
-#                 # Parse the time strings (format: HH:MM)
-#                 hours, minutes = map(int, start_time_str.split(':'))
-#                 start_time = time(hour=hours, minute=minutes)
-                
-#                 hours, minutes = map(int, end_time_str.split(':'))
-#                 end_time = time(hour=hours, minute=minutes)
-                
-#                 quiz.start_time = start_time
-#                 quiz.end_time = end_time
-#             else:
-#                 return jsonify({'success': False, 'message': 'Start and end times are required'}), 400
-#         else:
-#             # Reset time restrictions if always available
-#             quiz.start_time = None
-#             quiz.end_time = None
-        
-#         db.session.commit()
-#         return jsonify({'success': True}), 200
-        
-#     except Exception as e:
-#         db.session.rollback()
-#         traceback.print_exc()
-#         return jsonify({'success': False, 'message': str(e)}), 500
 
 
 @quiz_bp.route('/update_settings/<int:quiz_id>', methods=['POST'])
@@ -540,29 +488,85 @@ def delete_quiz(quiz_id):
 
 
 # Add these to your quiz_bp Blueprint in createquiz/routes.py
-@quiz_bp.route('/explore')
+# @quiz_bp.route('/explore')
+# def explore_quizzes():
+#     """
+#     Explore page that shows all public quizzes
+#     Any user can view this page, even if not logged in
+#     """
+#     # Get all public quizzes that are live
+#     public_quizzes = Quiz.query.filter(
+#         Quiz.is_public == True,
+#         # Quiz.is_live == True,
+#     ).order_by(Quiz.created_at.desc()).all()
+    
+#     # Get current user if logged in
+#     current_user = get_current_user()
+    
+#     # Get current time for checking availability
+#     from datetime import datetime
+#     current_time = (datetime.utcnow() + timedelta(hours=5, minutes=30)).time()
+    
+#     return render_template('explore/explore.html', 
+#                           quizzes=public_quizzes,
+#                           current_user=current_user,
+#                           current_time=current_time,username=session.get('username'),profile_pic=session.get('profile_pic'))
+
+
+from sqlalchemy import or_
+
+@quiz_bp.route('/explore', methods=['GET'])
 def explore_quizzes():
-    """
-    Explore page that shows all public quizzes
-    Any user can view this page, even if not logged in
-    """
-    # Get all public quizzes that are live
-    public_quizzes = Quiz.query.filter(
-        Quiz.is_public == True,
-        # Quiz.is_live == True,
-    ).order_by(Quiz.created_at.desc()).all()
+    # Get search and filter parameters
+    search_query = request.args.get('search', '')
+    filter_type = request.args.get('filter', 'all')
     
-    # Get current user if logged in
-    current_user = get_current_user()
+    # Current time for availability check
+    current_time = datetime.now().time()
     
-    # Get current time for checking availability
-    from datetime import datetime
-    current_time = (datetime.utcnow() + timedelta(hours=5, minutes=30)).time()
+    # Base query: only public quizzes
+    quizzes_query = Quiz.query.filter_by(is_public=True)
     
-    return render_template('explore/explore.html', 
-                          quizzes=public_quizzes,
-                          current_user=current_user,
-                          current_time=current_time,username=session.get('username'),profile_pic=session.get('profile_pic'))
+    # Apply search if provided
+    if search_query:
+        search_term = f"%{search_query}%"
+        quizzes_query = quizzes_query.join(User).filter(
+            or_(
+                Quiz.title.ilike(search_term),
+                Quiz.subject.ilike(search_term),
+                User.username.ilike(search_term),
+                User.email.ilike(search_term)
+            )
+        )
+    
+    # Apply filter if provided
+    if filter_type == 'available':
+        # Filter for currently available quizzes
+        quizzes_query = quizzes_query.filter(
+            or_(
+                Quiz.always_available == True,
+                db.and_(
+                    Quiz.start_time <= current_time,
+                    Quiz.end_time >= current_time
+                )
+            )
+        )
+    elif filter_type == 'always':
+        # Filter for quizzes that are always available
+        quizzes_query = quizzes_query.filter(Quiz.always_available == True)
+    
+    # Execute query and get results
+    quizzes = quizzes_query.all()
+    
+    return render_template(
+        'explore/explore.html',
+        quizzes=quizzes,
+        current_time=current_time,
+        search_query=search_query,
+        filter_type=filter_type,
+        username=session.get('username'),profile_pic=session.get('profile_pic')
+    )
+
 
 @quiz_bp.route('/explore/details/<int:quiz_id>')
 def explore_quiz_details(quiz_id):
@@ -589,7 +593,7 @@ def explore_quiz_details(quiz_id):
             completed_at=None
         ).first()
     
-    return render_template('explore/exploreQuizDetails.html', quiz=quiz,creator=creator, current_user=current_user,user_attempt=user_attempt)
+    return render_template('explore/exploreQuizDetails.html', quiz=quiz,creator=creator, current_user=current_user,user_attempt=user_attempt,username=session.get('username'),profile_pic=session.get('profile_pic'))
 
 
 @quiz_bp.route('/explore/start/<int:quiz_id>', methods=['POST'])
@@ -680,110 +684,6 @@ def take_quiz(attempt_id):
                           attempt=attempt,
                           current_time=current_time)
 
-# @quiz_bp.route('/quiz/submit/<int:attempt_id>', methods=['POST'])
-# @login_required
-# def submit_quiz(attempt_id):
-#     try:
-#         print(f"Received submission for attempt {attempt_id}")
-#         print(f"Request headers: {dict(request.headers)}")
-#         print(f"Request data: {request.get_json()}")
-
-#         if not request.is_json:
-#             return jsonify({'success': False, 'message': 'Invalid request. JSON payload required.'}), 400
-
-#         data = request.get_json()
-#         answers = data.get('answers', {})
-#         # completion_time = data.get('completionTime')
-
-#         if not answers or not isinstance(answers, dict):
-#             return jsonify({'success': False, 'message': 'Invalid or missing answers.'}), 400
-
-#         attempt = QuizAttempt.query.get_or_404(attempt_id)
-#         user = get_current_user()
-
-#         if attempt.user_id != user.id:
-#             return jsonify({'success': False, 'message': 'Unauthorized'}), 403
-
-#         if attempt.completed_at:
-#             return jsonify({'success': False, 'message': 'This attempt has already been completed'}), 400
-
-#         # Clear previous answers
-#         UserAnswer.query.filter_by(attempt_id=attempt.id).delete()
-#         db.session.flush()  # Ensure deletion is processed before adding new answers
-
-#         total_questions = 0
-#         correct_answers = 0
-#         incorrect_answers = 0
-
-#         for question_id, option_ids in answers.items():
-#             try:
-#                 question_id = int(question_id)
-#                 question = Question.query.get(question_id)
-#                 if not question or question.quiz_id != attempt.quiz_id:
-#                     print(f"Invalid question ID {question_id} for quiz {attempt.quiz_id}")
-#                     continue
-
-#                 total_questions += 1
-#                 correct_options = {o.id for o in question.options if o.is_correct}
-#                 user_option_ids = set(int(o_id) for o_id in option_ids if str(o_id).isdigit())
-
-#                 # Determine correctness
-#                 if question.question_type == 'single':
-#                     is_correct = len(user_option_ids) == 1 and user_option_ids.issubset(correct_options)
-#                 else:
-#                     is_correct = user_option_ids == correct_options
-
-#                 if is_correct:
-#                     correct_answers += 1
-#                 else:
-#                     incorrect_answers += 1
-
-#                 # Save user answers
-#                 for option_id in user_option_ids:
-#                     option = Option.query.get(option_id)
-#                     if option and option.question_id == question_id:  # Validate option exists and belongs to question
-#                         user_answer = UserAnswer(
-#                             attempt_id=attempt.id,
-#                             question_id=question.id,
-#                             option_id=option_id
-#                         )
-#                         db.session.add(user_answer)
-#                     else:
-#                         print(f"Invalid option ID {option_id} for question {question_id}")
-
-#             except ValueError as ve:
-#                 print(f"ValueError processing question {question_id}: {ve}")
-#                 continue
-
-#         # Update attempt details
-#         now = datetime.utcnow()
-#         score_percentage = int((correct_answers / total_questions) * 100) if total_questions > 0 else 0
-#         attempt.score = score_percentage
-#         attempt.completed_at = now
-
-#         # Commit all changes
-#         db.session.commit()
-#         print(f"Successfully saved attempt {attempt_id} with score {score_percentage}%")
-
-#         return jsonify({
-#             'success': True,
-#             'score': score_percentage,
-#             'correctAnswers': correct_answers,
-#             'totalQuestions': total_questions,
-#             'incorrectAnswers': incorrect_answers,
-#             'redirectUrl': url_for('quiz.quiz_results', attempt_id=attempt.id)
-#         }), 200
-
-#     except SQLAlchemyError as db_error:
-#         db.session.rollback()
-#         print(f"Database error: {str(db_error)}")
-#         return jsonify({'success': False, 'message': 'Database error occurred'}), 500
-#     except Exception as e:
-#         db.session.rollback()
-#         print(f"Unexpected error: {traceback.format_exc()}")
-#         return jsonify({'success': False, 'message': f'An unexpected error occurred: {str(e)}'}), 500
-
-
 from datetime import datetime, timedelta
 import pytz 
 
@@ -814,9 +714,8 @@ def submit_quiz(attempt_id):
         if attempt.completed_at:
             return jsonify({'success': False, 'message': 'This attempt has already been completed'}), 400
 
-        # Clear previous answers
         UserAnswer.query.filter_by(attempt_id=attempt.id).delete()
-        db.session.flush()  # Ensure deletion is processed before adding new answers
+        db.session.flush()  
 
         total_questions = 0
         correct_answers = 0
@@ -834,7 +733,6 @@ def submit_quiz(attempt_id):
                 correct_options = {o.id for o in question.options if o.is_correct}
                 user_option_ids = set(int(o_id) for o_id in option_ids if str(o_id).isdigit())
 
-                # Determine correctness
                 if question.question_type == 'single':
                     is_correct = len(user_option_ids) == 1 and user_option_ids.issubset(correct_options)
                 else:
@@ -845,10 +743,9 @@ def submit_quiz(attempt_id):
                 else:
                     incorrect_answers += 1
 
-                # Save user answers
                 for option_id in user_option_ids:
                     option = Option.query.get(option_id)
-                    if option and option.question_id == question_id:  # Validate option exists and belongs to question
+                    if option and option.question_id == question_id: 
                         user_answer = UserAnswer(
                             attempt_id=attempt.id,
                             question_id=question.id,
@@ -862,7 +759,6 @@ def submit_quiz(attempt_id):
                 print(f"ValueError processing question {question_id}: {ve}")
                 continue
 
-        # Get current time in Indian Standard Time (IST)
         ist_timezone = pytz.timezone('Asia/Kolkata')
         now_utc = datetime.utcnow()
         now_ist = now_utc.replace(tzinfo=pytz.UTC).astimezone(ist_timezone)
@@ -875,13 +771,11 @@ def submit_quiz(attempt_id):
         attempt.score = score_percentage
         attempt.completed_at = now_ist
 
-        # If completion_time was provided, use it to calculate the start time
         if completion_time:
             try:
                 completion_seconds = int(completion_time)
-                # Calculate start time by subtracting completion time from now
                 start_time = now_ist - timedelta(seconds=completion_seconds)
-                attempt.started_at = start_time  # Assuming you have this field
+                attempt.started_at = start_time 
             except (ValueError, TypeError):
                 print(f"Invalid completion time: {completion_time}")
 
