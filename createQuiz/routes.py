@@ -487,31 +487,6 @@ def delete_quiz(quiz_id):
     return redirect(url_for('quiz.my_quizzes'))
 
 
-# Add these to your quiz_bp Blueprint in createquiz/routes.py
-# @quiz_bp.route('/explore')
-# def explore_quizzes():
-#     """
-#     Explore page that shows all public quizzes
-#     Any user can view this page, even if not logged in
-#     """
-#     # Get all public quizzes that are live
-#     public_quizzes = Quiz.query.filter(
-#         Quiz.is_public == True,
-#         # Quiz.is_live == True,
-#     ).order_by(Quiz.created_at.desc()).all()
-    
-#     # Get current user if logged in
-#     current_user = get_current_user()
-    
-#     # Get current time for checking availability
-#     from datetime import datetime
-#     current_time = (datetime.utcnow() + timedelta(hours=5, minutes=30)).time()
-    
-#     return render_template('explore/explore.html', 
-#                           quizzes=public_quizzes,
-#                           current_user=current_user,
-#                           current_time=current_time,username=session.get('username'),profile_pic=session.get('profile_pic'))
-
 
 from sqlalchemy import or_
 
