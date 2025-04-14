@@ -12,7 +12,7 @@
         </div>
 
         <!-- Flash Messages -->
-        <div class="p-6">
+        <!-- <div class="p-6">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -22,12 +22,12 @@
                     {% endfor %}
                 {% endif %}
             {% endwith %}
-        </div>
+        </div> -->
 
         <!-- Body Content -->
         <div class="px-6 pb-6 space-y-6">
             <!-- Creator Info -->
-            <div class="flex items-center gap-3">
+            <div class="mt-6 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-gray-400 dark:bg-gray-600 flex items-center justify-center text-white font-semibold">
                     {{ (creator.username or creator.email)[0]|upper }}
                 </div>
