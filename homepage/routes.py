@@ -1,4 +1,4 @@
-from flask import Blueprint,render_template,url_for
+from flask import Blueprint,render_template,url_for,session
 from createQuiz.routes import login_required
 from utils.auth_helpers import get_current_user
 from extensions import db
@@ -19,7 +19,7 @@ def index():
     
     return render_template('homepage/index.html', 
                           username=username,
-                          recent_activities=recent_activities)
+                          recent_activities=recent_activities,profile_pic=session.get('profile_pic'))
 
 def get_user_recent_activities(user_id, limit=3):
     """Fetch recent user activities including quiz completions and created quizzes"""
