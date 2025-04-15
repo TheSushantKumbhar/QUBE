@@ -3,11 +3,11 @@
 {% block title %}Explore Public Quizzes{% endblock %}
 
 {% block content %}
-<div class="pt-0 pb-4 pl-6 pr-6 ">
+<div class="pt-0 pb-4 pl-6 pr-6 dark:bg-gray-900">
     <div class="mb-6">
         <form action="{{ url_for('quiz.explore_quizzes') }}" method="GET" class="flex flex-col sm:flex-row items-stretch gap-3 sm:gap-4">
             <div class="relative w-full">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-indigo-400 pointer-events-none">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-indigo-400 dark:text-indigo-300 pointer-events-none">
                     <i class="fas fa-search"></i>
                 </span>
                 <input 
@@ -16,13 +16,13 @@
                     id="search" 
                     value="{{ search_query or '' }}" 
                     placeholder="Search quizzes by title, subject, or creator..." 
-                    class="w-full pl-11 pr-14 py-3 rounded-2xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all duration-300"
+                    class="w-full pl-11 pr-14 py-3 rounded-2xl border border-indigo-200 dark:border-indigo-700 dark:bg-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all duration-300"
                 />
                 {% if search_query %}
                 <a 
                     href="{{ url_for('quiz.explore_quizzes') }}" 
                     title="Clear search"
-                    class="absolute inset-y-0 right-12 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                    class="absolute inset-y-0 right-12 flex items-center text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                 >
                     <i class="fas fa-times-circle"></i>
                 </a>
@@ -31,7 +31,7 @@
     
             <button 
                 type="submit" 
-                class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl shadow-md transition duration-300 whitespace-nowrap"
+                class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600 text-white font-semibold rounded-2xl shadow-md transition duration-300 whitespace-nowrap"
             >
                 Search
             </button>
@@ -42,71 +42,78 @@
     <!-- Filter Options -->
     <div class="mb-6 flex flex-wrap gap-3">
         <a href="{{ url_for('quiz.explore_quizzes', filter='all') }}" 
-           class="px-4 py-2 rounded-full text-sm font-medium {{ 'bg-indigo-600 text-white' if filter_type == 'all' else 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200' }}">
+           class="px-4 py-2 rounded-full text-sm font-medium {{ 'bg-indigo-600 text-white' if filter_type == 'all' else 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 dark:bg-indigo-800 dark:text-indigo-100 dark:hover:bg-indigo-700' }}">
             All Quizzes
         </a>
         <a href="{{ url_for('quiz.explore_quizzes', filter='available', search=search_query) }}" 
-           class="px-4 py-2 rounded-full text-sm font-medium {{ 'bg-indigo-600 text-white' if filter_type == 'available' else 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200' }}">
+           class="px-4 py-2 rounded-full text-sm font-medium {{ 'bg-indigo-600 text-white' if filter_type == 'available' else 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 dark:bg-indigo-800 dark:text-indigo-100 dark:hover:bg-indigo-700' }}">
             Currently Available
         </a>
         <a href="{{ url_for('quiz.explore_quizzes', filter='always', search=search_query) }}" 
-           class="px-4 py-2 rounded-full text-sm font-medium {{ 'bg-indigo-600 text-white' if filter_type == 'always' else 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200' }}">
+           class="px-4 py-2 rounded-full text-sm font-medium {{ 'bg-indigo-600 text-white' if filter_type == 'always' else 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200 dark:bg-indigo-800 dark:text-indigo-100 dark:hover:bg-indigo-700' }}">
             Always Available
         </a>
     </div>
 
+  
     <!-- Quizzes Grid -->
     <div class="container mx-auto py-4">
         {% if quizzes %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for quiz in quizzes %}
-            <div class="relative group">
-                <!-- Floating Blob SVG Background -->
-                <div class="absolute -top-6 -left-6 w-60 h-60 z-0 opacity-70 blur-md">
-                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                        <path fill="#e0e7ff" d="M50,-60C65,-48,75,-32,78,-15C80,2,74,18,64,33C54,48,39,62,22,67C5,72,-13,68,-30,60C-47,52,-63,39,-67,22C-71,5,-63,-16,-50,-32C-37,-48,-19,-59,-1,-59C17,-60,34,-61,50,-60Z" transform="translate(100 100)" />
-                    </svg>
+            <div class="relative group h-64 w-full">
+                <!-- Background Gradient -->
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-indigo-900 rounded-2xl shadow-lg dark:shadow-indigo-900/30 overflow-hidden">
+                    <!-- Decorative elements can be added here if desired -->
                 </div>
-            
-                <!-- Quiz Info -->
-                <div class="relative z-10 p-6 w-[365px] h-[210px] backdrop-blur-md bg-white/80 rounded-3xl shadow-xl ">
-                    <div class="flex items-center gap-4 mb-3">
-                        <img src="{{ quiz.user.profile_pic or '/static/default-profile.png' }}" class="w-10 h-10 rounded-full object-cover border border-white shadow">
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-800">{{ quiz.title }}</h3>
-                            <p class="text-sm text-indigo-500">{{ quiz.subject }}</p>
-                            <p class="text-xs text-gray-500">By {{ quiz.user.username or quiz.user.email }}</p>
-                        </div>
-                    </div>
-            
-                    <div class="text-sm text-gray-600 space-y-1 mb-3">
-                        <p><i class="fas fa-question-circle text-indigo-400 mr-2"></i>{{ quiz.questions|length }} Questions</p>
-                        {% if not quiz.always_available %}
-                        <p><i class="fas fa-calendar-alt text-indigo-400 mr-2"></i>{{ quiz.start_time.strftime('%I:%M %p') }} - {{ quiz.end_time.strftime('%I:%M %p') }}</p>
-                        {% endif %}
-                    </div>
-            
-                    <a href="{{ url_for('quiz.explore_quiz_details', quiz_id=quiz.id) }}"
-                       class="inline-block bg-indigo-200 text-indigo-900 text-sm px-4 py-2 rounded-full font-medium shadow-md hover:bg-indigo-300 transition duration-300">
-                        View Details <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
-            
-                <!-- Status Badge floating nearby -->
-                <div class="absolute -top-3 -right-3 z-20">
+                
+                <!-- Status Badge -->
+                <div class="absolute top-4 right-4 z-20">
                     {% if quiz.always_available %}
-                    <span class="bg-indigo-400 text-white text-xs font-medium px-3 py-1 rounded-full shadow">
-                        <i class="fas fa-infinity mr-1"></i> Available
+                    <span class="bg-indigo-500 text-white dark:bg-indigo-600 dark:text-indigo-100 text-xs font-medium px-3 py-1 rounded-full shadow">
+                        <i class="fas fa-infinity mr-1"></i> Always Available
                     </span>
                     {% elif quiz.start_time <= current_time <= quiz.end_time %}
-                    <span class="bg-emerald-400 text-white text-xs font-medium px-3 py-1 rounded-full shadow">
-                        <i class="fas fa-bolt mr-1"></i> Now
+                    <span class="bg-emerald-500 text-white dark:bg-emerald-600 dark:text-emerald-100 text-xs font-medium px-3 py-1 rounded-full shadow">
+                        <i class="fas fa-bolt mr-1"></i> Available Now
                     </span>
                     {% else %}
-                    <span class="bg-yellow-400 text-white text-xs font-medium px-3 py-1 rounded-full shadow">
-                        <i class="fas fa-clock mr-1"></i> Not Available
+                    <span class="bg-amber-400 text-black dark:bg-amber-500 dark:text-amber-950 text-xs font-medium px-3 py-1 rounded-full shadow">
+                        <i class="fas fa-clock mr-1"></i> Scheduled
                     </span>
                     {% endif %}
+                </div>
+                
+                <!-- Quiz Content -->
+                <div class="relative h-full w-full p-5 flex flex-col justify-between">
+                    <div>
+                        <!-- Creator Info -->
+                        <div class="flex items-center gap-3 mb-3">
+                            <img src="{{ quiz.user.profile_pic or '/static/default-profile.png' }}" 
+                                class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow">
+                            <p class="text-xs text-gray-600 dark:text-gray-300">{{ quiz.user.username or quiz.user.email }}</p>
+                        </div>
+                        
+                        <!-- Quiz Title & Subject -->
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 line-clamp-2">{{ quiz.title }}</h3>
+                        <p class="text-sm text-indigo-600 dark:text-indigo-300 font-medium mb-2">{{ quiz.subject }}</p>
+                        
+                        <!-- Quiz Details -->
+                        <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                            <p><i class="fas fa-question-circle text-indigo-400 dark:text-indigo-300 mr-1"></i>{{ quiz.questions|length }} Questions</p>
+                            {% if not quiz.always_available %}
+                            <p><i class="fas fa-calendar-alt text-indigo-400 dark:text-indigo-300 mr-1"></i>{{ quiz.start_time.strftime('%I:%M %p') }} - {{ quiz.end_time.strftime('%I:%M %p') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Action Button -->
+                    <div class="mt-auto">
+                        <a href="{{ url_for('quiz.explore_quiz_details', quiz_id=quiz.id) }}"
+                        class="w-full block text-center bg-indigo-100 hover:bg-indigo-200 text-indigo-800 dark:bg-indigo-700 dark:hover:bg-indigo-600 dark:text-white text-sm px-4 py-2 rounded-lg font-medium transition duration-300">
+                            View Details <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
             {% endfor %}
@@ -114,25 +121,25 @@
         
         {% elif search_query %}
         <!-- No Results Found -->
-        <div class="bg-white rounded-lg shadow-md p-8 text-center max-w-lg mx-auto border border-gray-100">
-            <div class="bg-indigo-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                <i class="fas fa-search text-4xl text-indigo-500"></i>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center max-w-lg mx-auto border border-gray-100 dark:border-gray-700">
+            <div class="bg-indigo-50 dark:bg-indigo-900/30 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-search text-4xl text-indigo-500 dark:text-indigo-300"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-3">No Results Found</h3>
-            <p class="text-gray-600">We couldn't find any quizzes matching "<span class="font-medium">{{ search_query }}</span>"</p>
-            <a href="{{ url_for('quiz.explore_quizzes') }}" class="mt-4 inline-block bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-4 py-2 rounded-lg font-medium">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">No Results Found</h3>
+            <p class="text-gray-600 dark:text-gray-300">We couldn't find any quizzes matching "<span class="font-medium">{{ search_query }}</span>"</p>
+            <a href="{{ url_for('quiz.explore_quizzes') }}" class="mt-4 inline-block bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-700 dark:text-white dark:hover:bg-indigo-600 px-4 py-2 rounded-lg font-medium">
                 Clear Search
             </a>
         </div>
         
         {% else %}
         <!-- Empty State -->
-        <div class="bg-white rounded-lg shadow-md p-8 text-center max-w-lg mx-auto border border-gray-100">
-            <div class="bg-indigo-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                <i class="fas fa-search text-4xl text-indigo-500"></i>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center max-w-lg mx-auto border border-gray-100 dark:border-gray-700">
+            <div class="bg-indigo-50 dark:bg-indigo-900/30 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-search text-4xl text-indigo-500 dark:text-indigo-300"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-3">No Quizzes Available</h3>
-            <p class="text-gray-600">It seems there are no public quizzes at the moment. Please check back later or create your own!</p>
+            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">No Quizzes Available</h3>
+            <p class="text-gray-600 dark:text-gray-300">It seems there are no public quizzes at the moment. Please check back later or create your own!</p>
         </div>
         {% endif %}
     </div>
