@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, current_app, g
+from flask import Blueprint, render_template, current_app, g,session
 from sqlalchemy import func, desc, case, or_
 from datetime import datetime, timedelta
 from models.quizModel import Quiz, Question, Option, QuizAttempt, UserAnswer
@@ -188,4 +188,4 @@ def analytics_dashboard():
                            recent_activity=recent_activity,
                            top_users=top_users,
                            user_performance_data=user_performance_data,
-                           subject_performance_data=subject_performance_data)
+                           subject_performance_data=subject_performance_data,username=session.get('username'),profile_pic=session.get('profile_pic'))

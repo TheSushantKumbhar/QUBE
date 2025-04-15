@@ -460,7 +460,7 @@ def edit_quiz(quiz_id):
         'questions': questions
     }
     
-    return render_template('CreateQuiz/createQuiz.html', quiz=quiz, quiz_data=json.dumps(quiz_data))
+    return render_template('CreateQuiz/createQuiz.html', quiz=quiz, quiz_data=json.dumps(quiz_data), username=session.get('username'),profile_pic=session.get('profile_pic'))
 
 
 @quiz_bp.route('/delete/<int:quiz_id>', methods=['POST'])
