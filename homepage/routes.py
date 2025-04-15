@@ -1,4 +1,4 @@
-from flask import Blueprint,render_template,url_for,session
+from flask import Blueprint,render_template,url_for,session,redirect
 from createQuiz.routes import login_required
 from utils.auth_helpers import get_current_user
 from extensions import db
@@ -6,20 +6,22 @@ from models.quizModel import Question,QuizAttempt,Quiz
 from sqlalchemy import func, desc, case, or_
 
 main_bp = Blueprint('main',__name__)
+
 @main_bp.route('/')
-@login_required
 def index():
     # Get the current user
     current_user = get_current_user()
-    user_id = current_user.id
-    username = current_user.username
+
+    # if not current_user:
+    #     return redirect(url_for('auth.login')) 
+    # user_id = current_user.id
+    # username = current_user.username
     
-    # Fetch recent activities for the user
-    recent_activities = get_user_recent_activities(user_id)
+    # # Fetch recent activities for the user
+    # recent_activities = get_user_recent_activities(user_id)
     
     return render_template('homepage/index.html', 
-                          username=username,
-                          recent_activities=recent_activities,profile_pic=session.get('profile_pic'))
+                          username=session.get('username'),profile_pic=session.get('profile_pic'))
 
 def get_user_recent_activities(user_id, limit=3):
     """Fetch recent user activities including quiz completions and created quizzes"""

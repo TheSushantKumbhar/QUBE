@@ -97,7 +97,7 @@ def login():
             session['profile_pic'] = db_user.profile_pic if db_user.profile_pic else "/static/profile_pics/default.jpg"
 
             flash("Login successful!", "success")
-            return redirect(url_for('home'))
+            return redirect(url_for('main.index'))
 
         except Exception as e:
             flash("Invalid email or password. Please try again.", "danger")
@@ -112,7 +112,7 @@ def logout():
     session.pop('username', None)
     session.pop('profile_pic', None)
     flash('Logged out successfully', 'info')
-    return redirect(url_for('home'))
+    return render_template('/Homepage/index.html')
 
 
 @auth_bp.route('/resetPassword', methods=['GET', 'POST'])
