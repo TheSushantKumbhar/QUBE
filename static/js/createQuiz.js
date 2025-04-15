@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
     
-    // Page navigation
     document.getElementById('nextToPage3').addEventListener('click', function () {
         if (!validateForm()) {
             return;
@@ -19,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('page2').classList.remove('hidden');
     });
 
-    // Initialize with page2 visible
+    // Initialize with page2 
     if (document.getElementById('page2')) {
         document.getElementById('page2').classList.remove('hidden');
     }
@@ -30,12 +29,11 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('quizTitle').value = '';
     document.getElementById('quizSubject').value = '';
 
-    // Preview quiz button functionality
     document.getElementById('previewQuiz').addEventListener('click', function () {
         const quizData = generateQuizData();
 
+        //local storage for saving quiz data
         if (validateQuizData(quizData)) {
-            // Store the quiz data for preview
             localStorage.setItem('previewQuizData', JSON.stringify(quizData));
 
             // Show preview page
@@ -147,7 +145,6 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('backToEdit').addEventListener('click', function () {
         document.getElementById('page4').classList.add('hidden');
         document.getElementById('page3').classList.remove('hidden');
-        // Don't reload questions since they're already in the editor
     });
 
 
