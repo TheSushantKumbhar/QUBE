@@ -14,7 +14,6 @@ import base64
 from datetime import datetime, timedelta
 from sqlalchemy.exc import SQLAlchemyError
 
-# Create blueprint
 quiz_bp = Blueprint('quiz', __name__)
 
 def allowed_file(filename):
@@ -26,22 +25,17 @@ def upload_to_cloudinary(file_data):
         return None
         
     try:
-        # Handle base64 encoded images
         if isinstance(file_data, str) and file_data.startswith('data:image'):
-            # Generate a unique filename
+
             filename = f"quiz_image_{uuid.uuid4()}"
-            
-            # Upload to Cloudinary
+
             result = cloudinary.uploader.upload(
                 file_data,
                 public_id=filename,
                 folder="quiz_images"
             )
-            
-            # Return the secure URL
             return result['secure_url']
             
-        # Handle file objects (if you're receiving actual file uploads)
         elif hasattr(file_data, 'filename'):
             filename = f"quiz_image_{uuid.uuid4()}"
             
@@ -50,7 +44,6 @@ def upload_to_cloudinary(file_data):
                 public_id=filename,
                 folder="quiz_images"
             )
-            
             return result['secure_url']
             
     except Exception as e:
@@ -71,10 +64,10 @@ from functools import wraps
 
 def login_required(func):
     """Decorator to ensure user is logged in"""
-    @wraps(func)  # Preserve the original function name
+    @wraps(func)  
     def wrapper(*args, **kwargs):
         if not get_current_user():
-            return redirect('/auth/login')  # Ensure correct Firebase login route
+            return redirect('/auth/login')  
         return func(*args, **kwargs)
     return wrapper
 
@@ -85,7 +78,6 @@ def login_required(func):
 def upload_image():
     if 'image' not in request.files and 'image_data' not in request.form:
         return jsonify({'success': False, 'message': 'No image provided'}), 400
-        
     try:
         if 'image' in request.files:
             image_url = upload_to_cloudinary(request.files['image'])
@@ -96,9 +88,11 @@ def upload_image():
             return jsonify({'success': False, 'message': 'Failed to upload image'}), 500
             
         return jsonify({'success': True, 'url': image_url}), 200
-        
+    
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+    
+
 
 @quiz_bp.route('/quizCategories',methods=['GET','POST'])
 @login_required
@@ -486,7 +480,7 @@ def delete_quiz(quiz_id):
     
     return redirect(url_for('quiz.my_quizzes'))
 
-
+import pytz
 
 from sqlalchemy import or_
 
@@ -497,7 +491,10 @@ def explore_quizzes():
     filter_type = request.args.get('filter', 'all')
     
     # Current time for availability check
-    current_time = datetime.now().time()
+    # current_time = datetime.now().time()
+    ist = pytz.timezone("Asia/Kolkata")
+    current_time = datetime.now(ist).time()
+
     
     # Base query: only public quizzes
     quizzes_query = Quiz.query.filter_by(is_public=True)
