@@ -9,10 +9,8 @@ from models.quizModel import Question,Quiz,Option
 import json
 
 AI = Blueprint("ai", __name__)
-
-# Configure Gemini API
 genai = configure_genai()
-model = genai.GenerativeModel("gemini-1.5-pro-001")  # Example model name
+model = genai.GenerativeModel("gemini-1.5-pro-001") 
 
 def format_prompt(topic, num_questions=5):
    
@@ -46,6 +44,7 @@ def parse_quiz_response(response_text):
     except Exception as e:
         return {"error": f"Failed to parse response: {str(e)}"}
 
+
 @AI.route("/generate-ai-quiz", methods=["POST"])
 def generate_ai_quiz():
     try:
@@ -58,7 +57,6 @@ def generate_ai_quiz():
 
         prompt = format_prompt(topic, num_questions)
         
-        # Generate content using Gemini
         response = model.generate_content(prompt)
         quiz_data = parse_quiz_response(response.text)
 
@@ -69,6 +67,7 @@ def generate_ai_quiz():
     
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
+
 
 @AI.route("/create-quiz", methods=["GET"])
 def create_quiz_page():
@@ -92,10 +91,10 @@ def save_ai_quiz():
         quiz = Quiz(
             title=title,
             subject=subject,
-            user_id=current_user.id  # Requires Flask-Login
+            user_id=current_user.id
         )
         db.session.add(quiz)
-        db.session.flush()  # Get quiz.id before committing
+        db.session.flush() 
 
         for idx, q in enumerate(questions):
             question = Question(
