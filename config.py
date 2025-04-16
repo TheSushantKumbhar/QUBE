@@ -20,7 +20,6 @@ firebase_Config = {
 }
 
 
-
 SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
 if not SQLALCHEMY_DATABASE_URI:
     raise ValueError("SQLALCHEMY_DATABASE_URI is not set. Check your .env file.")
@@ -38,10 +37,6 @@ cloudinary.config(
     api_secret=os.getenv("CLOUDINARY_API_SECRET"),
     secure=True
 )
-
-# genai.configure(
-#     api_key=os.getenv("GEMINI_API_KEY")
-# )
 
 
 
