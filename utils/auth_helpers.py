@@ -1,7 +1,5 @@
-# utils/auth_helpers.py
-
 from flask import session
-from models.models import User  # adjust import path if needed
+from models.models import User  
 
 def get_current_user():
     """Returns the current logged-in user object based on Firebase email in session."""
