@@ -3,14 +3,12 @@ load_dotenv()
 
 from flask import Flask, render_template, session
 
-
 from extensions import db, migrate
 from config import SQLALCHEMY_DATABASE_URI
 from models.db_init import create_database
 from models.models import User   
 from liveQuiz.websockets import socketio  
 from config import configure_genai
-
 
 from apscheduler.schedulers.background import BackgroundScheduler 
 
@@ -30,8 +28,6 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     "poolclass": NullPool
 }
  
-
-
 db.init_app(app)
 migrate.init_app(app, db) 
 
