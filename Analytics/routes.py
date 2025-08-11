@@ -11,7 +11,6 @@ analytics = Blueprint('analytics', __name__)
 def analytics_dashboard():
     current_user_id = g.user.id if hasattr(g, 'user') else None
 
-    # Summary statistics
     total_quizzes = db.session.query(func.count(Quiz.id)).scalar() or 0
     total_attempts = db.session.query(func.count(QuizAttempt.id)).scalar() or 0
     public_quizzes = db.session.query(func.count(Quiz.id)).filter(Quiz.is_public == True).scalar() or 0
@@ -23,7 +22,7 @@ def analytics_dashboard():
 
     # Top quizzes - Modified to ensure we get results
     try:
-        # First, try to get quizzes with attempts (original query)
+        # try to get quizzes with attempts (original query)
         top_quizzes_data = db.session.query(
             Quiz.id,
             Quiz.title,
@@ -31,7 +30,7 @@ def analytics_dashboard():
             func.count(QuizAttempt.id).label('attempts'),
             func.avg(QuizAttempt.score).label('avg_score'),
             (func.sum(case((QuizAttempt.completed_at != None, 1), else_=0)) * 100 / 
-             func.greatest(func.count(QuizAttempt.id), 1)).label('completion_rate')  # Avoid division by zero
+             func.greatest(func.count(QuizAttempt.id), 1)).label('completion_rate')  
         ).join(QuizAttempt, Quiz.id == QuizAttempt.quiz_id)\
          .group_by(Quiz.id)\
          .order_by(desc('avg_score'))\
@@ -43,7 +42,6 @@ def analytics_dashboard():
             raise Exception("No quizzes with attempts found")
             
     except Exception as e:
-        # Fallback: get the most recent quizzes
         top_quizzes_data = db.session.query(
             Quiz
         ).order_by(desc(Quiz.id)).limit(5).all()
@@ -131,7 +129,6 @@ def analytics_dashboard():
             user_performance_dates.append(attempt.completed_at.strftime('%b %d'))
             user_scores.append(round(attempt.score or 0))
             
-            # Get average score for this quiz from all users
             avg_quiz_score = db.session.query(func.avg(QuizAttempt.score))\
                 .filter(QuizAttempt.quiz_id == attempt.quiz_id,
                         QuizAttempt.completed_at != None)\
