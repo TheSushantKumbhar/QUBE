@@ -7,9 +7,7 @@
     <script src="https://kit.fontawesome.com/YOUR_KIT_CODE.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/static/css/output.css">
     <title>{% block title %}QUBE{% endblock %}</title>
-    <!-- Critical CSS to apply immediately -->
     <style>
-        /* Initial state setup - applied before DOM renders */
         :root {
             --sidebar-width: 13rem;
             --content-margin: 13rem;
@@ -27,10 +25,8 @@
             will-change: margin-left;
         }
     </style>
-    <!-- Apply initial state -->
     <script>
         (function () {
-            // Apply remembered state before page renders
             const sidebarState = localStorage.getItem('sidebarOpen');
             if (sidebarState === 'false') {
                 document.documentElement.style.setProperty('--sidebar-width', '6rem');
@@ -66,7 +62,6 @@
             scrollbar-color: #6366f1 #e5e7eb;
         }
 
-        /* Prevent FOUC but with faster reveal */
         body {
             opacity: 0;
         }
@@ -76,7 +71,6 @@
             transition: opacity 0.1s ease;
         }
 
-        /* Styles for the nav items */
         .nav-item {
             display: flex;
             align-items: center;
@@ -125,12 +119,10 @@
             height: 24px;
         }
 
-        /* Hide PNG icons by default, can be toggled */
         .png-icon {
             display: none;
         }
 
-        /* Use this class to show PNG icons and hide Font Awesome icons */
         .use-png-icons .fa-icon {
             display: none;
         }
@@ -139,7 +131,6 @@
             display: block;
         }
 
-        /* Logo container */
         .logo-container {
             display: flex;
             align-items: center;
@@ -220,7 +211,6 @@
             text-overflow: ellipsis;
         }
 
-        /* Drop-up menu styles - now appears on hover */
         .drop-up {
             position: absolute;
             bottom: calc(100% + 8px);
@@ -267,7 +257,6 @@
             background-color: #374151;
         }
 
-        /* For collapsed sidebar - make profile capsule a direct link */
         .sidebar-collapsed .profile-info {
             display: none;
         }
