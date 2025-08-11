@@ -127,12 +127,4 @@ Contributions are welcome! If you have suggestions for improvements, new feature
 3.  Make your changes.
 4.  Commit your changes (`git commit -m 'feat: Add new feature'` or `fix: Description of bug fix`).
 5.  Push to the branch (`git push origin feature/YourFeature`).
-6.  Open a Pull Request, describing your changes in detail and linking to any relevant issues.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for more details.
-
-## 📧 Contact
-
-For any inquiries, feedback, or support, please reach out to [Your Name/Email/Social Media Link].
+6.  Open a Pull Request, describing your changes in detail and linking to an
