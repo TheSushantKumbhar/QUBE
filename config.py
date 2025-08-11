@@ -11,7 +11,7 @@ load_dotenv()
 firebase_Config = {
     "apiKey": os.getenv('FIREBASE_API_KEY'),
     "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
-    "databaseURL": os.getenv('FIREBASE_DATABASE_URL'),
+    "databaseURL": os.getenv('FIREBASE_DATABASE_URL'),      
     "projectId": os.getenv('FIREBASE_PROJECT_ID'),
     "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
     "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
@@ -37,8 +37,6 @@ cloudinary.config(
     api_secret=os.getenv("CLOUDINARY_API_SECRET"),
     secure=True
 )
-
-
 
 def configure_genai():
     genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
