@@ -141,27 +141,21 @@
         </div>
     </div>
 
-    <!-- Note: You'll need to include this script to make the custom dropdown work -->
     <script>
-        // Only include this if you need the visual dropdown effect
-        // This doesn't replace your existing form submission logic
         document.addEventListener('DOMContentLoaded', function () {
             const subjectInput = document.getElementById('quizSubject');
             const subjectDropdown = document.getElementById('subjectDropdown');
 
-            // Toggle dropdown on input field click
             subjectInput.addEventListener('click', function () {
                 subjectDropdown.classList.toggle('hidden');
             });
 
-            // Hide dropdown when clicking outside
             document.addEventListener('click', function (event) {
                 if (!subjectInput.contains(event.target) && !subjectDropdown.contains(event.target)) {
                     subjectDropdown.classList.add('hidden');
                 }
             });
 
-            // Handle option selection
             const options = document.querySelectorAll('.subject-option');
             options.forEach(option => {
                 option.addEventListener('click', function () {
@@ -171,31 +165,6 @@
             });
         });
     </script>
-
-    <!-- <div id="page3" class=" hidden overflow-hidden h-full">
-        <div class="bg-white rounded-xl shadow-md flex flex-col justify-between h-full p-6">
-            <div class="overflow-auto">
-                <h2 class="text-xl font-semibold mb-4">Create Questions</h2>
-                <div id="questionsContainer"></div>
-            </div> -->
-
-    <!-- Button Bar inside white container -->
-    <!-- <div class="bg-indigo-300 mt-6 p-4 flex justify-between rounded-b-xl">
-                <button id="backToPage2"
-                    class="bg-gray-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-500 transition">
-                    Back
-                </button>
-                <button id="addQuestion"
-                    class="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-700 transition">
-                    <i class="fas fa-plus mr-2"></i>Add Question
-                </button>
-                <button id="previewQuiz"
-                    class="bg-green-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-green-700 transition">
-                    Preview Quiz
-                </button>
-            </div>
-        </div>
-    </div> -->
 
     <div id="page3" class="hidden overflow-hidden h-full  transition-colors duration-300">
         <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-md flex flex-col justify-between h-full p-6">
@@ -308,7 +277,6 @@
                     <div
                         class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600">
                     </div>
-                    <!-- <p class="mt-4 text-indigo-600 font-medium">Loading quiz preview...</p> -->
                 </div>
             </div>
         </div>
