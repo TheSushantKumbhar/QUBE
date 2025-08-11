@@ -1,46 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Theme toggling
-    // const themeToggle = document.getElementById('theme-toggle');
     
-    // // Check for saved theme preference or respect OS preference
-    // if (localStorage.getItem('theme') === 'dark' || 
-    //     (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    //     document.documentElement.classList.add('dark');
-    // } else {
-    //     document.documentElement.classList.remove('dark');
-    // }
-    
-    // // Toggle theme
-    // themeToggle.addEventListener('click', function() {
-    //     if (document.documentElement.classList.contains('dark')) {
-    //         document.documentElement.classList.remove('dark');
-    //         localStorage.setItem('theme', 'light');
-    //     } else {
-    //         document.documentElement.classList.add('dark');
-    //         localStorage.setItem('theme', 'dark');
-    //     }
-    // });
-
     // Initialize variables
     const questions = document.querySelectorAll('.question-container');
     const totalQuestions = questions.length;
     let currentQuestionIndex = 0;
     const answeredQuestions = new Set();
     const flaggedQuestions = new Set();
-    
-    // // Timer variables
-    // let timerSeconds = 0;
-    // let timerInterval;
-    // const startTime = new Date();
-    // const timerDisplay = document.getElementById('timer-display');
-    // const quizTimer = document.getElementById('quiz-timer');
-    
-    // Modal setup
+
     const submitModal = document.getElementById('submitConfirmModal');
     const cancelSubmit = document.getElementById('cancel-submit');
-    
-    // // Start the timer
-    // startTimer();
 
     let timerSeconds = 0;
     let timerInterval;
@@ -48,12 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const timerDisplay = document.getElementById('timer-display');
     const quizTimer = document.getElementById('quiz-timer');
     
-    // Get time limit from data attributes
     const quizContainer = document.getElementById('quiz-container');
     const timeLimit = parseInt(quizContainer.dataset.timeLimit) || 0;
     const timeUnit = quizContainer.dataset.timeUnit || 'minutes';
     
-    // Calculate total seconds for time limit
     let totalSeconds = 0;
     if (timeLimit > 0) {
         if (timeUnit === 'minutes') {
@@ -64,14 +30,12 @@ document.addEventListener('DOMContentLoaded', function() {
         timerSeconds = totalSeconds; // Start from the time limit and count down
     }
     
-    // Start the timer
     if (timeLimit > 0) {
-        startCountdownTimer(); // Use countdown timer if there's a time limit
+        startCountdownTimer();
     } else {
-        startTimer(); // Use elapsed timer if no time limit
+        startTimer(); 
     }
     
-    // Initialize question navigation
     initializeQuestionNavigation();
     
     // Handle option selection to mark questions as answered
@@ -81,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const questionContainer = document.getElementById('question-' + questionId);
             const questionIndex = Array.from(questions).indexOf(questionContainer);
             
-            // For radio buttons, a selection means the question is answered
             if (this.type === 'radio') {
                 answeredQuestions.add(questionIndex);
             } 
@@ -264,34 +227,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('sidebar-unanswered').textContent = totalQuestions - answeredQuestions.size;
         document.getElementById('sidebar-flagged').textContent = flaggedQuestions.size;
     }
-    
-    // Timer function
-    // function startTimer() {
-    //     timerInterval = setInterval(updateTimer, 1000);
-    // }
-    
-    // function updateTimer() {
-    //     timerSeconds++;
-        
-    //     const hours = Math.floor(timerSeconds / 3600);
-    //     const minutes = Math.floor((timerSeconds % 3600) / 60);
-    //     const seconds = timerSeconds % 60;
-        
-    //     timerDisplay.textContent = 
-    //         (hours < 10 ? '0' + hours : hours) + ':' +
-    //         (minutes < 10 ? '0' + minutes : minutes) + ':' +
-    //         (seconds < 10 ? '0' + seconds : seconds);
-        
-    //     // Add warning colors based on time
-    //     if (timerSeconds > 2700) { // 45 minutes - warning
-    //         quizTimer.classList.remove('bg-white', 'bg-opacity-20');
-    //         quizTimer.classList.add('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-800', 'dark:text-yellow-100');
-    //     }
-    //     if (timerSeconds > 3300) { // 55 minutes - danger
-    //         quizTimer.classList.remove('bg-yellow-100', 'text-yellow-800', 'dark:bg-yellow-800', 'dark:text-yellow-100');
-    //         quizTimer.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-800', 'dark:text-red-100', 'animate-pulse');
-    //     }
-    // }
 
     function startTimer() {
         timerInterval = setInterval(updateElapsedTimer, 1000);
@@ -328,10 +263,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function updateCountdownTimer() {
         if (timerSeconds <= 0) {
-            // Time's up - submit the quiz automatically
+          
             clearInterval(timerInterval);
             
-            // Show a time's up message
             const timeUpAlert = document.createElement('div');
             timeUpAlert.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
             timeUpAlert.innerHTML = `
@@ -383,7 +317,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const submitUrl = document.getElementById('quiz-container').dataset.submitUrl;
         const completionTime = Math.floor((new Date() - startTime) / 1000);
         
-        // Collect all answers - THIS IS THE FIX
         const answers = {};
         document.querySelectorAll('.question-container').forEach(container => {
             const questionId = container.id.split('-')[1];
@@ -396,7 +329,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Show loading indicator
         const loadingIndicator = document.createElement('div');
         loadingIndicator.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
         loadingIndicator.innerHTML = `
