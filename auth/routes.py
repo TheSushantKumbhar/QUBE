@@ -101,8 +101,8 @@ def login():
 
         except Exception as e:
             flash("Invalid email or password. Please try again.", "danger")
-            print(f"Login error: {str(e)}")  # Log error for debugging
-
+            print(f"Login error: {str(e)}") 
+            
     return render_template('authentication/login.html')
 
 
