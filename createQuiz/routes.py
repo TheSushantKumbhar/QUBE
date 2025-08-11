@@ -20,7 +20,6 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
 
 def upload_to_cloudinary(file_data):
-    """Upload image to Cloudinary and return the URL"""
     if not file_data:
         return None
         
@@ -258,8 +257,6 @@ def get_quiz(quiz_id):
         return jsonify({'success': False, 'message': f'Error retrieving quiz: {str(e)}'}), 500
 
 
-
-
 @quiz_bp.route('/myquizzes')
 @login_required
 def my_quizzes():
@@ -275,6 +272,7 @@ def preview_quiz():
     """Preview the quiz before creating it"""
     return render_template('CreateQuiz/previewQuiz.html')
         
+
 @quiz_bp.route('/save_quiz', methods=['POST'])
 @login_required
 def save_quiz():
@@ -490,8 +488,6 @@ def explore_quizzes():
     search_query = request.args.get('search', '')
     filter_type = request.args.get('filter', 'all')
     
-    # Current time for availability check
-    # current_time = datetime.now().time()
     ist = pytz.timezone("Asia/Kolkata")
     current_time = datetime.now(ist).time()
 
@@ -499,7 +495,6 @@ def explore_quizzes():
     # Base query: only public quizzes
     quizzes_query = Quiz.query.filter_by(is_public=True)
     
-    # Apply search if provided
     if search_query:
         search_term = f"%{search_query}%"
         quizzes_query = quizzes_query.join(User).filter(
@@ -510,10 +505,8 @@ def explore_quizzes():
                 User.email.ilike(search_term)
             )
         )
-    
-    # Apply filter if provided
+
     if filter_type == 'available':
-        # Filter for currently available quizzes
         quizzes_query = quizzes_query.filter(
             or_(
                 Quiz.always_available == True,
@@ -550,13 +543,10 @@ def explore_quiz_details(quiz_id):
         flash("This quiz is not available for public viewing.", "danger")
         return redirect(url_for('quiz.explore_quizzes'))
     
-    # Get quiz creator info
     creator = User.query.get(quiz.user_id)
     
-    # Get current user if logged in
     current_user = get_current_user()
     
-    # Check if there's a current quiz attempt by this user
     user_attempt = None
     if current_user:
         user_attempt = QuizAttempt.query.filter_by(
@@ -575,7 +565,6 @@ def start_explore_quiz(quiz_id):
     quiz = Quiz.query.get_or_404(quiz_id)
     user = get_current_user()
     
-    # Check if quiz is public and live
     if not quiz.is_public :
         flash("This quiz is not available for public attempts.", "danger")
         return redirect(url_for('quiz.explore_quizzes'))
@@ -656,6 +645,7 @@ def take_quiz(attempt_id):
                           attempt=attempt,
                           current_time=current_time)
 
+
 from datetime import datetime, timedelta
 import pytz 
 
@@ -735,8 +725,6 @@ def submit_quiz(attempt_id):
         now_utc = datetime.utcnow()
         now_ist = now_utc.replace(tzinfo=pytz.UTC).astimezone(ist_timezone)
         
-        # Remove timezone information before storing in database
-        # (assuming your database field doesn't store timezone info)
         now_ist = now_ist.replace(tzinfo=None)
 
         score_percentage = int((correct_answers / total_questions) * 100) if total_questions > 0 else 0
@@ -753,7 +741,6 @@ def submit_quiz(attempt_id):
 
         # Commit all changes
         db.session.commit()
-        print(f"Successfully saved attempt {attempt_id} with score {score_percentage}%")
 
         return jsonify({
             'success': True,
