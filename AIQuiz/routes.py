@@ -10,29 +10,32 @@ import json
 
 AI = Blueprint("ai", __name__)
 genai = configure_genai()
-model = genai.GenerativeModel("gemini-1.5-pro-001") 
+model = genai.GenerativeModel("gemini-2.5-flash") 
 
 def format_prompt(topic, num_questions=5):
-   
     return f"""
-    Generate a quiz on the topic "{topic}" with {num_questions} questions.
+    Generate exactly {num_questions} multiple-choice questions about "{topic}".
 
-    Each question should:
-    - Have a clear and concise question text.
-    - Include 4 options.
-    - Have only one correct answer.
-    - Be returned in this exact JSON format:
+    Return ONLY a valid JSON array with this exact structure:
     [
         {{
-            "question": "Question text here",
+            "question": "Clear question text here?",
             "options": ["Option A", "Option B", "Option C", "Option D"],
-            "answer": ["Correct option(s) exactly as in options"]
-        }},
-        ...
+            "answer": ["Option A"]
+        }}
     ]
 
-    IMPORTANT: Return ONLY valid JSON that can be parsed directly.
+    Requirements:
+    - Each question must have exactly 4 options
+    - Each question must have exactly 1 correct answer
+    - The "answer" field must contain the exact text from one of the options
+    - Do not include any markdown formatting, explanations, or additional text
+    - Return ONLY the JSON array, nothing else
+
+    Topic: {topic}
+    Number of questions: {num_questions}
     """
+
 
 def parse_quiz_response(response_text):
     """
