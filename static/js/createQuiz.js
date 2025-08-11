@@ -36,18 +36,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (validateQuizData(quizData)) {
             localStorage.setItem('previewQuizData', JSON.stringify(quizData));
 
-            // Show preview page
             document.getElementById('page3').classList.add('hidden');
             document.getElementById('page4').classList.remove('hidden');
 
-            // Render preview
             function renderPreview(quizData) {
-                // Set basic quiz info
                 document.getElementById('previewTitle').textContent = quizData.title;
                 document.getElementById('previewSubject').textContent = quizData.subject;
                 document.getElementById('questionCount').textContent = quizData.questions.length;
 
-                // Set creation date to today
                 const today = new Date();
                 document.getElementById('creationDate').textContent = today.toLocaleDateString();
 
@@ -64,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
 
-                // Add legend for correct answers
                 const legend = document.createElement('div');
                 legend.className = 'bg-white rounded-xl shadow-sm p-4 mb-6 border border-gray-100 flex items-center';
                 legend.innerHTML = `
@@ -129,11 +124,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>` : ''}
                 </div>
             `;
-
                         optionElement.innerHTML = optionHTML;
                         optionsContainer.appendChild(optionElement);
                     });
-
                     questionElement.appendChild(optionsContainer);
                     previewContainer.appendChild(questionElement);
                 });
@@ -150,37 +143,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Save quiz button in preview
     document.getElementById('saveQuiz').addEventListener('click', function () {
-        // Set flag to skip the beforeunload warning
+
         window.skipBeforeUnloadWarning = true;
 
-        // Get quiz data from localStorage
         const quizData = JSON.parse(localStorage.getItem('previewQuizData'));
 
-        // Submit the form with quiz data
         document.getElementById('quizData').value = JSON.stringify(quizData);
 
-        // Clear localStorage BEFORE submitting the form
         localStorage.removeItem('previewQuizData');
 
-        // Submit the form
         document.getElementById('quizForm').submit();
-
         
     });
 
-    // Add this to help check if we're coming back after a successful save
+    // help check if we're coming back after a successful save
     // This should run when the page loads
     document.addEventListener('DOMContentLoaded', function () {
-        // Check if there's a success message indicating a quiz was just saved
         const successMessages = document.querySelectorAll('.bg-green-100.text-green-800');
         if (successMessages.length > 0) {
-            // If we just saved a quiz successfully, make sure everything is cleared
             localStorage.removeItem('previewQuizData');
             document.getElementById('quizTitle').value = '';
             document.getElementById('quizSubject').value = '';
             document.getElementById('questionsContainer').innerHTML = '';
 
-            // Make sure we're on page 2
             if (document.getElementById('page2')) {
                 document.getElementById('page2').classList.remove('hidden');
             }
@@ -193,7 +178,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Question management functions
     function updateQuestionNumbers() {
         const questions = document.querySelectorAll('.question-block');
         questions.forEach((question, index) => {
@@ -208,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Modified addQuestion function to prevent duplication
+    // Modified addQuestion function to prevent duplcation
     function addQuestion() {
         const container = document.getElementById('questionsContainer');
         // Check if this is being called during initialization with saved data
@@ -417,7 +401,6 @@ document.addEventListener('DOMContentLoaded', function () {
         updateOptionNumbers(optionsContainer);
     }
 
-    // Setup event listeners for adding questions
     document.getElementById('addQuestion').addEventListener('click', addQuestion);
 
     document.addEventListener('click', function (event) {
@@ -657,14 +640,14 @@ function displayOptionImage(dropZone, file) {
     })
     .then(response => response.json())
     .then(data => {
-        // Remove loading indicator
+
         preview.innerHTML = '';
         
         if (data.success) {
             // Create image element
             const img = document.createElement('img');
             img.classList.add('max-h-32', 'mx-auto');
-            img.src = data.url; // Use the URL returned from server
+            img.src = data.url; 
             
             // Create remove button
             const removeBtn = document.createElement('button');
@@ -682,9 +665,9 @@ function displayOptionImage(dropZone, file) {
             preview.appendChild(img);
             preview.appendChild(removeBtn);
         } else {
-            // Show error
+            // Shows error
             preview.innerHTML = `<div class="text-red-500 text-xs text-center">Failed: ${data.message}</div>`;
-            // Show upload text again
+            // Shows upload text again
             dropZone.querySelector('p').classList.remove('hidden');
         }
     })
@@ -798,14 +781,6 @@ function displayOptionImage(dropZone, file) {
         return true;
     }
 
-    // Add keyboard shortcuts for common actions
-    document.addEventListener('keydown', function (event) {
-        // Ctrl+Enter to add a new question
-        if (event.ctrlKey && event.key === 'Enter' && document.getElementById('page3') && !document.getElementById('page3').classList.contains('hidden')) {
-            event.preventDefault();
-            addQuestion();
-        }
-    });
 
     // Add form validation for required fields
     function validateForm() {
@@ -894,7 +869,6 @@ function displayOptionImage(dropZone, file) {
             }
         });
 
-        // Add legend for correct answers FIRST, before adding the questions
         const legend = document.createElement('div');
         legend.className = 'bg-white rounded-xl shadow-sm p-4 mb-6 border border-gray-100 flex items-center';
         legend.innerHTML = `
@@ -909,24 +883,21 @@ function displayOptionImage(dropZone, file) {
     `;
         previewContainer.appendChild(legend);
 
-        // Create preview elements for each question
         quizData.questions.forEach((question, qIndex) => {
             const questionElement = document.createElement('div');
             questionElement.className = 'bg-white rounded-xl shadow-md p-6 mb-6 border border-gray-100';
 
-            // Create question header
             const questionHeader = document.createElement('div');
             questionHeader.className = 'flex items-center mb-4';
             questionHeader.innerHTML = `
             <div class="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">
                 ${qIndex + 1}
             </div>
-            <h3 class="text-xl font-semibold text-gray-800">${question.text}</h3>
+            <h3 class="text-xl font-semibold text-gray-800">${question.text}</h3>   
         `;
 
             questionElement.appendChild(questionHeader);
 
-            // Add question image if exists
             if (question.image) {
                 const imageDiv = document.createElement('div');
                 imageDiv.className = 'mb-5 flex justify-center';
@@ -934,7 +905,6 @@ function displayOptionImage(dropZone, file) {
                 questionElement.appendChild(imageDiv);
             }
 
-            // Create options container
             const optionsContainer = document.createElement('div');
             optionsContainer.className = 'ml-11 space-y-3';
 
