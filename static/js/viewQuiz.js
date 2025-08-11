@@ -16,14 +16,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Set initial state
         if (toggle.checked) {
             toggle.parentElement.querySelector('.dot').classList.add('translate-x-6');
             toggle.parentElement.querySelector('.block').classList.replace('bg-gray-300', 'bg-indigo-600');
         }
     });
 
-    // Availability Radio Buttons
     const availabilityRadios = document.querySelectorAll('input[name="availability_type"]');
     const timeScheduleDiv = document.getElementById('timeSchedule');
 
@@ -33,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Share Modal
     const shareQuizBtn = document.getElementById('shareQuizBtn');
     const shareModal = document.getElementById('shareModal');
     const closeShareModal = document.getElementById('closeShareModal');
@@ -104,24 +101,19 @@ document.addEventListener('DOMContentLoaded', function () {
         quizSettingsForm.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            // Get form data
             const formData = new FormData(this);
 
-            // Add always_available flag based on radio selection
             const availabilityType = document.querySelector('input[name="availability_type"]:checked').value;
             formData.append('always_available', availabilityType === 'always');
 
-            // Explicitly add time limit data to the form data
             const timeLimit = document.getElementById('time_limit').value;
             const timeUnit = document.getElementById('time_unit').value;
 
-            // Ensure we're sending the correct values by explicitly setting them
             formData.set('time_limit', timeLimit);
             formData.set('time_unit', timeUnit);
 
             console.log("Sending time_limit:", timeLimit, "time_unit:", timeUnit);
 
-            // If scheduled but times not set, show error
             if (availabilityType === 'scheduled') {
                 const startTime = document.getElementById('start_time').value;
                 const endTime = document.getElementById('end_time').value;
@@ -153,15 +145,6 @@ document.addEventListener('DOMContentLoaded', function () {
                             const endTime = new Date(`1970-01-01T${document.getElementById('end_time').value}`);
                             availabilityDisplay.textContent = `${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
                         }
-
-                        // Update time limit display if needed
-                        // If you have a time limit display element, uncomment this
-                        // const timeLimitDisplay = document.getElementById('quizTimeLimit');
-                        // if (timeLimit && parseInt(timeLimit) > 0) {
-                        //     timeLimitDisplay.textContent = `${timeLimit} ${timeUnit}`;
-                        // } else {
-                        //     timeLimitDisplay.textContent = 'No time limit';
-                        // }
 
                         alert('Quiz settings updated successfully');
                     } else {
