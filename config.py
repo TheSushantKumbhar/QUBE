@@ -19,7 +19,6 @@ firebase_Config = {
     "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
 }
 
-
 SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
 if not SQLALCHEMY_DATABASE_URI:
     raise ValueError("SQLALCHEMY_DATABASE_URI is not set. Check your .env file.")
