@@ -1,154 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create AI Quiz</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-
-    <div class="bg-white shadow-lg rounded-lg p-8 w-96">
-        <h2 class="text-2xl font-bold text-center mb-6">Create Quiz with AI</h2>
-
-        <form id="quiz-form">
-          <div class="mb-4">
-              <label for="title" class="block text-sm font-medium text-gray-700">Quiz Title</label>
-              <input type="text" id="title" name="title" required class="mt-1 block w-full px-4 py-2 border rounded-md">
-          </div>
-      
-          <div class="mb-4">
-              <label for="subject" class="block text-sm font-medium text-gray-700">Subject</label>
-              <input type="text" id="subject" name="subject" class="mt-1 block w-full px-4 py-2 border rounded-md">
-          </div> 
-      
-          <div class="mb-4">
-              <label for="topic" class="block text-sm font-medium text-gray-700">Topic</label>
-              <input type="text" id="topic" name="topic" required class="mt-1 block w-full px-4 py-2 border rounded-md">
-          </div>
-      
-          <div class="mb-4">
-              <label for="num_questions" class="block text-sm font-medium text-gray-700">Number of Questions</label>
-              <input type="number" id="num_questions" name="num_questions" min="1" value="5" required class="mt-1 block w-full px-4 py-2 border rounded-md">
-          </div>
-      
-          <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700">Generate Quiz</button>
-      </form>
-      
-
-        <div id="quiz-result" class="mt-6 hidden">
-            <h3 class="text-xl font-semibold">Generated Quiz</h3>
-            <div id="quiz-questions" class="mt-4 space-y-4"></div>
-        </div>
-
-        <button id="save-quiz" class="hidden mt-4 w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700">Save Quiz</button>
-
-    </div>
-
-    <script>
-      const form = document.getElementById('quiz-form');
-      const quizResult = document.getElementById('quiz-result');
-      const quizQuestions = document.getElementById('quiz-questions');
-      const saveQuizBtn = document.getElementById('save-quiz');
-  
-      let currentQuizData = null; // store generated quiz data for saving later
-  
-      form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-  
-          const title = document.getElementById('title').value;
-          const subject = document.getElementById('subject').value;
-          const topic = document.getElementById('topic').value;
-          const num_questions = document.getElementById('num_questions').value;
-  
-          const response = await fetch('/AI/generate-ai-quiz', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ topic, num_questions }),
-          });
-  
-          const data = await response.json();
-  
-          if (response.ok) {
-              // Store the generated quiz data along with the title and subject
-              currentQuizData = {
-                  title: title,
-                  subject: subject,
-                  questions: data.quiz // This matches what the backend expects
-              };
-              
-              quizResult.classList.remove('hidden');
-              saveQuizBtn.classList.remove('hidden');
-              quizQuestions.innerHTML = '';
-  
-              data.quiz.forEach((q, idx) => {
-                  const questionDiv = document.createElement('div');
-                  questionDiv.classList.add('p-4', 'bg-gray-50', 'rounded-md', 'shadow-md');
-  
-                  const questionTitle = document.createElement('h4');
-                  questionTitle.classList.add('font-bold');
-                  questionTitle.textContent = `${idx + 1}. ${q.question}`;
-  
-                  const optionsList = document.createElement('ul');
-                  optionsList.classList.add('mt-2', 'space-y-2');
-  
-                  q.options.forEach((opt, optIdx) => {
-                      const li = document.createElement('li');
-                      const isCorrect = q.answer.includes(opt);
-                      li.textContent = opt;
-                      if (isCorrect) {
-                          li.classList.add('text-green-600', 'font-semibold');
-                      }
-                      optionsList.appendChild(li);
-                  });
-  
-                  questionDiv.appendChild(questionTitle);
-                  questionDiv.appendChild(optionsList);
-                  quizQuestions.appendChild(questionDiv);
-              });
-          } else {
-              alert('Error generating quiz: ' + data.error);
-          }
-      });
-  
-      saveQuizBtn.addEventListener('click', saveQuiz);
-  
-      async function saveQuiz() {
-          if (!currentQuizData) return alert('No quiz data to save.');
-          
-          if (!currentQuizData.title) {
-              return alert('Quiz title is required.');
-          }
-          
-          if (!currentQuizData.questions || currentQuizData.questions.length === 0) {
-              return alert('Quiz must contain at least one question.');
-          }
-  
-          const response = await fetch('/AI/save-ai-quiz', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(currentQuizData),
-          });
-  
-          const result = await response.json();
-  
-          if (response.ok) {
-              alert('Quiz saved successfully!');
-          } else {
-              alert('Failed to save quiz: ' + result.error);
-          }
-      }
-  </script>
-
-</body>
-</html> -->
-
-
-
 {% extends "base.html" %}
 
 {% block title %}AI Quiz Generator | QUBE{% endblock %}
@@ -158,15 +7,18 @@
     <!-- Information Box -->
     <div id="info-box" class="bg-white dark:bg-zinc-900 rounded-xl shadow-md p-6 md:w-1/3 mb-6 md:mb-0">
         <div class="flex items-center mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600 dark:text-indigo-400" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <h2 class="text-2xl font-bold ml-2 text-gray-800 dark:text-gray-200">AI Quiz Generator</h2>
         </div>
-        
+
         <div class="space-y-4">
-            <p class="text-gray-700 dark:text-gray-300">Create custom quizzes in seconds using our advanced AI. Just specify your topic and let the AI do the work!</p>
-            
+            <p class="text-gray-700 dark:text-gray-300">Create custom quizzes in seconds using our advanced AI. Just
+                specify your topic and let the AI do the work!</p>
+
             <div class="bg-indigo-100 dark:bg-indigo-900/30 p-4 rounded-lg">
                 <h3 class="font-semibold text-indigo-800 dark:text-indigo-300 mb-2">Features:</h3>
                 <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
@@ -176,7 +28,7 @@
                     <li>Share with students or colleagues</li>
                 </ul>
             </div>
-            
+
             <div class="bg-amber-100 dark:bg-amber-900/30 p-4 rounded-lg">
                 <h3 class="font-semibold text-amber-800 dark:text-amber-300 mb-2">Tips:</h3>
                 <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
@@ -191,59 +43,72 @@
     <!-- Form Box -->
     <div id="form-box" class="bg-white dark:bg-zinc-900 rounded-xl shadow-md p-6 md:w-2/3">
         <div class="flex items-center mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600 dark:text-indigo-400" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
             <h2 class="text-2xl font-bold ml-2 text-gray-800 dark:text-gray-200">Create Your Quiz</h2>
         </div>
-        
+
         <form id="quiz-form" class="space-y-4">
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quiz Title</label>
-                    <input type="text" id="title" name="title" required 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quiz
+                        Title</label>
+                    <input type="text" id="title" name="title" required
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
                 </div>
-                
+
                 <div>
-                    <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject</label>
-                    <input type="text" id="subject" name="subject" 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                    <label for="subject"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject</label>
+                    <input type="text" id="subject" name="subject"
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
                 </div>
             </div>
-            
+
             <div>
                 <label for="topic" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Topic</label>
-                <input type="text" id="topic" name="topic" required 
-                       placeholder="E.g. 'World War II', 'Python Functions', 'Cell Biology'" 
-                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                <input type="text" id="topic" name="topic" required
+                    placeholder="E.g. 'World War II', 'Python Functions', 'Cell Biology'"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
             </div>
-            
+
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
-                    <label for="num_questions" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Number of Questions</label>
-                    <input type="number" id="num_questions" name="num_questions" min="1" max="20" value="5" required 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                    <label for="num_questions"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Number of
+                        Questions</label>
+                    <input type="number" id="num_questions" name="num_questions" min="1" max="20" value="5" required
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
                 </div>
-                
+
                 <div>
-                    <label for="difficulty" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Difficulty Level</label>
-                    <select id="difficulty" name="difficulty" 
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
+                    <label for="difficulty"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Difficulty Level</label>
+                    <select id="difficulty" name="difficulty"
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500">
                         <option value="easy">Easy</option>
                         <option value="medium" selected>Medium</option>
                         <option value="hard">Hard</option>
                     </select>
                 </div>
             </div>
-            
+
             <div class="flex justify-center mt-6">
-                <button type="submit" id="generate-btn" class="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors flex items-center justify-center">
-                    <svg id="normal-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V8z" clip-rule="evenodd" />
+                <button type="submit" id="generate-btn"
+                    class="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors flex items-center justify-center">
+                    <svg id="normal-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V8z"
+                            clip-rule="evenodd" />
                     </svg>
-                    <svg id="loading-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 animate-spin hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    <svg id="loading-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 animate-spin hidden"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     Generate Quiz
                 </button>
@@ -257,23 +122,29 @@
     <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-md p-6">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Generated Quiz</h2>
-            <button id="back-to-form" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center">
+            <button id="back-to-form"
+                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd"
+                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                        clip-rule="evenodd" />
                 </svg>
                 Back to Form
             </button>
         </div>
-        
+
         <div id="quiz-title-display" class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2"></div>
         <div id="quiz-subject-display" class="text-md text-gray-600 dark:text-gray-400 mb-4"></div>
-        
+
         <div id="quiz-questions" class="space-y-6 mt-6"></div>
-        
+
         <div class="mt-8 flex justify-center">
-            <button id="save-quiz" class="px-6 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
+            <button id="save-quiz"
+                class="px-6 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20"
+                    fill="currentColor">
+                    <path
+                        d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
                 </svg>
                 Save Quiz
             </button>
@@ -281,246 +152,229 @@
     </div>
 </div>
 
-<!-- Loading overlay -->
-<div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50  items-center justify-center z-50">
-    <div class="bg-white dark:bg-zinc-900 rounded-xl p-8 flex flex-col items-center max-w-md">
-        <div class="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">Generating Quiz</h3>
-        <p class="text-gray-600 dark:text-gray-400 text-center">Our AI is creating your quiz. This may take a few moments...</p>
-    </div>
-</div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('quiz-form');
-    const quizResult = document.getElementById('quiz-result');
-    const quizQuestions = document.getElementById('quiz-questions');
-    const saveQuizBtn = document.getElementById('save-quiz');
-    const infoBox = document.getElementById('info-box');
-    const formBox = document.getElementById('form-box');
-    const backToFormBtn = document.getElementById('back-to-form');
-    const loadingOverlay = document.getElementById('loading-overlay');
-    const normalIcon = document.getElementById('normal-icon');
-    const loadingIcon = document.getElementById('loading-icon');
-    const generateBtn = document.getElementById('generate-btn');
-    const quizTitleDisplay = document.getElementById('quiz-title-display');
-    const quizSubjectDisplay = document.getElementById('quiz-subject-display');
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('quiz-form');
+        const quizResult = document.getElementById('quiz-result');
+        const quizQuestions = document.getElementById('quiz-questions');
+        const saveQuizBtn = document.getElementById('save-quiz');
+        const infoBox = document.getElementById('info-box');
+        const formBox = document.getElementById('form-box');
+        const backToFormBtn = document.getElementById('back-to-form');
+        const normalIcon = document.getElementById('normal-icon');
+        const loadingIcon = document.getElementById('loading-icon');
+        const generateBtn = document.getElementById('generate-btn');
+        const quizTitleDisplay = document.getElementById('quiz-title-display');
+        const quizSubjectDisplay = document.getElementById('quiz-subject-display');
 
-    let currentQuizData = null; // store generated quiz data for saving later
+        let currentQuizData = null;
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        // Show loading state
-        loadingOverlay.classList.remove('hidden');
-        normalIcon.classList.add('hidden');
-        loadingIcon.classList.remove('hidden');
-        generateBtn.disabled = true;
+            // Show loading state in the button only
+            normalIcon.classList.add('hidden');
+            loadingIcon.classList.remove('hidden');
+            generateBtn.disabled = true;
 
-        const title = document.getElementById('title').value;
-        const subject = document.getElementById('subject').value;
-        const topic = document.getElementById('topic').value;
-        const num_questions = document.getElementById('num_questions').value;
-        const difficulty = document.getElementById('difficulty').value;
+            const title = document.getElementById('title').value;
+            const subject = document.getElementById('subject').value;
+            const topic = document.getElementById('topic').value;
+            const num_questions = document.getElementById('num_questions').value;
+            const difficulty = document.getElementById('difficulty').value;
 
-        try {
-            const response = await fetch('/AI/generate-ai-quiz', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ topic, num_questions, difficulty }),
-            });
+            try {
+                const response = await fetch('/AI/generate-ai-quiz', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ topic, num_questions, difficulty }),
+                });
 
-            const data = await response.json();
+                const data = await response.json();
 
-            if (response.ok) {
-                // Store the generated quiz data along with the title and subject
-                currentQuizData = {
-                    title: title,
-                    subject: subject,
-                    questions: data.quiz // This matches what the backend expects
-                };
-                
-                // Hide form and info boxes, show results
-                infoBox.classList.add('hidden');
-                formBox.classList.add('hidden');
-                quizResult.classList.remove('hidden');
-                
-                // Display quiz metadata
-                quizTitleDisplay.textContent = title || 'Untitled Quiz';
-                quizSubjectDisplay.textContent = subject ? `Subject: ${subject}` : '';
-                
-                quizQuestions.innerHTML = '';
+                if (response.ok) {
+                    currentQuizData = {
+                        title: title,
+                        subject: subject,
+                        questions: data.quiz
+                    };
 
-                // Render questions
-                data.quiz.forEach((q, idx) => {
-                    const questionDiv = document.createElement('div');
-                    questionDiv.classList.add('p-6', 'bg-gray-50', 'dark:bg-zinc-800/50', 'rounded-lg', 'shadow-sm');
 
-                    const questionHeader = document.createElement('div');
-                    questionHeader.classList.add('flex', 'items-start', 'mb-4');
-                    
-                    const questionNumber = document.createElement('div');
-                    questionNumber.classList.add('flex', 'items-center', 'justify-center', 'bg-indigo-100', 'dark:bg-indigo-900/30', 'text-indigo-800', 'dark:text-indigo-300', 'font-bold', 'rounded-full', 'w-8', 'h-8', 'mr-3', 'flex-shrink-0');
-                    questionNumber.textContent = idx + 1;
-                    
-                    const questionText = document.createElement('h4');
-                    questionText.classList.add('text-lg', 'font-semibold', 'text-gray-800', 'dark:text-gray-200', 'flex-grow');
-                    questionText.textContent = q.question;
-                    
-                    questionHeader.appendChild(questionNumber);
-                    questionHeader.appendChild(questionText);
-                    questionDiv.appendChild(questionHeader);
+                    infoBox.classList.add('hidden');
+                    formBox.classList.add('hidden');
+                    quizResult.classList.remove('hidden');
 
-                    const optionsList = document.createElement('ul');
-                    optionsList.classList.add('space-y-2', 'ml-11');
+                    // Display quiz metadata
+                    quizTitleDisplay.textContent = title || 'Untitled Quiz';
+                    quizSubjectDisplay.textContent = subject ? `Subject: ${subject}` : '';
 
-                    q.options.forEach((opt, optIdx) => {
-                        const li = document.createElement('li');
-                        li.classList.add('flex', 'items-center', 'text-gray-700', 'dark:text-gray-300');
-                        
-                        const isCorrect = q.answer.includes(opt);
-                        
-                        if (isCorrect) {
-                            const correctMark = document.createElement('div');
-                            correctMark.classList.add('mr-2', 'text-green-500', 'flex-shrink-0');
-                            correctMark.innerHTML = `
+                    quizQuestions.innerHTML = '';
+
+                    // Render questions
+                    data.quiz.forEach((q, idx) => {
+                        const questionDiv = document.createElement('div');
+                        questionDiv.classList.add('p-6', 'bg-gray-50', 'dark:bg-zinc-800/50', 'rounded-lg', 'shadow-sm');
+
+                        const questionHeader = document.createElement('div');
+                        questionHeader.classList.add('flex', 'items-start', 'mb-4');
+
+                        const questionNumber = document.createElement('div');
+                        questionNumber.classList.add('flex', 'items-center', 'justify-center', 'bg-indigo-100', 'dark:bg-indigo-900/30', 'text-indigo-800', 'dark:text-indigo-300', 'font-bold', 'rounded-full', 'w-8', 'h-8', 'mr-3', 'flex-shrink-0');
+                        questionNumber.textContent = idx + 1;
+
+                        const questionText = document.createElement('h4');
+                        questionText.classList.add('text-lg', 'font-semibold', 'text-gray-800', 'dark:text-gray-200', 'flex-grow');
+                        questionText.textContent = q.question;
+
+                        questionHeader.appendChild(questionNumber);
+                        questionHeader.appendChild(questionText);
+                        questionDiv.appendChild(questionHeader);
+
+                        const optionsList = document.createElement('ul');
+                        optionsList.classList.add('space-y-2', 'ml-11');
+
+                        q.options.forEach((opt, optIdx) => {
+                            const li = document.createElement('li');
+                            li.classList.add('flex', 'items-center', 'text-gray-700', 'dark:text-gray-300');
+
+                            const isCorrect = q.answer.includes(opt);
+
+                            if (isCorrect) {
+                                const correctMark = document.createElement('div');
+                                correctMark.classList.add('mr-2', 'text-green-500', 'flex-shrink-0');
+                                correctMark.innerHTML = `
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                 </svg>
                             `;
-                            li.appendChild(correctMark);
-                            li.classList.add('font-medium', 'text-green-700', 'dark:text-green-500');
-                        } else {
-                            const optionMark = document.createElement('div');
-                            optionMark.classList.add('mr-2', 'text-gray-400', 'flex-shrink-0');
-                            optionMark.innerHTML = `
+                                li.appendChild(correctMark);
+                                li.classList.add('font-medium', 'text-green-700', 'dark:text-green-500');
+                            } else {
+                                const optionMark = document.createElement('div');
+                                optionMark.classList.add('mr-2', 'text-gray-400', 'flex-shrink-0');
+                                optionMark.innerHTML = `
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
                                 </svg>
                             `;
-                            li.appendChild(optionMark);
-                        }
-                        
-                        const optText = document.createElement('span');
-                        optText.textContent = opt;
-                        li.appendChild(optText);
-                        
-                        optionsList.appendChild(li);
+                                li.appendChild(optionMark);
+                            }
+
+                            const optText = document.createElement('span');
+                            optText.textContent = opt;
+                            li.appendChild(optText);
+
+                            optionsList.appendChild(li);
+                        });
+
+                        questionDiv.appendChild(optionsList);
+                        quizQuestions.appendChild(questionDiv);
                     });
-
-                    questionDiv.appendChild(optionsList);
-                    quizQuestions.appendChild(questionDiv);
-                });
-            } else {
-                alert('Error generating quiz: ' + data.error);
-                // Reset form to normal state
-                infoBox.classList.remove('hidden');
-                formBox.classList.remove('hidden');
+                } else {
+                    alert('Error generating quiz: ' + data.error);
+                    infoBox.classList.remove('hidden');
+                    formBox.classList.remove('hidden');
+                }
+            } catch (error) {
+                alert('Error connecting to server. Please try again later.');
+                console.error('Error:', error);
+            } finally {
+                normalIcon.classList.remove('hidden');
+                loadingIcon.classList.add('hidden');
+                generateBtn.disabled = false;
             }
-        } catch (error) {
-            alert('Error connecting to server. Please try again later.');
-            console.error('Error:', error);
-        } finally {
-            // Hide loading indicators
-            loadingOverlay.classList.add('hidden');
-            normalIcon.classList.remove('hidden');
-            loadingIcon.classList.add('hidden');
-            generateBtn.disabled = false;
-        }
-    });
+        });
 
-    backToFormBtn.addEventListener('click', () => {
-        // Show form and info boxes, hide results
-        infoBox.classList.remove('hidden');
-        formBox.classList.remove('hidden');
-        quizResult.classList.add('hidden');
-        
-        // Clear the questions
-        quizQuestions.innerHTML = '';
-    });
+        backToFormBtn.addEventListener('click', () => {
+            // Show form and info boxes, hide results
+            infoBox.classList.remove('hidden');
+            formBox.classList.remove('hidden');
+            quizResult.classList.add('hidden');
 
-    saveQuizBtn.addEventListener('click', saveQuiz);
+            // Clear the questions
+            quizQuestions.innerHTML = '';
+        });
 
-    async function saveQuiz() {
-        if (!currentQuizData) return alert('No quiz data to save.');
-        
-        if (!currentQuizData.title) {
-            return alert('Quiz title is required.');
-        }
-        
-        if (!currentQuizData.questions || currentQuizData.questions.length === 0) {
-            return alert('Quiz must contain at least one question.');
-        }
+        saveQuizBtn.addEventListener('click', saveQuiz);
 
-        // Show loading state for save button
-        saveQuizBtn.disabled = true;
-        saveQuizBtn.innerHTML = `
+        async function saveQuiz() {
+            if (!currentQuizData) return alert('No quiz data to save.');
+
+            if (!currentQuizData.title) {
+                return alert('Quiz title is required.');
+            }
+
+            if (!currentQuizData.questions || currentQuizData.questions.length === 0) {
+                return alert('Quiz must contain at least one question.');
+            }
+
+            // Show loading state for save button
+            saveQuizBtn.disabled = true;
+            saveQuizBtn.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
             Saving...
         `;
 
-        try {
-            const response = await fetch('/AI/save-ai-quiz', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(currentQuizData),
-            });
+            try {
+                const response = await fetch('/AI/save-ai-quiz', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(currentQuizData),
+                });
 
-            const result = await response.json();
+                const result = await response.json();
 
-            if (response.ok) {
-                // Show success message
-                const successToast = document.createElement('div');
-                successToast.classList.add(
-                    'fixed', 'bottom-4', 'right-4', 'bg-green-600', 'text-white', 
-                    'px-6', 'py-3', 'rounded-lg', 'shadow-lg', 'flex', 'items-center',
-                    'animate-fade-in'
-                );
-                successToast.innerHTML = `
+                if (response.ok) {
+                    // Show success message
+                    const successToast = document.createElement('div');
+                    successToast.classList.add(
+                        'fixed', 'bottom-4', 'right-4', 'bg-green-600', 'text-white',
+                        'px-6', 'py-3', 'rounded-lg', 'shadow-lg', 'flex', 'items-center',
+                        'animate-fade-in'
+                    );
+                    successToast.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                     Quiz saved successfully!
                 `;
-                document.body.appendChild(successToast);
-                
-                // Remove toast after 3 seconds
-                setTimeout(() => {
-                    successToast.classList.add('animate-fade-out');
-                    setTimeout(() => successToast.remove(), 500);
-                }, 3000);
-                
-                // Redirect to my quizzes page after a brief delay
-                setTimeout(() => {
-                    window.location.href = '/quiz/myquizzes';
-                }, 1500);
-            } else {
-                alert('Failed to save quiz: ' + result.error);
-            }
-        } catch (error) {
-            alert('Error connecting to server. Please try again later.');
-            console.error('Error:', error);
-        } finally {
-            // Reset save button
-            saveQuizBtn.disabled = false;
-            saveQuizBtn.innerHTML = `
+                    document.body.appendChild(successToast);
+
+                    setTimeout(() => {
+                        successToast.classList.add('animate-fade-out');
+                        setTimeout(() => successToast.remove(), 500);
+                    }, 3000);
+
+                    setTimeout(() => {
+                        window.location.href = '/quiz/myquizzes';
+                    }, 1500);
+                } else {
+                    alert('Failed to save quiz: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error connecting to server. Please try again later.');
+                console.error('Error:', error);
+            } finally {
+                // Reset save button
+                saveQuizBtn.disabled = false;
+                saveQuizBtn.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
                 </svg>
                 Save Quiz
             `;
+            }
         }
-    }
 
-    // Add some CSS animations
-    const style = document.createElement('style');
-    style.textContent = `
+        // Add some CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
         @keyframes fadeIn {
             0% { opacity: 0; transform: translateY(10px); }
             100% { opacity: 1; transform: translateY(0); }
@@ -536,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function() {
             animation: fadeOut 0.3s ease-in forwards;
         }
     `;
-    document.head.appendChild(style);
-});
+        document.head.appendChild(style);
+    });
 </script>
 {% endblock %}
